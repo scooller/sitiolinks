@@ -1,30 +1,67 @@
-/vendor/
-node_modules/
-npm-debug.log
-yarn-error.log
+link-persons.code-workspace
 
-# Laravel 4 specific
-bootstrap/compiled.php
-app/storage/
+/back-admin/*.log
+/back-admin/.DS_Store
+/back-admin/.env
+/back-admin/.env.backup
+/back-admin/.env.production
+/back-admin/.phpactor.json
+/back-admin/.phpunit.result.cache
+/back-admin/.fleet
+/back-admin/.idea
+/back-admin/.nova
+/back-admin/.phpunit.cache
+/back-admin/.vscode
+/back-admin/.zed
+/back-admin/auth.json
+/back-admin/node_modules
+/back-admin/public/build
+/back-admin/public/hot
+/back-admin/public/storage
+/back-admin/storage/*.key
+/back-admin/storage/pail
+/back-admin/vendor
+/back-admin/Homestead.json
+/back-admin/Homestead.yaml
+/back-admin/Thumbs.db
 
-# Laravel 5 & Lumen specific
-public/storage
-public/hot
+# dependencies
+/front-site/node_modules
+/front-site/.pnp
+/front-site/.pnp.js
+# testing
+/front-site/coverage
+# production
+/front-site/build
+# misc
+/front-site/.DS_Store
+/front-site/.env.local
+/front-site/.env.development.local
+/front-site/.env.test.local
+/front-site/.env.production.local
+/front-site/npm-debug.log*
+/front-site/yarn-debug.log*
+/front-site/yarn-error.log*
+/front-site/dist
+/front-site/.env
+/front-site/.env.*
+/front-site/.eslintcache
+/front-site/*.tsbuildinfo
+/front-site/pnpm-debug.log*
 
-# Laravel 5 & Lumen specific with changed public path
-public_html/storage
-public_html/hot
+/back-admin/.env.*
+/back-admin/storage/logs/
+/back-admin/storage/framework/
+/back-admin/bootstrap/cache/
+/back-admin/*.zip
 
-storage/*.key
-.env
-Homestead.yaml
-Homestead.json
-/.vagrant
-.phpunit.result.cache
-
-/public/build
-/storage/pail
-.env.backup
-.env.production
-.phpactor.json
-auth.json
+/.env
+/.env.*
+/.vscode/
+/.idea/
+/Thumbs.db
+/.DS_Store
+/back-admin/storage/media-library/temp
+back-admin/.editorconfig
+back-admin/.gitattributes
+.github/instructions/instructions.instructions.md

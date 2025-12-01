@@ -1,0 +1,14 @@
+{
+  "AR": [
+    "Buenos Aires","Córdoba","Rosario","Mendoza","La Plata","San Miguel de Tucumán","Mar del Plata","Salta","Santa Fe","San Juan","Resistencia","Neuquén","Corrientes","Posadas","Santiago del Estero","Bahía Blanca","Paraná","San Salvador de Jujuy","Quilmes","Lanús","Avellaneda","Godoy Cruz","Trelew","Puerto Madryn","Río Gallegos","Comodoro Rivadavia","Ushuaia","Bariloche","San Luis","Catamarca","Formosa","La Rioja","Rafaela","Villa María","Concordia","San Rafael","Tandil","Pergamino","Zárate","Campana","Chivilcoy","Luján","Merlo","Morón","Ituzaingó","San Isidro","San Martín","Tigre","Pilar"
+  ],
+  "CL": [
+    "Santiago","Valparaíso","Viña del Mar","Concepción","La Serena","Antofagasta","Temuco","Rancagua","Iquique","Talca","Arica","Puerto Montt","Copiapó","Osorno","Quilpué","Curicó","Punta Arenas","Valdivia","Calama","Los Ángeles","San Antonio","Chillán","Quillota","San Bernardo","Maipú","Puente Alto","Peñalolén","Ñuñoa","Providencia","Las Condes","La Florida","Macul","Recoleta","Independencia","Lo Barnechea","Estación Central","Vitacura","Huechuraba","Cerro Navia","Lo Prado","San Joaquín","San Miguel","Pedro Aguirre Cerda","La Cisterna","San Ramón","La Granja"
+  ],
+  "CO": [
+    "Bogotá","Medellín","Cali","Barranquilla","Cartagena","Cúcuta","Bucaramanga","Pereira","Santa Marta","Ibagué","Villavicencio","Montería","Manizales","Pasto","Neiva","Armenia","Sincelejo","Valledupar","Soledad","Itagüí","Envigado","Bello","Soacha","Floridablanca","Dosquebradas","Tuluá","Riohacha","Quibdó","Tunja","Yopal","Fusagasugá","Zipaquirá","Girardot","Popayán","Palmira","Buenaventura","Apartadó","Turbo","Chía","Mosquera","Funza","Jamundí","Rionegro","Sogamoso"
+  ],
+  "VE": [
+    "Caracas","Maracaibo","Valencia","Barquisimeto","Maracay","Ciudad Guayana","Barcelona","Maturín","San Cristóbal","Puerto La Cruz","Cumaná","Merida","Cabimas","Los Teques","Guarenas","Guatire","Puerto Ordaz","Acarigua","Araure","El Tigre","Punto Fijo","Valera","Guanare","Carúpano","Ciudad Bolívar","El Vigía","Trujillo","La Guaira","Ocumare del Tuy","Charallave","Guacara","Naguanagua","Tinaquillo","San Felipe","Barinas","San Fernando de Apure","San Juan de los Morros","Calabozo","La Victoria","Coro","Porlamar","Nueva Esparta","Carora","Upata"
+  ]
+}
