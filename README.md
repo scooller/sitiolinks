@@ -5,14 +5,21 @@ Plataforma full‑stack para perfiles, galerías y descubrimiento de creadores c
 ## Índice
 - [Visión General](#visión-general)
 - [Tecnologías](#tecnologías)
+- [Requisitos de Instalación](#requisitos-de-instalación)
 - [Arranque Rápido](#arranque-rápido)
+- [Instrucciones de Configuración](#instrucciones-de-configuración)
 - [Características Clave](#características-clave)
+- [Guía de Uso](#guía-de-uso)
+- [Estado del Proyecto](#estado-del-proyecto)
 - [Roadmap](#roadmap)
   - [Hecho (últimas versiones)](#hecho-v27x-recientes)
   - [En curso / Siguientes](#en-curso--siguientes)
   - [Backlog de deseados](#backlog-de-deseados)
 - [Convenciones del Proyecto](#convenciones-del-proyecto)
 - [Enlaces útiles](#enlaces-útiles)
+- [Repositorio](#repositorio)
+- [Contribución](#contribución)
+- [Licencia](#licencia)
 - [Producción](#producción)
 - [Changelog (detalle histórico)](#changelog-detalle-histórico)
 
@@ -28,6 +35,17 @@ Plataforma full‑stack para perfiles, galerías y descubrimiento de creadores c
 - Backend: Laravel 12.38.1, Filament v4, rebing/graphql-laravel, Sanctum, Spatie Media Library, Spatie Permission, MySQL.
 - Frontend: React 18, TypeScript 5, Vite 5, React Bootstrap, FilePond, lightGallery 2.9, Motion (framer-motion), i18next + react-i18next.
 - Optimización: WebP images, GraphQL cache con invalidación automática, Service Worker, lazy loading, database indexes.
+
+## Requisitos de Instalación
+- `PHP 8.2` y `Composer 2.x`
+- Extensiones PHP recomendadas: `fileinfo`, `json`, `mbstring`, `openssl`, `gd` o `imagick`
+- `Node.js >= 18.18` y `npm >= 9` (o `pnpm >= 8`)
+- Base de datos `MySQL 8.x` (o compatible)
+- `Git` y entorno de desarrollo con acceso a Internet
+
+Versionado de paquetes principales:
+- Backend (`back-admin/composer.json`): `laravel/framework ^12`, `filament/filament 4.0`, `rebing/graphql-laravel ^9.12`, `spatie/laravel-medialibrary ^11.17`, `spatie/laravel-permission ^6.23`, `phpunit ^11.5.3`, `laravel/pint ^1.24`.
+- Frontend: `React 18`, `TypeScript 5`, `Vite 5`.
 
 ## Arranque Rápido
 
@@ -53,6 +71,24 @@ npx tsc --noEmit  # Chequeo de tipos recomendado
 ```
 
 **Nota:** El frontend usa `VITE_BACKEND_URL` para conectarse al backend. Por defecto es `http://127.0.0.1:8000`.
+
+## Instrucciones de Configuración
+- Backend (`back-admin/.env`):
+  - `APP_URL=http://127.0.0.1:8000`
+  - `APP_ENV=local`
+  - `DB_CONNECTION=mysql` + credenciales (`DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`)
+  - `SANCTUM_STATEFUL_DOMAINS=127.0.0.1:5173,localhost:5173`
+  - `SESSION_DOMAIN=localhost`
+  - `FRONTEND_URL=http://localhost:5173`
+  - Ejecutar: `php artisan storage:link` y verificar permisos de `storage/` y `bootstrap/cache/`
+- Frontend (`front-site/.env`):
+  - `VITE_BACKEND_URL=http://127.0.0.1:8000`
+  - Opcional: configurar proxy/preview en `vite.config.ts` si aplica
+  - Verificar que el navegador permite cookies de `Sanctum` (SPA) en desarrollo
+
+Flujo de autenticación SPA (Sanctum):
+- El frontend solicita `GET /sanctum/csrf-cookie` y luego `POST /api/login` con credenciales.
+- Las peticiones autenticadas usan `credentials: 'include'` y cabecera `X-XSRF-TOKEN`.
 
 ## Características Clave
 - Galerías de imágenes con visibilidad (público/privado/seguidores) y moderación.
@@ -684,6 +720,29 @@ npm run build  # Reconstruir bundle con lazy loading
 - Motion: https://motion.dev/docs/
 - Alcha: https://altcha.org/docs
 - Pusher: https://pusher.com/docs/
+
+## Repositorio
+- Código fuente: https://github.com/scooller/sitiolinks
+
+## Contribución
+- Estilo y calidad:
+  - Frontend 100% TypeScript; evitar nuevos `.jsx/.js`.
+  - No dejar `console.*` en producción.
+  - GraphQL: lecturas en esquema `public` y mutaciones autenticadas en `default`.
+- Flujo para PRs:
+  - Crear rama descriptiva: `feature/…`, `fix/…` o `chore/…`.
+  - Ejecutar verificación antes de abrir PR:
+    - Backend: `vendor/bin/phpunit` y `vendor/bin/pint`.
+    - Frontend: `npx tsc --noEmit` y `npm run build`.
+  - Describir cambios, impacto y pasos de validación.
+  - Evitar romper compatibilidad de API/GraphQL públicamente expuesta.
+- Seguridad y privacidad:
+  - No exponer PII en UI pública ni en logs.
+  - Revisar permisos y políticas antes de añadir endpoints.
+
+## Licencia
+- Este proyecto no incluye archivo `LICENSE`. Por defecto, el contenido se considera **privado / todos los derechos reservados**.
+- Si se decide abrir el código bajo una licencia (p. ej., MIT), agregar `LICENSE` y actualizar esta sección.
 
 ---
 
@@ -4427,3 +4486,18 @@ php artisan queue:restart
 
 Fin sección Optimización Shared Hosting.
 
+## Guía de Uso
+- Registro e inicio de sesión: `/register` y `/login`. Tras verificar email (`/email-verified`), el estado se actualiza automáticamente.
+- Explorar usuarios: `/explorar` con filtros por rol, país, género, precio y tags.
+- Ver perfil: `/u/:username` con badges, enlaces y secciones de información.
+- Seguir usuarios: botón Follow en tarjetas/perfil; listar seguidos en el modal de “Siguiendo”.
+- Galerías:
+  - Crear: `/mis-galerias/nueva`
+  - Gestionar: `/mis-galerias` (crear, editar, visibilidad, destacados VIP)
+  - Detalle: `/galleries/:id` con lightGallery y likes.
+- Tags: visibles en grid/perfil; bilingües (`name_en` en EN, fallback a ES) y algunos fijos.
+- Páginas CMS: términos, privacidad y FAQs se resuelven por slug según idioma.
+## Estado del Proyecto
+- Versión actual: `v2.7.30`
+- Estado: activo y en desarrollo continuo; despliegues frecuentes.
+- Backend estable (Laravel 12, Filament 4) y frontend en React 18/Vite 5.
