@@ -356,6 +356,21 @@ class SiteSettingsForm
                                 Section::make('Configuración de Grilla de Usuarios')
                                     ->description('Define qué tipos de usuarios mostrar y en qué orden')
                                     ->schema([
+                                        Select::make('grid_users_sort')
+                                            ->label('Orden de Usuarios')
+                                            ->options([
+                                                'newest' => 'Más nuevos primero',
+                                                'oldest' => 'Más antiguos primero',
+                                                'most_views' => 'Más visitas',
+                                                'least_views' => 'Menos visitas',
+                                                'name' => 'Por nombre (A-Z)',
+                                                'username' => 'Por username (A-Z)',
+                                                'random' => 'Al azar',
+                                            ])
+                                            ->default('newest')
+                                            ->helperText('Orden en que se listan los usuarios en el frontend.')
+                                            ->columnSpanFull(),
+
                                         Repeater::make('grid_roles_order')
                                             ->label('Roles a Mostrar (orden de prioridad)')
                                             ->schema([

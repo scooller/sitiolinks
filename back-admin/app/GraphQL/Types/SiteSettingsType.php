@@ -41,6 +41,10 @@ class SiteSettingsType extends GraphQLType
             'grid_cols_mobile' => [
                 'type' => Type::int(),
             ],
+            'grid_users_sort' => [
+                'type' => Type::string(),
+                'description' => 'Orden de usuarios en el grid: newest | random',
+            ],
             'grid_roles_order' => [
                 'type' => Type::listOf(Type::string()),
                 'selectable' => false,

@@ -19,6 +19,7 @@ class SiteSettings extends Model implements HasMedia
         'thumbnail_height',
         'grid_cols_desktop',
         'grid_cols_mobile',
+        'grid_users_sort',
         'grid_roles_order',
         'grid_users_per_page',
         'max_galleries_creator',

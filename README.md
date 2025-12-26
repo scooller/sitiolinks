@@ -101,6 +101,14 @@ Flujo de autenticación SPA (Sanctum):
 ## Roadmap
 
 ### Hecho (v2.7.x recientes)
+- [x] v2.7.31 (Actual) ✅
+  - **Orden de usuarios configurable (Frontend + Backend):**
+    - Admin: `/admin/site-settings` → pestaña "Diseño Grid" → campo "Orden de Usuarios" con opciones: `newest`, `oldest`, `most_views`, `least_views`, `name`, `username`, `random`.
+    - Backend: `UsersQuery` aplica el orden global según `SiteSettings.grid_users_sort`; `random` desactiva cache en la primera página para resultados frescos.
+    - Frontend: las páginas que consumen `users` reflejan automáticamente el orden sin parámetros adicionales; `siteSettings.grid_users_sort` disponible para mostrar en UI.
+  - **Admin `/admin/users`:** tabla ordenada por defecto por `created_at DESC` (más nuevos primero).
+  - **Migración:** nueva columna `grid_users_sort` en `site_settings`.
+  - **Versión Frontend:** `front-site` actualizado a `0.2.0`.
 - [x] v2.7.30 (Actual) ✅
   - **Tags bilingües (ES/EN) — sin cambiar slug:**
     - Backend:

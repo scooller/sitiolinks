@@ -114,6 +114,7 @@ class UserForm
                         Select::make('nationality')
                             ->label('Nacionalidad')
                             ->options(self::countryOptions())
+                            ->optionsLimit(500)
                             ->searchable()
                             ->preload()
                             ->native(false)
@@ -131,6 +132,7 @@ class UserForm
                         Select::make('country')
                             ->label('País')
                             ->options(self::countryOptions())
+                            ->optionsLimit(500)
                             ->searchable()
                             ->preload()
                             ->native(false)
@@ -379,7 +381,13 @@ class UserForm
 
     protected static function countryOptions(): array
     {
-        return Countries::getList('es', 'php') ?? [];
+        $list = Countries::getList('es', 'php') ?? [];
+        // Asegurar orden alfabético por nombre en español
+        if (! empty($list)) {
+            // Mantener claves (códigos ISO) y ordenar por valor (nombre)
+            asort($list, SORT_LOCALE_STRING);
+        }
+        return $list;
     }
 
     protected static array $citiesCache = [];

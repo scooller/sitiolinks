@@ -11,4 +11,14 @@
   "VE": [
     "Caracas","Maracaibo","Valencia","Barquisimeto","Maracay","Ciudad Guayana","Barcelona","Maturín","San Cristóbal","Puerto La Cruz","Cumaná","Merida","Cabimas","Los Teques","Guarenas","Guatire","Puerto Ordaz","Acarigua","Araure","El Tigre","Punto Fijo","Valera","Guanare","Carúpano","Ciudad Bolívar","El Vigía","Trujillo","La Guaira","Ocumare del Tuy","Charallave","Guacara","Naguanagua","Tinaquillo","San Felipe","Barinas","San Fernando de Apure","San Juan de los Morros","Calabozo","La Victoria","Coro","Porlamar","Nueva Esparta","Carora","Upata"
   ]
+  ,
+  "MX": [
+    "Ciudad de México","Guadalajara","Monterrey","Puebla","Tijuana","León","Juárez","Zapopan","Nezahualcóyotl","Mexicali","Aguascalientes","Mérida","Cancún","Toluca","Querétaro","San Luis Potosí","Chihuahua","Acapulco","Cuernavaca","Morelia","Villahermosa","Saltillo","Hermosillo","Culiacán","Durango","Veracruz","Xalapa","Irapuato","Naucalpan","Apodaca","Tlalnepantla","Matamoros","Reynosa","Coatzacoalcos","Celaya","Tepic","Oaxaca","Tuxtla Gutiérrez","Torreón","Campeche","La Paz"
+  ],
+  "US": [
+    "New York","Los Angeles","Chicago","Houston","Phoenix","Philadelphia","San Antonio","San Diego","Dallas","San Jose","Austin","Jacksonville","Fort Worth","Columbus","Charlotte","San Francisco","Indianapolis","Seattle","Denver","Washington","Boston","El Paso","Nashville","Detroit","Portland","Memphis","Oklahoma City","Las Vegas","Louisville","Baltimore","Milwaukee","Albuquerque","Tucson","Fresno","Sacramento","Kansas City","Mesa","Atlanta","Miami","Raleigh"
+  ],
+  "ES": [
+    "Madrid","Barcelona","Valencia","Sevilla","Zaragoza","Málaga","Murcia","Palma","Las Palmas de Gran Canaria","Bilbao","Alicante","Córdoba","Valladolid","Vigo","Gijón","Hospitalet de Llobregat","A Coruña","Vitoria-Gasteiz","Granada","Elche","Oviedo","Tarragona","Santa Cruz de Tenerife","Pamplona","Sabadell","Almería","Donostia-San Sebastián","Cartagena","Jerez de la Frontera","Leganés","Fuenlabrada","Getafe","San Sebastián de los Reyes","Alcobendas","Móstoles","Badalona","Castellón de la Plana","León","Badajoz","Salamanca","Huelva"
+  ]
 }

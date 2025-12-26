@@ -191,6 +191,35 @@ class UsersQuery extends Query
             );
         }
 
+        // Orden global de usuarios según configuración del sitio
+        $sortMode = $settings?->grid_users_sort ?? 'newest';
+        switch ($sortMode) {
+            case 'random':
+                // Evitar cachear resultados aleatorios
+                $cacheable = false;
+                $q->orderByRaw('RAND()');
+                break;
+            case 'oldest':
+                $q->orderBy('created_at', 'asc');
+                break;
+            case 'most_views':
+                $q->orderBy('views', 'desc');
+                break;
+            case 'least_views':
+                $q->orderBy('views', 'asc');
+                break;
+            case 'name':
+                $q->orderByRaw("LOWER(name) ASC");
+                break;
+            case 'username':
+                $q->orderByRaw("LOWER(username) ASC");
+                break;
+            case 'newest':
+            default:
+                $q->orderBy('created_at', 'desc');
+                break;
+        }
+
         // Paginación
         $page = max(1, $args['page'] ?? 1);
         $perPage = min(100, max(1, $args['per_page'] ?? $args['limit'] ?? 12));
