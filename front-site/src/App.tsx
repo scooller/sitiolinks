@@ -198,90 +198,138 @@ function App() {
 
         const hf = settings.heading_font as string | undefined;
         const bf = settings.body_font as string | undefined;
-        
+                
         console.log('🔤 Configuración de fuentes:', {
           heading_font: hf,
           body_font: bf,
           has_heading: !!(hf && hf.trim()),
           has_body: !!(bf && bf.trim())
         });
-        
+                
         if ((hf && hf.trim()) || (bf && bf.trim())) {
           const encode = (n: string) => n.trim().replace(/\s+/g, '+');
-          const familyParam = (n: string) => `family=${encode(n)}:ital,wght@0,100..900;1,100..900`;
+          
+          // Función para detectar si es fuente variable o estática
+          const getFontParams = (fontName: string): string => {
+            // Fuentes variables comunes de Google (agregar más según necesites)
+            const variableFonts = [
+              'Inter', 'Roboto Flex', 'Outfit', 'Manrope', 'Plus Jakarta Sans',
+              'Work Sans', 'DM Sans', 'Space Grotesk', 'Sora', 'Epilogue'
+            ];
+            
+            const isVariable = variableFonts.some(vf => 
+              fontName.toLowerCase().includes(vf.toLowerCase())
+            );
+            
+            if (isVariable) {
+              // Para fuentes variables: wght@100..900
+              return `family=${encode(fontName)}:wght@100..900`;
+            } else {
+              // Para fuentes estáticas: múltiples pesos
+              return `family=${encode(fontName)}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900`;
+            }
+          };
+          
           const families: string[] = [];
-          if (bf && bf.trim()) families.push(familyParam(bf));
-          if (hf && hf.trim() && hf !== bf) families.push(familyParam(hf));
+          if (bf && bf.trim()) families.push(getFontParams(bf));
+          if (hf && hf.trim() && hf !== bf) families.push(getFontParams(hf));
+          
           const href = `https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`;
           
-          console.log('🔤 Cargando fuentes desde Google Fonts:', href);       
+          console.log('🔤 URL de Google Fonts generada:', href);
           
-          
+          // PASO 1: Crear/actualizar el <link> PRIMERO
           let link = document.getElementById('site-fonts') as HTMLLinkElement | null;
           if (!link) {
             link = document.createElement('link');
             link.id = 'site-fonts';
             link.rel = 'stylesheet';
+            link.href = href;
             document.head.appendChild(link);
-            console.log('🔤 Elemento <link> de fuentes creado');
+            console.log('🔤 <link> de Google Fonts creado');
+          } else {
+            link.href = href;
+            console.log('🔤 <link> de Google Fonts actualizado');
           }
-          link.href = href;
-
-          // Aplicar CSS inmediatamente (como antes)
-          let style = document.getElementById('site-fonts-style') as HTMLStyleElement | null;
-          if (!style) {
-            style = document.createElement('style');
-            style.id = 'site-fonts-style';
-            document.head.appendChild(style);
-            console.log('🔤 Elemento <style> de fuentes creado');
-          }
-          const bodyFamily = bf && bf.trim() ? `'${bf}', sans-serif` : '';
-          const headingFamily = hf && hf.trim() ? `'${hf}', sans-serif` : '';
-          const parts: string[] = [];
-          if (bodyFamily) {
-            parts.push(`:root{--bs-body-font-family:${bodyFamily}}`);
-          }
-          parts.push(`body{font-family:var(--bs-body-font-family) !important;}`);
-          if (headingFamily) {
-            parts.push(`h1,h2,h3,h4,h5,h6,.nav-link{font-family:${headingFamily} !important;}`);
-          }
-          style.textContent = parts.join('');
           
-          console.log('🔤 CSS de fuentes aplicado inmediatamente:', {
-            bodyFamily,
-            headingFamily,
-            cssText: style.textContent,
-            cssRules: parts
-          });
+          // PASO 2: Esperar a que las fuentes carguen, LUEGO aplicar CSS
+          const applyFontStyles = () => {
+            let style = document.getElementById('site-fonts-style') as HTMLStyleElement | null;
+            if (!style) {
+              style = document.createElement('style');
+              style.id = 'site-fonts-style';
+              document.head.appendChild(style);
+              console.log('🔤 <style> de fuentes creado');
+            }
+            
+            const bodyFamily = bf && bf.trim() ? `'${bf}', sans-serif` : '';
+            const headingFamily = hf && hf.trim() ? `'${hf}', sans-serif` : '';
+            const parts: string[] = [];
+            
+            if (bodyFamily) {
+              parts.push(`:root { --bs-body-font-family: ${bodyFamily}; }`);
+              parts.push(`body { font-family: ${bodyFamily} !important; }`);
+            }
+            
+            if (headingFamily) {
+              parts.push(`h1, h2, h3, h4, h5, h6, .nav-link { font-family: ${headingFamily} !important; }`);
+            }
+            
+            style.textContent = parts.join('\n');
+            console.log('✅ CSS de fuentes aplicado:', style.textContent);
+          };
           
-          // Log para verificar que se aplicó en el DOM
+          // PASO 3: Usar Font Face Observer para aplicar estilos cuando estén listas
+          if (document.fonts && document.fonts.ready) {
+            // Opción A: Esperar a que TODAS las fuentes carguen
+            document.fonts.ready.then(() => {
+              console.log('✅ Todas las fuentes cargadas vía fonts.ready');
+              applyFontStyles();
+              
+              // Forzar repaint
+              document.body.style.opacity = '0.99999';
+              requestAnimationFrame(() => {
+                document.body.style.opacity = '1';
+              });
+            }).catch(err => {
+              console.warn('⚠️ Error en fonts.ready, aplicando estilos de todos modos:', err);
+              applyFontStyles();
+            });
+            
+            // Opción B: Timeout de seguridad (máximo 3 segundos)
+            setTimeout(() => {
+              if (!document.getElementById('site-fonts-style')?.textContent) {
+                console.warn('⏱️ Timeout: aplicando estilos después de 3s');
+                applyFontStyles();
+              }
+            }, 3000);
+            
+          } else {
+            // Fallback para navegadores antiguos: aplicar inmediatamente
+            console.warn('⚠️ document.fonts.ready no disponible, aplicando estilos inmediatamente');
+            applyFontStyles();
+          }
+          
+          // PASO 4: Verificación después de 1 segundo
           setTimeout(() => {
             const computedBody = window.getComputedStyle(document.body);
-            const computedH1 = document.querySelector('h1') ? window.getComputedStyle(document.querySelector('h1')!) : null;
+            const h1 = document.querySelector('h1');
+            const computedH1 = h1 ? window.getComputedStyle(h1) : null;
+            
             console.log('🔍 Verificación de fuentes aplicadas:', {
               bodyFontFamily: computedBody.fontFamily,
               h1FontFamily: computedH1?.fontFamily,
-              customStyleExists: !!document.getElementById('site-fonts-style'),
-              linkExists: !!document.getElementById('site-fonts')
+              linkExists: !!document.getElementById('site-fonts'),
+              styleExists: !!document.getElementById('site-fonts-style'),
+              linkHref: (document.getElementById('site-fonts') as HTMLLinkElement)?.href,
+              styleContent: document.getElementById('site-fonts-style')?.textContent
             });
-          }, 500);
-
-          // Forzar repaint cuando las fuentes estén completamente cargadas
-          if (document.fonts && document.fonts.ready) {
-            document.fonts.ready.then(() => {
-              console.log('✅ Fuentes completamente cargadas, forzando repaint');
-              // Forzar repaint del body
-              document.body.style.opacity = '0.9999';
-              setTimeout(() => {
-                document.body.style.opacity = '1';
-              }, 0);
-            }).catch((err) => {
-              console.warn('⚠️ Error esperando fonts.ready:', err);
-            });
-          }
+          }, 1000);
+          
         } else {
           console.log('⚠️ No hay fuentes configuradas en siteSettings');
         }
+
 
         const css = settings.custom_css as string | undefined;
         if (css && css.trim()) {
