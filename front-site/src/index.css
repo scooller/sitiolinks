@@ -1,0 +1,122 @@
+body {
+  margin: 0;
+  font-family: var(--bs-body-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Fix para modo oscuro - mejora contraste de texto */
+[data-bs-theme="dark"] .text-muted {
+  color: #adb5bd !important;
+}
+
+[data-bs-theme="dark"] .bg-light {
+  background-color: #343a40 !important;
+}
+
+[data-bs-theme="dark"] .card {
+  background-color: #21252982;
+  border-color: #495057;
+}
+[data-bs-theme="light"] .card {
+  background-color: #ffffff82;
+}
+
+[data-bs-theme="dark"] h1,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] h3,
+[data-bs-theme="dark"] h4,
+[data-bs-theme="dark"] h5,
+[data-bs-theme="dark"] h6 {
+  color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .lead {
+  color: #dee2e6 !important;
+}
+
+[data-bs-theme="dark"] small,
+[data-bs-theme="dark"] .small {
+  color: #ced4da;
+}
+
+/* Asegurar contraste en badges con fondo claro */
+[data-bs-theme="dark"] .badge.bg-light {
+  color: #212529 !important;
+}
+
+/* Mejora de formularios en modo oscuro */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+  background-color: #212529;
+  border-color: #495057;
+  color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+  background-color: #212529;
+  border-color: #86b7fe;
+  color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .form-control::placeholder {
+  color: #6c757d;
+}
+
+/* Mejorar contraste en alertas */
+[data-bs-theme="dark"] .alert {
+  border-color: #495057;
+}
+
+/* Links en modo oscuro */
+[data-bs-theme="dark"] a {
+  color: #6ea8fe;
+}
+
+[data-bs-theme="dark"] a:hover {
+  color: #9ec5fe;
+}
+
+/* Override modal backdrop opacity */
+.modal-backdrop {
+  --bs-backdrop-opacity: 0.97;
+}
+
+.profile-links .list-group-item {
+  transition: transform .18s ease, box-shadow .18s ease, color .18s ease, background-color .18s ease;
+  border-radius: 8px;
+}
+
+.profile-links .list-group-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.08);
+  background-color: rgba(var(--bs-primary-rgb, 13,110,253), .06);
+}
+
+.profile-links .list-group-item .fa-external-link-alt {
+  transition: transform .18s ease, color .18s ease;
+}
+
+.profile-links .list-group-item:hover .fa-external-link-alt {
+  transform: translateX(2px);
+  color: var(--bs-link-hover-color, var(--bs-primary));
+}
+.card{
+  padding-top: 1rem;
+}
+body.perfil .card.perfil{
+  padding-top: 0;
+  box-shadow: rgba(38, 57, 77, 0.8) 0px 20px 30px -10px;
+}
+body.perfil .card.perfil-info{
+  padding-top: 0;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+}

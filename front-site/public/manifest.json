@@ -1,0 +1,54 @@
+{
+  "short_name": "OnlyModels",
+  "name": "Only Models - Plataforma de Creadores",
+  "description": "Plataforma para perfiles, galerías y descubrimiento de creadores",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo190.png",
+      "type": "image/png",
+      "sizes": "190x190",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo500.png",
+      "type": "image/png",
+      "sizes": "500x500",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0d6efd",
+  "background_color": "#ffffff",
+  "categories": ["social", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "Explorar Usuarios",
+      "short_name": "Explorar",
+      "description": "Descubre nuevos creadores",
+      "url": "/explorar",
+      "icons": [{ "src": "logo190.png", "sizes": "190x190" }]
+    },
+    {
+      "name": "Mi Perfil",
+      "short_name": "Perfil",
+      "description": "Ver mi perfil",
+      "url": "/perfil/editar",
+      "icons": [{ "src": "logo190.png", "sizes": "190x190" }]
+    },
+    {
+      "name": "Mis Galerías",
+      "short_name": "Galerías",
+      "description": "Administrar mis galerías",
+      "url": "/mis-galerias",
+      "icons": [{ "src": "logo190.png", "sizes": "190x190" }]
+    }
+  ]
+}
