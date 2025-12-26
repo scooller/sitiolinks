@@ -268,11 +268,11 @@ function App() {
             
             if (bodyFamily) {
               parts.push(`:root { --bs-body-font-family: ${bodyFamily}; }`);
-              parts.push(`body { font-family: ${bodyFamily} !important; }`);
+              parts.push(`body { font-family: ${bodyFamily}; }`);
             }
-            
+
             if (headingFamily) {
-              parts.push(`h1, h2, h3, h4, h5, h6, .nav-link { font-family: ${headingFamily} !important; }`);
+              parts.push(`h1, h2, h3, h4, h5, h6, .nav-link { font-family: ${headingFamily}; }`);
             }
             
             style.textContent = parts.join('\n');

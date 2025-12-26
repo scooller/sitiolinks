@@ -120,3 +120,18 @@ body.perfil .card.perfil-info{
   padding-top: 0;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
 }
+/* Sobrescribir variables de Bootstrap para fuentes */
+:root {
+  --bs-body-font-family: var(--bs-body-font-family);
+  --bs-font-sans-serif: var(--bs-body-font-family);
+}
+
+/* Asegurar que body use la variable */
+body {
+  font-family: var(--bs-body-font-family) !important;
+}
+
+/* Forzar fuentes en todos los elementos si es necesario */
+* {
+  font-family: inherit;
+}

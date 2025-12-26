@@ -31,7 +31,7 @@ const Navigation: React.FC = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : BACKEND_URL;
     return `${origin.replace(/\/$/, '')}/admin`;
   }, []);
-  const [siteTitle, setSiteTitle] = React.useState<string>('Link Persons');
+  const [siteTitle, setSiteTitle] = React.useState<string>('...');
   const [logoUrl, setLogoUrl] = React.useState<string>('');
   const [unreadCount, setUnreadCount] = React.useState<number>(0);
   const [notifications, setNotifications] = React.useState<any[]>([]);
