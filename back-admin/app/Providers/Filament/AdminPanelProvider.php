@@ -41,22 +41,22 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->authGuard('web')
             ->login()
-            ->brandName($settings?->site_title ?? 'Link Persons')
-            ->brandLogo(fn () => $settings?->getFirstMediaUrl('logo'))
+            ->brandName($settings?->site_title ?? '...')
+            ->brandLogo(fn() => $settings?->getFirstMediaUrl('logo'))
             ->brandLogoHeight('2.5rem')
-            ->favicon(fn () => $settings?->getFirstMediaUrl('favicon'))
+            ->favicon(fn() => $settings?->getFirstMediaUrl('favicon'))
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->renderHook(
                 'panels::head.end',
-                fn () => '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />'
+                fn() => '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />'
             )
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
                 function () {
                     $url = env('FRONTEND_URL', '/');
-                    return Blade::render('<x-filament::button tag="a" href="'.$url.'" target="_blank" icon="heroicon-o-globe-alt">Ver Sitio</x-filament::button>');
+                    return Blade::render('<x-filament::button tag="a" href="' . $url . '" target="_blank" icon="heroicon-o-globe-alt">Ver Sitio</x-filament::button>');
                 }
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
