@@ -34,6 +34,7 @@ const Navigation: React.FC = () => {
   const [siteTitle, setSiteTitle] = React.useState<string>('...');
   const [logoUrl, setLogoUrl] = React.useState<string>('');
   const [unreadCount, setUnreadCount] = React.useState<number>(0);
+  const [vipUnreadCount, setVipUnreadCount] = React.useState<number>(0);
   const [notifications, setNotifications] = React.useState<any[]>([]);
   const [showUserMenu, setShowUserMenu] = React.useState<boolean>(false);
   const [showToast, setShowToast] = React.useState<boolean>(false);
@@ -75,20 +76,26 @@ const Navigation: React.FC = () => {
     if (!isAuthenticated) return;
 
     try {
-      const [countData, notifData] = await Promise.all([
+      const [countData, vipCountData, notifData] = await Promise.all([
         graphqlRequest({
           query: 'query { unreadNotificationsCount }',
           schema: 'default',
           authenticated: true,
         }),
         graphqlRequest({
-          query: 'query { notifications(limit: 5, unread_only: true) { id title message url created_at read_at } }',
+          query: queries.vipUnreadNotificationsCount,
+          schema: 'default',
+          authenticated: true,
+        }),
+        graphqlRequest({
+          query: 'query { notifications(limit: 5, unread_only: true) { id type title message url created_at read_at } }',
           schema: 'default',
           authenticated: true,
         }),
       ]);
 
       setUnreadCount(countData?.unreadNotificationsCount ?? 0);
+      setVipUnreadCount(vipCountData?.vipUnreadNotificationsCount ?? 0);
       setNotifications(notifData?.notifications ?? []);
     } catch (err) {
     }
@@ -329,6 +336,17 @@ const Navigation: React.FC = () => {
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </Badge>
                     )}
+                    {vipUnreadCount > 0 && (
+                      <Badge
+                        pill
+                        bg="warning"
+                        text="dark"
+                        className="position-absolute top-100 start-100 translate-middle"
+                        style={{ fontSize: '0.65rem' }}
+                      >
+                        VIP {vipUnreadCount > 99 ? '99+' : vipUnreadCount}
+                      </Badge>
+                    )}
                   </Dropdown.Toggle>
 
                   <Dropdown.Menu style={{ minWidth: '320px', maxHeight: '400px', overflowY: 'auto' }}>
@@ -361,6 +379,9 @@ const Navigation: React.FC = () => {
                             >
                               <div className="flex-grow-1">
                                 <strong className="d-block" style={{ fontSize: '0.9rem' }}>
+                                  {notif.type === 'vip_user_message' && (
+                                    <i className="fas fa-crown text-warning me-1"></i>
+                                  )}
                                   {truncateText(notif.title, 50)}
                                 </strong>
                                 <small className="text-muted d-block" style={{ fontSize: '0.8rem' }}>
@@ -398,10 +419,10 @@ const Navigation: React.FC = () => {
                       </>
                     )}
                   </Dropdown.Menu>
-                </Dropdown>                
+                </Dropdown>
               </>
             ) : (
-              <>                
+              <>
                 <Nav.Link className='ms-auto' as={Link} to="/login">{t('nav.login')}</Nav.Link>
                 <Nav.Link href="/register">{t('nav.register')}</Nav.Link>
                 <LanguageSwitcher />

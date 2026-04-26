@@ -1,0 +1,11 @@
+{
+    "agents": [
+        "copilot"
+    ],
+    "editors": [
+        "vscode"
+    ],
+    "guidelines": [
+        "spatie/laravel-medialibrary"
+    ]
+}

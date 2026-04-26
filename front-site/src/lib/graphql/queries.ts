@@ -281,4 +281,23 @@ export const queries = {
       ${GalleryFields}
     }
   `,
+  vipNotifications: `
+    query VipNotifications($limit: Int = 20, $unreadOnly: Boolean = false) {
+      vipNotifications(limit: $limit, unread_only: $unreadOnly) {
+        id
+        type
+        title
+        message
+        data
+        url
+        read_at
+        created_at
+      }
+    }
+  `,
+  vipUnreadNotificationsCount: `
+    query VipUnreadNotificationsCount {
+      vipUnreadNotificationsCount
+    }
+  `,
 } as const;

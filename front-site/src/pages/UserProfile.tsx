@@ -6,6 +6,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { useTranslation } from 'react-i18next';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { queries } from '../lib/graphql/queries';
+import { mutations } from '../lib/graphql/mutations';
 import { useAuth } from '../contexts/AuthContext';
 import { getCountryDisplay } from '../lib/countryUtils.ts';
 import type { User, SiteSettings, Tag, Link as UserLink } from '../types';
@@ -44,6 +45,10 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
   const [vipBadgeLabel, setVipBadgeLabel] = useState<string | null>(null);
   const [vipBadgeIcon, setVipBadgeIcon] = useState<string | null>(null);
   const [showFollowingModal, setShowFollowingModal] = useState<boolean>(false);
+  const [showVipMessageModal, setShowVipMessageModal] = useState<boolean>(false);
+  const [vipMessage, setVipMessage] = useState<string>('');
+  const [vipMessageSending, setVipMessageSending] = useState<boolean>(false);
+  const [vipMessageStatus, setVipMessageStatus] = useState<{ variant: 'success' | 'danger'; text: string } | null>(null);
   const [followingUsers, setFollowingUsers] = useState<User[]>([]);
   const [loadingFollowing, setLoadingFollowing] = useState<boolean>(false);
   const [followingPage, setFollowingPage] = useState<number>(1);
@@ -323,6 +328,47 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
   const handleTabChange = (tab: 'profile' | 'galleries') => {
     setActiveTab(tab);
     navigate(`/u/${username}${tab !== 'profile' ? `/${tab}` : ''}`);
+  };
+
+  const handleSendVipMessage = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!isAuthenticated || !currentUser || !user) {
+      setVipMessageStatus({ variant: 'danger', text: 'Debes iniciar sesion para enviar mensajes VIP.' });
+
+      return;
+    }
+
+    const cleanedMessage = vipMessage.trim();
+    if (cleanedMessage.length < 3) {
+      setVipMessageStatus({ variant: 'danger', text: 'El mensaje debe tener al menos 3 caracteres.' });
+
+      return;
+    }
+
+    setVipMessageSending(true);
+    setVipMessageStatus(null);
+
+    try {
+      await graphqlRequest({
+        query: mutations.sendVipNotification,
+        variables: {
+          recipientId: user.id,
+          message: cleanedMessage,
+          title: `Mensaje VIP de @${currentUser.username}`,
+          url: `/u/${currentUser.username}`,
+        },
+        schema: 'default',
+        authenticated: true,
+      });
+
+      setVipMessageStatus({ variant: 'success', text: 'Mensaje VIP enviado correctamente.' });
+      setVipMessage('');
+    } catch (error: any) {
+      setVipMessageStatus({ variant: 'danger', text: error?.message || 'No se pudo enviar el mensaje VIP.' });
+    } finally {
+      setVipMessageSending(false);
+    }
   };
 
   const loadFollowing = async (page: number = 1, search: string = '', tag: string = '') => {
@@ -687,6 +733,42 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
         </Modal.Body>
       </Modal>
 
+      <Modal show={showVipMessageModal} onHide={() => setShowVipMessageModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="fas fa-crown text-warning me-2"></i>
+            Mensaje para @{user.username}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {vipMessageStatus && (
+            <Alert variant={vipMessageStatus.variant}>{vipMessageStatus.text}</Alert>
+          )}
+          <Form onSubmit={handleSendVipMessage}>
+            <Form.Group className="mb-3">
+              <Form.Label>Mensaje</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                maxLength={500}
+                value={vipMessage}
+                onChange={(event) => setVipMessage(event.target.value)}
+                placeholder="Escribe un mensaje breve para este creador VIP"
+                required
+              />
+            </Form.Group>
+            <div className="d-flex justify-content-end gap-2">
+              <Button variant="outline-secondary" onClick={() => setShowVipMessageModal(false)} disabled={vipMessageSending}>
+                Cerrar
+              </Button>
+              <Button type="submit" variant="warning" disabled={vipMessageSending}>
+                {vipMessageSending ? 'Enviando...' : 'Enviar mensaje VIP'}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
       <Container
         className="mt-4"
         as={motion.div}
@@ -864,6 +946,21 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                         )}
                       </Button>
                     )
+                  )}
+
+                  {currentUser?.username !== user.username && isAuthenticated && user.roles?.some((role: any) => role.name === 'vip') && (
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      className="mb-3"
+                      onClick={() => {
+                        setVipMessageStatus(null);
+                        setShowVipMessageModal(true);
+                      }}
+                    >
+                      <i className="fas fa-paper-plane me-2"></i>
+                      Enviar mensaje VIP
+                    </Button>
                   )}
                 </motion.div>
 

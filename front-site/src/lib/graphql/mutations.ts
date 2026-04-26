@@ -72,4 +72,16 @@ export const mutations = {
       }
     }
   `,
+  sendVipNotification: `
+    mutation SendVipNotification($recipientId: ID!, $message: String!, $title: String, $url: String) {
+      sendVipNotification(recipient_id: $recipientId, message: $message, title: $title, url: $url) {
+        id
+        type
+        title
+        message
+        url
+        created_at
+      }
+    }
+  `,
 } as const;

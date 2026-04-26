@@ -5,6 +5,7 @@ import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { useAuth } from '../contexts/AuthContext';
 import { initEcho, getEcho } from '../lib/echo';
 import { useTranslation } from 'react-i18next';
+import { queries } from '../lib/graphql/queries';
 
 interface Notification {
   id: string | number;
@@ -23,7 +24,7 @@ export default function Notifications(): ReactElement {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [filter, setFilter] = useState<'all' | 'unread' | 'vip'>('all');
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -68,26 +69,40 @@ export default function Notifications(): ReactElement {
     setLoading(true);
     setError(null);
     try {
-      const data = await graphqlRequest<{ notifications: Notification[] }>({
-        query: `
-          query {
-            notifications(limit: 50, unread_only: ${filter === 'unread'}) {
-              id
-              type
-              title
-              message
-              data
-              url
-              read_at
-              created_at
-            }
-          }
-        `,
-        schema: 'default',
-        authenticated: true,
-      });
+      if (filter === 'vip') {
+        const data = await graphqlRequest<{ vipNotifications: Notification[] }>({
+          query: queries.vipNotifications,
+          variables: {
+            limit: 50,
+            unreadOnly: false,
+          },
+          schema: 'default',
+          authenticated: true,
+        });
 
-      setNotifications(data.notifications || []);
+        setNotifications(data.vipNotifications || []);
+      } else {
+        const data = await graphqlRequest<{ notifications: Notification[] }>({
+          query: `
+            query {
+              notifications(limit: 50, unread_only: ${filter === 'unread'}) {
+                id
+                type
+                title
+                message
+                data
+                url
+                read_at
+                created_at
+              }
+            }
+          `,
+          schema: 'default',
+          authenticated: true,
+        });
+
+        setNotifications(data.notifications || []);
+      }
     } catch (err: any) {
       setError(err.message || t('errors.loading', { entity: t('entities.notifications') }));
     } finally {
@@ -98,16 +113,16 @@ export default function Notifications(): ReactElement {
   const handleMarkAsRead = async (id: string | number) => {
     try {
       await graphqlRequest({
-        query: `mutation MarkAsRead($id: String!) { 
+        query: `mutation MarkAsRead($id: String!) {
           markNotificationAsRead(id: $id)
         }`,
         variables: { id: String(id) },
         schema: 'default',
         authenticated: true,
       });
-      
+
       // Actualizar el estado local sin refetch
-      setNotifications(prev => 
+      setNotifications(prev =>
         prev.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n)
       );
     } catch (err: any) {
@@ -121,10 +136,10 @@ export default function Notifications(): ReactElement {
         schema: 'default',
         authenticated: true,
       });
-      
+
       // Actualizar el estado local sin refetch
       const now = new Date().toISOString();
-      setNotifications(prev => 
+      setNotifications(prev =>
         prev.map(n => ({ ...n, read_at: n.read_at || now }))
       );
     } catch (err: any) {
@@ -143,6 +158,8 @@ export default function Notifications(): ReactElement {
         return 'fa-times-circle';
       case 'system':
         return 'fa-info-circle';
+      case 'vip_user_message':
+        return 'fa-crown';
       default:
         return 'fa-bell';
     }
@@ -160,9 +177,30 @@ export default function Notifications(): ReactElement {
         return 'danger';
       case 'system':
         return 'info';
+      case 'vip_user_message':
+        return 'warning';
       default:
         return 'secondary';
     }
+  };
+
+  const getSenderText = (notification: Notification): string | null => {
+    if (notification.type !== 'vip_user_message' || !notification.data) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(notification.data);
+      const username = parsed?.sender_username;
+
+      if (typeof username === 'string' && username.trim() !== '') {
+        return `@${username}`;
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
   };
 
   if (loading) {
@@ -219,12 +257,18 @@ export default function Notifications(): ReactElement {
             >
               {t('notifications.filter_unread')} ({unreadCount})
             </Button>
+            <Button
+              variant={filter === 'vip' ? 'warning' : 'outline-warning'}
+              onClick={() => setFilter('vip')}
+            >
+              VIP
+            </Button>
           </ButtonGroup>
 
           {notifications.length === 0 ? (
             <Alert variant="info" className="text-center">
-              {filter === 'unread' 
-                ? t('notifications.empty_unread') 
+              {filter === 'unread'
+                ? t('notifications.empty_unread')
                 : t('notifications.empty_all')}
             </Alert>
           ) : (
@@ -257,6 +301,12 @@ export default function Notifications(): ReactElement {
                           )}
                         </div>
                         <p className="mb-2">{notif.message}</p>
+                        {getSenderText(notif) && (
+                          <small className="text-muted d-block mb-2">
+                            <i className="fas fa-user me-1"></i>
+                            {getSenderText(notif)}
+                          </small>
+                        )}
                         <small className="text-muted">
                           <i className="fas fa-clock me-1"></i>
                           {new Date(notif.created_at).toLocaleString(i18n.language, {
