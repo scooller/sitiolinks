@@ -154,6 +154,6 @@ class GalleriesTable
                         ->successNotificationTitle('Galerías rechazadas'),
                 ]),
             ])
-            ->defaultSort('order');
+            ->defaultSort('created_at', 'desc');
     }
 }
