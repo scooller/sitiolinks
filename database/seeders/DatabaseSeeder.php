@@ -5,8 +5,10 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Throwable;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,14 +26,26 @@ class DatabaseSeeder extends Seeder
             PageSeeder::class,
         ]);
 
-        // Crear usuario super administrador sin usar factories (faker no está en producción)
-        $superAdmin = User::query()->create([
-            'name' => 'Super Admin',
-            'email' => 'scoollerx@hotmail.com',
-            'username' => 'superadmin',
-            'password' => bcrypt('password'),
-            'email_verified_at' => now(),
-        ]);
+        $superAdminEmail = (string) config('app.super_admin_email', 'scoollerx@hotmail.com');
+
+        // Crear o actualizar super admin para permitir ejecutar seeders varias veces sin duplicar usuarios
+        $superAdmin = User::query()->firstOrCreate(
+            ['username' => 'superadmin'],
+            [
+                'name' => 'Super Admin',
+                'email' => $superAdminEmail,
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        if (! $superAdmin->wasRecentlyCreated) {
+            $superAdmin->forceFill([
+                'name' => 'Super Admin',
+                'email' => $superAdminEmail,
+                'email_verified_at' => $superAdmin->email_verified_at ?? now(),
+            ])->save();
+        }
 
         // Asignar rol super_admin si existe (Shield debe estar instalado)
         try {
@@ -43,7 +57,7 @@ class DatabaseSeeder extends Seeder
                 // Asignar rol al usuario
                 $superAdmin->assignRole($roleModel);
             }
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             // Si falla, el rol se asignará manualmente desde el panel
             $this->command->warn('No se pudo asignar el rol super_admin. Asígnalo manualmente desde el panel.');
         }

@@ -5,6 +5,7 @@
     "nav": {
         "home": "Home",
         "explore": "Explore",
+        "cafes": "Cafes",
         "login": "Login",
         "register": "Register",
         "my_profile": "My Profile",
@@ -26,6 +27,27 @@
         "vip_creators": "VIP Creators",
         "vip_creators_desc": "Discover our featured creators with VIP membership",
         "view_all_users": "View all users",
+        "cafes_reviews_title": "Cafes and Reviews",
+        "cafes_reviews_desc": "Discover recommended coffee shops and recent community reviews",
+        "reviews_count_label": "Reviews: {{count}}",
+        "branches_count_label": "Branches: {{count}}",
+        "no_review_comment": "No comment",
+        "anonymous_reviewer": "User",
+        "view_cafe_site": "Visit cafe site",
+        "filter_city": "City",
+        "all_cities": "All cities",
+        "filter_search": "Search",
+        "search_cafes_placeholder": "Search by cafe name, description, or branch...",
+        "filter_branch_tag": "Branch tag",
+        "all_tags": "All tags",
+        "filter_min_rating": "Minimum rating",
+        "any_rating": "Any rating",
+        "clear_cafes_filters": "Clear filters",
+        "no_cafes_for_filters": "No cafes found for these filters.",
+        "latest_cafes_title": "Latest Cafes",
+        "latest_cafes_desc": "Discover the most recently added cafes.",
+        "featured_cafes_title": "Featured Cafes",
+        "featured_cafes_desc": "Cafes with the highest activity and strongest reviews.",
         "popular_tags": "Popular Tags",
         "popular_tags_desc": "Explore the most searched interests and categories",
         "error_loading_page": "Error loading page",
@@ -47,6 +69,51 @@
         "tag_all": "Tag: All",
         "no_users": "No users available with the selected filters.",
         "error_loading": "Error loading users"
+    },
+    "cafes": {
+        "title": "Explore Cafes",
+        "subtitle": "Discover cafes, branches, and community reviews",
+        "grid_title": "Cafes Grid",
+        "grid_desc": "Search and filter cafes by city, tag, and rating",
+        "detail": {
+            "view": "View detail",
+            "not_found": "The requested cafe was not found.",
+            "invalid_id": "Invalid cafe id.",
+            "no_image": "No image available",
+            "no_branches": "This cafe has no registered branches.",
+            "branch_data": "Branch data",
+            "branch_creators": "Associated creators",
+            "branch_reviews": "Reviews",
+            "no_creators": "There are no creators associated with this branch.",
+            "no_reviews": "There are no reviews for this branch yet.",
+            "no_reviews_short": "No reviews",
+            "review_success": "Review submitted successfully.",
+            "review_error": "Could not submit the review.",
+            "login_to_review": "You need to log in to leave a review.",
+            "view_menu": "View menu",
+            "sections": {
+                "details": "Details",
+                "branches": "Branches"
+            },
+            "fields": {
+                "name": "Name",
+                "description": "Description",
+                "address": "Address",
+                "comuna": "Comuna",
+                "postal_code": "Postal code",
+                "phone": "Phone",
+                "entry_price": "Entry price",
+                "website": "Website",
+                "maps": "Map"
+            },
+            "form": {
+                "rating": "Rating",
+                "comment": "Comment",
+                "comment_placeholder": "Tell us about your experience at this branch...",
+                "submit": "Submit review",
+                "sending": "Sending..."
+            }
+        }
     },
     "ranking": {
         "title": "User Ranking",
@@ -237,6 +304,7 @@
        "galleries": "galleries",
        "gallery": "gallery",
        "featured_galleries": "featured galleries",
+       "cafes": "cafes",
        "user_galleries": "galleries",
        "vip_users": "VIP users",
        "countries": "countries",
@@ -252,7 +320,7 @@
         "label": "VIP",
         "upgrade_cta": "Upgrade to VIP to get unlimited galleries."
     },
-    
+
     "tickets": {
         "my_tickets": "My Tickets",
         "new": "New Ticket",
@@ -334,7 +402,7 @@
         "login_here": "Login here",
         "error_register": "Error registering user"
     },
-    
+
     "filepond": {
         "label_idle": "Drag & drop your image or <span class=\"filepond--label-action\">Browse</span>"
     },
@@ -414,7 +482,7 @@
     "modal": {
         "warning_title": "Important Notice",
         "ok": "Got it"
-    },      
+    },
     "contact": {
         "title": "Contact",
         "intro": "Do you have questions or comments? Send us a message and we will reply soon.",

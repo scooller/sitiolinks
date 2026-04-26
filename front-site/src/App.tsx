@@ -12,6 +12,8 @@ import VerifiedRoute from './components/VerifiedRoute.tsx';
 // Lazy load ALL pages including Home for optimal initial bundle
 const Home = React.lazy(() => import('./pages/Home.tsx'));
 const Explore = React.lazy(() => import('./pages/Explore.tsx'));
+const Cafes = React.lazy(() => import('./pages/Cafes.tsx'));
+const CafeDetail = React.lazy(() => import('./pages/CafeDetail.tsx'));
 const Ranking = React.lazy(() => import('./pages/Ranking.tsx'));
 const Contact = React.lazy(() => import('./pages/Contact.tsx'));
 const Page = React.lazy(() => import('./pages/Page.tsx'));
@@ -55,6 +57,7 @@ const AnimatedRoutes: React.FC<{ transitionType?: string }> = ({ transitionType 
       'terms-and-conditions': 'terminos',
       'privacy-policy': 'privacidad',
       'explorar': 'explorar',
+      'cafes': 'cafes',
       'ranking': 'ranking',
       'login': 'login',
       'register': 'register',
@@ -77,6 +80,8 @@ const AnimatedRoutes: React.FC<{ transitionType?: string }> = ({ transitionType 
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<AnimatedPage id="home" transitionType={transitionType}><Home /></AnimatedPage>} />
         <Route path="/explorar" element={<AnimatedPage id="explorar" transitionType={transitionType}><Explore /></AnimatedPage>} />
+        <Route path="/cafes" element={<AnimatedPage id="cafes" transitionType={transitionType}><Cafes /></AnimatedPage>} />
+        <Route path="/cafes/:id" element={<AnimatedPage id="cafe-detalle" transitionType={transitionType}><CafeDetail /></AnimatedPage>} />
         <Route path="/ranking" element={<AnimatedPage id="ranking" transitionType={transitionType}><Ranking /></AnimatedPage>} />
         <Route path="/login" element={<AnimatedPage id="login" transitionType={transitionType}><Login /></AnimatedPage>} />
         <Route path="/register" element={<AnimatedPage id="register" transitionType={transitionType}><Register /></AnimatedPage>} />

@@ -21,6 +21,8 @@ class TicketResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBell;
 
+    protected static string|\UnitEnum|null $navigationGroup = 'Mensajería';
+
     protected static ?string $navigationLabel = 'Tickets de Soporte';
 
     protected static ?string $modelLabel = 'Ticket';

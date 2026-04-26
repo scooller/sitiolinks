@@ -52,6 +52,14 @@ code {
   color: #212529 !important;
 }
 
+[data-bs-theme="light"] .cafes-section-title {
+  color: #212529 !important;
+}
+
+[data-bs-theme="dark"] .cafes-section-title {
+  color: #f8f9fa !important;
+}
+
 /* Mejora de formularios en modo oscuro */
 [data-bs-theme="dark"] .form-control,
 [data-bs-theme="dark"] .form-select {

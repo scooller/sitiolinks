@@ -8,14 +8,20 @@ use App\Filament\Resources\VipNotifications\Pages\ListVipNotifications;
 use App\Filament\Resources\VipNotifications\Schemas\VipNotificationForm;
 use App\Filament\Resources\VipNotifications\Tables\VipNotificationsTable;
 use App\Models\Notification;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class VipNotificationResource extends Resource
 {
     protected static ?string $model = Notification::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Mensajería';
 
     protected static ?string $navigationLabel = 'Notificaciones VIP';
 

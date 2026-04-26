@@ -5,6 +5,7 @@
     "nav": {
         "home": "Inicio",
         "explore": "Explorar",
+        "cafes": "Cafés",
         "login": "Iniciar Sesión",
         "register": "Registrarse",
         "my_profile": "Mi Perfil",
@@ -26,6 +27,27 @@
         "vip_creators": "Creadores VIP",
         "vip_creators_desc": "Descubre nuestros creadores destacados con membresía VIP",
         "view_all_users": "Ver todos los usuarios",
+        "cafes_reviews_title": "Cafés y Reseñas",
+        "cafes_reviews_desc": "Descubre cafeterías recomendadas y opiniones recientes de la comunidad",
+        "reviews_count_label": "Reseñas: {{count}}",
+        "branches_count_label": "Sucursales: {{count}}",
+        "no_review_comment": "Sin comentario",
+        "anonymous_reviewer": "Usuario",
+        "view_cafe_site": "Ver sitio del café",
+        "filter_city": "Ciudad",
+        "all_cities": "Todas las ciudades",
+        "filter_search": "Buscar",
+        "search_cafes_placeholder": "Buscar por nombre de café, descripción o sucursal...",
+        "filter_branch_tag": "Etiqueta de sucursal",
+        "all_tags": "Todas las etiquetas",
+        "filter_min_rating": "Calificación mínima",
+        "any_rating": "Cualquier calificación",
+        "clear_cafes_filters": "Limpiar filtros",
+        "no_cafes_for_filters": "No se encontraron cafés con esos filtros.",
+        "latest_cafes_title": "Últimos Cafés",
+        "latest_cafes_desc": "Conoce los cafés agregados recientemente.",
+        "featured_cafes_title": "Cafés Destacados",
+        "featured_cafes_desc": "Los cafés con más actividad y mejores reseñas.",
         "popular_tags": "Etiquetas Populares",
         "popular_tags_desc": "Explora los intereses y categorías más buscados",
         "error_loading_page": "Error al cargar la página",
@@ -47,6 +69,51 @@
         "tag_all": "Etiqueta: Todas",
         "no_users": "No hay usuarios disponibles con los filtros seleccionados.",
         "error_loading": "Error al cargar usuarios"
+    },
+    "cafes": {
+        "title": "Explorar Cafés",
+        "subtitle": "Descubre cafés, sucursales y reseñas de la comunidad",
+        "grid_title": "Grilla de Cafés",
+        "grid_desc": "Busca y filtra cafés por ciudad, etiqueta y calificación",
+        "detail": {
+            "view": "Ver detalle",
+            "not_found": "No se encontró el café solicitado.",
+            "invalid_id": "ID de café inválido.",
+            "no_image": "Sin imagen disponible",
+            "no_branches": "Este café no tiene sucursales registradas.",
+            "branch_data": "Datos de la sucursal",
+            "branch_creators": "Creadores asociados",
+            "branch_reviews": "Reseñas",
+            "no_creators": "No hay creadores asociados a esta sucursal.",
+            "no_reviews": "Aún no hay reseñas para esta sucursal.",
+            "no_reviews_short": "Sin reseñas",
+            "review_success": "Reseña enviada correctamente.",
+            "review_error": "No se pudo enviar la reseña.",
+            "login_to_review": "Debes iniciar sesión para dejar una reseña.",
+            "view_menu": "Ver menú",
+            "sections": {
+                "details": "Detalles",
+                "branches": "Sucursales"
+            },
+            "fields": {
+                "name": "Nombre",
+                "description": "Descripción",
+                "address": "Dirección",
+                "comuna": "Comuna",
+                "postal_code": "Código postal",
+                "phone": "Teléfono",
+                "entry_price": "Precio entrada",
+                "website": "Sitio web",
+                "maps": "Mapa"
+            },
+            "form": {
+                "rating": "Calificación",
+                "comment": "Comentario",
+                "comment_placeholder": "Cuéntanos tu experiencia en esta sucursal...",
+                "submit": "Enviar reseña",
+                "sending": "Enviando..."
+            }
+        }
     },
     "ranking": {
         "title": "Ranking de Usuarios",
@@ -236,6 +303,7 @@
         "galleries": "galerías",
         "gallery": "galería",
         "featured_galleries": "galerías destacadas",
+        "cafes": "cafés",
         "user_galleries": "galerías",
         "vip_users": "usuarios VIP",
         "countries": "países",
@@ -251,7 +319,7 @@
         "label": "VIP",
         "upgrade_cta": "Actualiza a VIP para obtener galerías ilimitadas."
     },
-    
+
     "tickets": {
         "my_tickets": "Mis Tickets",
         "new": "Nuevo Ticket",
@@ -333,7 +401,7 @@
         "login_here": "Inicia sesión aquí",
         "error_register": "Error al registrar usuario"
     },
-    
+
     "filepond": {
         "label_idle": "Arrastra y suelta tu imagen o <span class=\"filepond--label-action\">Examinar</span>"
     },

@@ -7,6 +7,7 @@ import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { useAuth } from '../contexts/AuthContext';
 import { useSiteSettings } from '../hooks/useSiteSettings';
 import FeaturedGalleries from '../components/FeaturedGalleries';
+import CafesWithReviews from '../components/CafesWithReviews';
 import UsersGrid from '../components/UsersGrid';
 import PopularTags from '../components/PopularTags';
 import type { Page, User } from '../types';
@@ -45,7 +46,7 @@ export default function Home(): React.ReactElement {
             return;
           }
         } catch (e) {
-          
+
         }
 
         try {
@@ -210,6 +211,15 @@ export default function Home(): React.ReactElement {
           </Container>
         </section>
       )}
+
+      {/* Cafes en home: ultimos y destacados en una sola seccion */}
+      <CafesWithReviews
+        limit={12}
+        showFilters={false}
+        orderBy="latest_featured"
+        title={t('home.cafes_reviews_title')}
+        description={t('home.cafes_reviews_desc')}
+      />
 
       {/* Etiquetas populares */}
       <PopularTags limit={20} />

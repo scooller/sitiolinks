@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AltchaController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AvatarUploadController;
+use App\Http\Controllers\Api\CafeMediaUploadController;
 use App\Http\Controllers\Api\GalleryMediaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
@@ -30,3 +31,8 @@ Route::delete('/gallery-media/revert', [GalleryMediaController::class, 'revert']
 // Avatar uploads
 Route::post('/avatar/upload', [AvatarUploadController::class, 'upload'])->middleware('auth:web');
 Route::delete('/avatar/revert', [AvatarUploadController::class, 'revert'])->middleware('auth:web');
+
+// Cafe media uploads
+Route::post('/cafe-media/upload-cafe-image', [CafeMediaUploadController::class, 'uploadCafeImage'])->middleware('auth:web');
+Route::post('/cafe-media/upload-branch-image', [CafeMediaUploadController::class, 'uploadBranchImage'])->middleware('auth:web');
+Route::delete('/cafe-media/revert', [CafeMediaUploadController::class, 'revert'])->middleware('auth:web');

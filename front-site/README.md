@@ -81,6 +81,25 @@ Notas:
 
 Este paquete: `front-site` versión **0.2.0**.
 
+---
+
+## Imágenes de Cafés y Sucursales
+
+El frontend consume `image_url` desde GraphQL para cafés y sucursales.
+
+Reglas actuales:
+- `image_url` llega desde backend como URL absoluta contra `APP_URL`.
+- En desarrollo, la URL correcta de media debe ser `http://127.0.0.1:8000/...`, no `http://127.0.0.1:3000/...`.
+- Esto evita que Vite resuelva accidentalmente la imagen contra el host del frontend cuando GraphQL pasa por proxy.
+
+Endpoints esperados:
+- `http://127.0.0.1:8000/cafe-media/{id}`
+- `http://127.0.0.1:8000/branch-media/{id}`
+
+Notas:
+- El componente `CafesWithReviews` usa directamente `cafe.image_url` y `branch.image_url`.
+- La selección de imagen en backend siempre toma la más nueva por `created_at desc` con `id desc` como desempate.
+
 
 ```
 VITE_CAPTCHA_PROVIDER=altcha

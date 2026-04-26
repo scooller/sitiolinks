@@ -4,6 +4,7 @@ declare(strict_types=1);
 use App\GraphQL\Mutations\AddMediaToGalleryMutation;
 use App\GraphQL\Mutations\AddTicketCommentMutation;
 use App\GraphQL\Mutations\AssignUserTagsMutation;
+use App\GraphQL\Mutations\CreateCafeBranchReviewMutation;
 use App\GraphQL\Mutations\CreateContactMessageMutation;
 use App\GraphQL\Mutations\CreateGalleryMutation;
 use App\GraphQL\Mutations\CreateLinkMutation;
@@ -19,6 +20,8 @@ use App\GraphQL\Mutations\RemoveMediaFromGalleryMutation;
 use App\GraphQL\Mutations\ReorderGalleryMediaMutation;
 use App\GraphQL\Mutations\ReorderLinksMutation;
 use App\GraphQL\Mutations\SendVipNotificationMutation;
+use App\GraphQL\Mutations\SetBranchImageMutation;
+use App\GraphQL\Mutations\SetCafeImageMutation;
 use App\GraphQL\Mutations\ToggleFeaturedGalleryMutation;
 use App\GraphQL\Mutations\ToggleLikeMutation;
 use App\GraphQL\Mutations\ToggleUserLikeMutation;
@@ -30,6 +33,8 @@ use App\GraphQL\Mutations\UpdateLinkMutation;
 use App\GraphQL\Mutations\UpdateLinksMutation;
 use App\GraphQL\Mutations\UpdateProfileMutation;
 use App\GraphQL\Mutations\UpdateTicketMutation;
+use App\GraphQL\Queries\CafeDetailQuery;
+use App\GraphQL\Queries\CafesWithReviewsQuery;
 use App\GraphQL\Queries\CountriesQuery;
 use App\GraphQL\Queries\FeaturedGalleriesQuery;
 use App\GraphQL\Queries\FollowersQuery;
@@ -50,6 +55,9 @@ use App\GraphQL\Queries\UserQuery;
 use App\GraphQL\Queries\UsersQuery;
 use App\GraphQL\Queries\VipNotificationsQuery;
 use App\GraphQL\Queries\VipUnreadNotificationsCountQuery;
+use App\GraphQL\Types\CafeBranchReviewType;
+use App\GraphQL\Types\CafeBranchType;
+use App\GraphQL\Types\CafeType;
 use App\GraphQL\Types\ContactMessageType;
 use App\GraphQL\Types\GalleryMediaItemType;
 use App\GraphQL\Types\GalleryPaginatorType;
@@ -69,6 +77,7 @@ use App\GraphQL\Types\TicketType;
 use App\GraphQL\Types\UserLikeType;
 use App\GraphQL\Types\UserPaginatorType;
 use App\GraphQL\Types\UserType;
+use App\Support\GraphQLErrorsHandler;
 use Rebing\GraphQL\GraphQL;
 use Rebing\GraphQL\GraphQLController;
 use Rebing\GraphQL\Support\CursorPaginationType;
@@ -196,6 +205,9 @@ return [
                 MarkAllNotificationsAsReadMutation::class,
                 SendVipNotificationMutation::class,
                 DismissWarningMutation::class,
+                SetCafeImageMutation::class,
+                SetBranchImageMutation::class,
+                CreateCafeBranchReviewMutation::class,
             ],
             // The types only available in this schema
             'types' => [
@@ -216,6 +228,9 @@ return [
                 GalleryPaginatorType::class,
                 UserPaginatorType::class,
                 SystemStatsType::class, // v2.7.23 Analytics
+                CafeType::class,
+                CafeBranchType::class,
+                CafeBranchReviewType::class,
             ],
 
             // Laravel HTTP middleware (schema-specific). Protected by session (`auth:web`).
@@ -250,6 +265,8 @@ return [
                 GalleriesQuery::class,
                 GalleryQuery::class,
                 FeaturedGalleriesQuery::class,
+                CafesWithReviewsQuery::class,
+                CafeDetailQuery::class,
                 CountriesQuery::class,
             ],
             'mutation' => [
@@ -262,6 +279,9 @@ return [
                 LinkType::class,
                 RoleType::class,
                 SiteSettingsType::class,
+                CafeType::class,
+                CafeBranchType::class,
+                CafeBranchReviewType::class,
                 ContactMessageType::class,
                 PageType::class,
                 TicketType::class,
@@ -311,7 +331,7 @@ return [
      *
      * The default handler will pass exceptions to laravel Error Handling mechanism
      */
-    'errors_handler' => [GraphQL::class, 'handleErrors'],
+    'errors_handler' => [GraphQLErrorsHandler::class, 'handle'],
 
     /*
      * Options to limit the query complexity and depth. See the doc

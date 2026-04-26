@@ -178,3 +178,32 @@ ALTCHA_SITE_KEY=tu_site_key
 - Preferir `UserError` para errores que debe ver el cliente; reservar excepciones para fallos del servidor.
 - Mantener los `use` ordenados y sin duplicados; eliminar imports no usados.
 - Validar con `php artisan test` y revisar que la ruta `/graphql` esté accesible con las políticas/middlewares esperados.
+
+## Cafés y Sucursales: Imágenes con Media Library
+
+La sección de cafés y sucursales quedó alineada con el patrón ya usado en galerías: las imágenes se gestionan en backend con Spatie Media Library y no mediante rutas directas del frontend.
+
+### Backend
+- Colecciones usadas:
+  - `cafe_image` y `cafe_image_temp` en `App\Models\Cafe`
+  - `branch_image` y `branch_image_temp` en `App\Models\CafeBranch`
+- Conversiones configuradas para ambas entidades:
+  - `thumb` (`200x120`)
+  - `thumb_webp` (`200x120`, calidad `75`)
+  - `preview` (`600x360`)
+- La carga en Filament se hace desde relation managers, no desde el formulario principal:
+  - `CafeImageRelationManager`
+  - `BranchImageRelationManager`
+
+### Entrega de imágenes
+- Las imágenes públicas de café y sucursal se sirven desde rutas backend:
+  - `/cafe-media/{media}`
+  - `/cafe-media/{media}/{conversion}`
+  - `/branch-media/{media}`
+  - `/branch-media/{media}/{conversion}`
+- El controlador responsable es `App\Http\Controllers\MediaController`.
+- En GraphQL, `CafeType.image_url` y `CafeBranchType.image_url` devuelven URLs absolutas construidas contra `APP_URL`, no contra el host del request actual.
+
+### Regla de orden
+- Cuando se necesita elegir una sola imagen para mostrar, se toma la más reciente por `created_at desc` y `id desc` como desempate.
+- Esto aplica tanto en tablas de Filament como en los resolvers GraphQL de cafés y sucursales.

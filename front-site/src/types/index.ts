@@ -199,6 +199,50 @@ export interface ContactMessage {
   created_at?: string;
 }
 
+export interface Cafe {
+  id: string | number;
+  name: string;
+  description?: string;
+  website?: string;
+  image_url?: string;
+  branches_count?: number;
+  reviews_count?: number;
+  average_rating?: number;
+  branches?: CafeBranch[];
+}
+
+export interface CafeBranch {
+  id: string | number;
+  cafe_id: string | number;
+  name: string;
+  description?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  phone?: string;
+  website?: string;
+  google_maps_url?: string;
+  menu_qr_url?: string;
+  entry_price?: number;
+  image_url?: string;
+  tags?: Tag[];
+  creators?: User[];
+  reviews_count?: number;
+  average_rating?: number;
+  reviews?: CafeBranchReview[];
+}
+
+export interface CafeBranchReview {
+  id: string | number;
+  cafe_branch_id: string | number;
+  user_id: string | number;
+  rating: number;
+  comment?: string;
+  created_at?: string;
+  user?: User;
+}
+
 export interface Ticket {
   id: string | number;
   user_id: string | number;
