@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
 
 class CafesTable
 {
@@ -67,8 +68,11 @@ class CafesTable
 
                 TextColumn::make('creators_count')
                     ->label('Creadores')
-                    ->counts('creators')
-                    ->sortable(),
+                    ->getStateUsing(fn ($record) => DB::table('cafe_branch_creator')
+                        ->join('cafe_branches', 'cafe_branches.id', '=', 'cafe_branch_creator.cafe_branch_id')
+                        ->where('cafe_branches.cafe_id', $record->id)
+                        ->distinct('cafe_branch_creator.user_id')
+                        ->count('cafe_branch_creator.user_id')),
 
                 TextColumn::make('created_at')
                     ->label('Creado')
