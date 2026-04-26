@@ -26,6 +26,9 @@ class CafeType extends GraphQLType
             'name' => [
                 'type' => Type::nonNull(Type::string()),
             ],
+            'slug' => [
+                'type' => Type::string(),
+            ],
             'description' => [
                 'type' => Type::string(),
             ],

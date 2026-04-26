@@ -202,6 +202,7 @@ export interface ContactMessage {
 export interface Cafe {
   id: string | number;
   name: string;
+  slug?: string;
   description?: string;
   website?: string;
   image_url?: string;

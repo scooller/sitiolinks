@@ -9,6 +9,7 @@ import {
   Container,
   Form,
   ListGroup,
+  Modal,
   Row,
   Spinner,
   Tab,
@@ -32,7 +33,7 @@ interface CreateReviewResponse {
 
 export default function CafeDetail(): React.ReactElement {
   const { t } = useTranslation();
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const { isAuthenticated } = useAuth();
 
   const [cafe, setCafe] = useState<Cafe | null>(null);
@@ -44,13 +45,15 @@ export default function CafeDetail(): React.ReactElement {
   const [submittingReview, setSubmittingReview] = useState<boolean>(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
 
   const activeBranch = useMemo(() => {
     return (cafe?.branches ?? []).find((branch) => String(branch.id) === activeBranchKey) ?? null;
   }, [activeBranchKey, cafe?.branches]);
 
   const loadCafeDetail = async (): Promise<void> => {
-    if (!id) {
+    if (!slug) {
       setError(t('cafes.detail.invalid_id'));
       setLoading(false);
       return;
@@ -61,9 +64,10 @@ export default function CafeDetail(): React.ReactElement {
       setError(null);
 
       const query = `
-        query CafeDetail($id: ID!) {
-          cafeDetail(id: $id) {
+        query CafeDetail($id: ID, $slug: String) {
+          cafeDetail(id: $id, slug: $slug) {
             id
+            slug
             name
             description
             website
@@ -98,6 +102,11 @@ export default function CafeDetail(): React.ReactElement {
                 username
                 avatar_thumb
                 avatar_url
+                tags {
+                  id
+                  name
+                  color
+                }
               }
               reviews {
                 id
@@ -118,7 +127,10 @@ export default function CafeDetail(): React.ReactElement {
 
       const response = await graphqlRequest<CafeDetailResponse>({
         query,
-        variables: { id },
+        variables: {
+          id: /^\d+$/.test(slug) ? Number(slug) : null,
+          slug: /^\d+$/.test(slug) ? null : slug,
+        },
         schema: 'public',
       });
 
@@ -139,7 +151,7 @@ export default function CafeDetail(): React.ReactElement {
 
   useEffect(() => {
     loadCafeDetail();
-  }, [id]);
+  }, [slug]);
 
   const renderStars = (value: number): string => {
     const fullStars = Math.max(0, Math.min(5, Math.round(value)));
@@ -194,6 +206,65 @@ export default function CafeDetail(): React.ReactElement {
     }
   };
 
+  const getShareUrl = (): string => {
+    if (typeof window === 'undefined') {
+      return '';
+    }
+
+    return window.location.href;
+  };
+
+  const openShareDialog = (): void => {
+    setShareMessage(null);
+    setShowShareDialog(true);
+  };
+
+  const closeShareDialog = (): void => {
+    setShowShareDialog(false);
+  };
+
+  const handleCopyShareUrl = async (): Promise<void> => {
+    const shareUrl = getShareUrl();
+    if (shareUrl === '') {
+      setShareMessage(t('cafes.detail.share_error'));
+      return;
+    }
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const tempInput = document.createElement('input');
+        tempInput.value = shareUrl;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+      }
+
+      setShareMessage(t('cafes.detail.share_copied'));
+    } catch {
+      setShareMessage(t('cafes.detail.share_error'));
+    }
+  };
+
+  const handleNativeShare = async (): Promise<void> => {
+    const shareUrl = getShareUrl();
+    if (!cafe || !(typeof navigator !== 'undefined' && 'share' in navigator) || shareUrl === '') {
+      return;
+    }
+
+    try {
+      await navigator.share({
+        title: cafe.name,
+        text: cafe.description || cafe.name,
+        url: shareUrl,
+      });
+    } catch {
+      // Ignore canceled share dialog to avoid noisy UI errors.
+    }
+  };
+
   if (loading) {
     return (
       <Container className="py-5 text-center">
@@ -219,13 +290,18 @@ export default function CafeDetail(): React.ReactElement {
       <Row className="mb-4 g-4 align-items-center">
         <Col md={8}>
           <h1 className="mb-2">{cafe.name}</h1>
-          {cafe.description && <p className="text-muted mb-0">{cafe.description}</p>}
         </Col>
-        <Col md={4} className="text-md-end">
-          <Link to="/cafes" className="btn btn-outline-secondary btn-sm">
-            <i className="fas fa-arrow-left me-2"></i>
-            {t('common.back')}
-          </Link>
+        <Col md={4} className="text-center text-md-end">
+          <div className="d-flex gap-2 justify-content-center justify-content-md-end">
+            <Button variant="outline-dark" size="sm" onClick={openShareDialog}>
+              <i className="fas fa-share-alt me-2"></i>
+              {t('cafes.detail.share')}
+            </Button>
+            <Link to="/cafes" className="btn btn-outline-secondary btn-sm">
+              <i className="fas fa-arrow-left me-2"></i>
+              {t('common.back')}
+            </Link>
+          </div>
         </Col>
       </Row>
 
@@ -258,6 +334,8 @@ export default function CafeDetail(): React.ReactElement {
                     <Badge bg="warning" text="dark">{renderStars(cafe.average_rating)} {cafe.average_rating.toFixed(1)}</Badge>
                   )}
                 </div>
+                <hr />
+                {cafe.description && <p className="text-muted mb-3">{cafe.description}</p>}
 
                 {cafe.website && (
                   <p className="mb-0">
@@ -284,7 +362,16 @@ export default function CafeDetail(): React.ReactElement {
                 onSelect={(key) => setActiveBranchKey(key ?? '')}
                 className="mb-3"
               >
-                {(cafe.branches ?? []).map((branch) => (
+                {(cafe.branches ?? []).map((branch) => {
+                  const creatorTags = Array.from(
+                    new Map(
+                      (branch.creators ?? [])
+                        .flatMap((creator) => creator.tags ?? [])
+                        .map((tag) => [String(tag.id), tag])
+                    ).values()
+                  );
+
+                  return (
                   <Tab key={branch.id} eventKey={String(branch.id)} title={branchLocationLabel(branch)}>
                     <Row className="g-4 mt-1">
                       <Col lg={6}>
@@ -297,7 +384,12 @@ export default function CafeDetail(): React.ReactElement {
                             {(branch.city || branch.state) && <ListGroup.Item><strong>{t('cafes.detail.fields.comuna')}:</strong> {(branch.city ?? branch.state) || '-'}</ListGroup.Item>}
                             {branch.postal_code && <ListGroup.Item><strong>{t('cafes.detail.fields.postal_code')}:</strong> {branch.postal_code}</ListGroup.Item>}
                             {branch.phone && <ListGroup.Item><strong>{t('cafes.detail.fields.phone')}:</strong> {branch.phone}</ListGroup.Item>}
-                            {typeof branch.entry_price === 'number' && <ListGroup.Item><strong>{t('cafes.detail.fields.entry_price')}:</strong> {branch.entry_price}</ListGroup.Item>}
+                            <ListGroup.Item>
+                              <strong>{t('cafes.detail.fields.entry_price')}:</strong>{' '}
+                              {typeof branch.entry_price === 'number' && branch.entry_price > 0
+                                ? branch.entry_price
+                                : t('cafes.detail.free_entry')}
+                            </ListGroup.Item>
                             {branch.website && (
                               <ListGroup.Item>
                                 <strong>{t('cafes.detail.fields.website')}:</strong>{' '}
@@ -327,17 +419,57 @@ export default function CafeDetail(): React.ReactElement {
                             {(branch.creators ?? []).length === 0 ? (
                               <p className="text-muted mb-0">{t('cafes.detail.no_creators')}</p>
                             ) : (
-                              <div className="d-flex flex-wrap gap-2">
+                              <>
+                              <div className="d-flex flex-wrap gap-3">
                                 {(branch.creators ?? []).map((creator) => (
                                   <Link
                                     key={creator.id}
                                     to={`/u/${creator.username}`}
-                                    className="btn btn-outline-dark btn-sm"
+                                    className="d-inline-flex flex-column align-items-center text-decoration-none text-dark"
+                                    style={{ width: '112px' }}
                                   >
-                                    {creator.name || `@${creator.username}`}
+                                    {creator.avatar_thumb || creator.avatar_url ? (
+                                      <img
+                                        src={creator.avatar_thumb || creator.avatar_url}
+                                        alt={creator.name || creator.username}
+                                        width={100}
+                                        height={100}
+                                        className="rounded-circle"
+                                        style={{ objectFit: 'cover' }}
+                                      />
+                                    ) : (
+                                      <span
+                                        className="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center"
+                                        style={{ width: '100px', height: '100px', fontSize: '32px' }}
+                                      >
+                                        {(creator.name || creator.username || '?').charAt(0).toUpperCase()}
+                                      </span>
+                                    )}
+                                    <span className="mt-2 text-center small fw-semibold lh-sm">{creator.name || `@${creator.username}`}</span>
                                   </Link>
                                 ))}
                               </div>
+                              <div className="mt-3 pt-3 border-top">
+                                <p className="text-muted small mb-2">{t('cafes.detail.creators_tags')}</p>
+                                {creatorTags.length > 0 ? (
+                                  <div className="d-flex flex-wrap gap-2">
+                                    {creatorTags.map((tag) => {
+                                      const slug = String(tag.name).trim().toLowerCase().replace(/\s+/g, '-');
+
+                                      return (
+                                        <Badge key={tag.id} bg={(tag.color as any) || 'secondary'}>
+                                          <Link to={`/t/${slug}`} className="text-white text-decoration-none">
+                                            {tag.name}
+                                          </Link>
+                                        </Badge>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <p className="text-muted mb-0 small">{t('cafes.detail.no_creator_tags')}</p>
+                                )}
+                              </div>
+                              </>
                             )}
                           </Card.Body>
                         </Card>
@@ -420,12 +552,45 @@ export default function CafeDetail(): React.ReactElement {
                       </Col>
                     </Row>
                   </Tab>
-                ))}
+                  );
+                })}
               </Tabs>
             )}
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
+
+      <Modal show={showShareDialog} onHide={closeShareDialog} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{t('cafes.detail.share_title')}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="text-muted small mb-2">{t('cafes.detail.share_description')}</p>
+          <Form.Control type="text" readOnly value={getShareUrl()} onFocus={(event) => event.currentTarget.select()} />
+          {shareMessage && (
+            <Alert variant="info" className="mt-3 py-2 mb-0">
+              {shareMessage}
+            </Alert>
+          )}
+        </Modal.Body>
+        <Modal.Footer className="d-flex gap-2 justify-content-between">
+          <div>
+            {typeof navigator !== 'undefined' && 'share' in navigator && (
+              <Button variant="outline-dark" onClick={handleNativeShare}>
+                <i className="fas fa-share-nodes me-2"></i>
+                {t('cafes.detail.share_native')}
+              </Button>
+            )}
+          </div>
+          <div className="d-flex gap-2 ms-auto">
+            <Button variant="secondary" onClick={closeShareDialog}>{t('common.close')}</Button>
+            <Button variant="dark" onClick={handleCopyShareUrl}>
+              <i className="fas fa-copy me-2"></i>
+              {t('cafes.detail.share_copy')}
+            </Button>
+          </div>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }

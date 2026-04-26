@@ -81,7 +81,7 @@ const AnimatedRoutes: React.FC<{ transitionType?: string }> = ({ transitionType 
         <Route path="/" element={<AnimatedPage id="home" transitionType={transitionType}><Home /></AnimatedPage>} />
         <Route path="/explorar" element={<AnimatedPage id="explorar" transitionType={transitionType}><Explore /></AnimatedPage>} />
         <Route path="/cafes" element={<AnimatedPage id="cafes" transitionType={transitionType}><Cafes /></AnimatedPage>} />
-        <Route path="/cafes/:id" element={<AnimatedPage id="cafe-detalle" transitionType={transitionType}><CafeDetail /></AnimatedPage>} />
+        <Route path="/cafes/:slug" element={<AnimatedPage id="cafe-detalle" transitionType={transitionType}><CafeDetail /></AnimatedPage>} />
         <Route path="/ranking" element={<AnimatedPage id="ranking" transitionType={transitionType}><Ranking /></AnimatedPage>} />
         <Route path="/login" element={<AnimatedPage id="login" transitionType={transitionType}><Login /></AnimatedPage>} />
         <Route path="/register" element={<AnimatedPage id="register" transitionType={transitionType}><Register /></AnimatedPage>} />
@@ -122,15 +122,15 @@ function App() {
     // Evitar múltiples cargas (React Strict Mode en dev ejecuta 2 veces)
     // Pero permitir recarga en navegación normal
     const shouldLoad = !settingsLoaded.current || performance.navigation.type === 1;
-    
+
     if (settingsLoaded.current && performance.navigation.type !== 1) {
       console.log('⏭️ SiteSettings ya cargados, saltando...');
       return;
     }
-    
+
     settingsLoaded.current = true;
     console.log('🚀 Iniciando carga de SiteSettings...');
-    
+
     graphqlRequest({ query: queries.siteSettings })
       .then((data) => {
         const settings = data?.siteSettings;
@@ -138,7 +138,7 @@ function App() {
           console.warn('⚠️ No se pudieron cargar siteSettings');
           return;
         }
-        
+
         console.log('⚙️ SiteSettings cargados:', {
           full: settings,
           fonts: {
@@ -203,17 +203,17 @@ function App() {
 
         const hf = settings.heading_font as string | undefined;
         const bf = settings.body_font as string | undefined;
-                
+
         console.log('🔤 Configuración de fuentes:', {
           heading_font: hf,
           body_font: bf,
           has_heading: !!(hf && hf.trim()),
           has_body: !!(bf && bf.trim())
         });
-                
+
         if ((hf && hf.trim()) || (bf && bf.trim())) {
           const encode = (n: string) => n.trim().replace(/\s+/g, '+');
-          
+
           // Función para detectar si es fuente variable o estática
           const getFontParams = (fontName: string): string => {
             // Fuentes variables comunes de Google (agregar más según necesites)
@@ -221,11 +221,11 @@ function App() {
               'Inter', 'Roboto Flex', 'Outfit', 'Manrope', 'Plus Jakarta Sans',
               'Work Sans', 'DM Sans', 'Space Grotesk', 'Sora', 'Epilogue'
             ];
-            
-            const isVariable = variableFonts.some(vf => 
+
+            const isVariable = variableFonts.some(vf =>
               fontName.toLowerCase().includes(vf.toLowerCase())
             );
-            
+
             if (isVariable) {
               // Para fuentes variables: wght@100..900
               return `family=${encode(fontName)}:wght@100..900`;
@@ -234,15 +234,15 @@ function App() {
               return `family=${encode(fontName)}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900`;
             }
           };
-          
+
           const families: string[] = [];
           if (bf && bf.trim()) families.push(getFontParams(bf));
           if (hf && hf.trim() && hf !== bf) families.push(getFontParams(hf));
-          
+
           const href = `https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`;
-          
+
           console.log('🔤 URL de Google Fonts generada:', href);
-          
+
           // PASO 1: Crear/actualizar el <link> PRIMERO
           let link = document.getElementById('site-fonts') as HTMLLinkElement | null;
           if (!link) {
@@ -256,7 +256,7 @@ function App() {
             link.href = href;
             console.log('🔤 <link> de Google Fonts actualizado');
           }
-          
+
           // PASO 2: Esperar a que las fuentes carguen, LUEGO aplicar CSS
           const applyFontStyles = () => {
             let style = document.getElementById('site-fonts-style') as HTMLStyleElement | null;
@@ -266,11 +266,11 @@ function App() {
               document.head.appendChild(style);
               console.log('🔤 <style> de fuentes creado');
             }
-            
+
             const bodyFamily = bf && bf.trim() ? `'${bf}', sans-serif` : '';
             const headingFamily = hf && hf.trim() ? `'${hf}', sans-serif` : '';
             const parts: string[] = [];
-            
+
             if (bodyFamily) {
               parts.push(`:root { --bs-body-font-family: ${bodyFamily}; }`);
               parts.push(`body { font-family: ${bodyFamily}; }`);
@@ -279,18 +279,18 @@ function App() {
             if (headingFamily) {
               parts.push(`h1, h2, h3, h4, h5, h6, .nav-link { font-family: ${headingFamily}; }`);
             }
-            
+
             style.textContent = parts.join('\n');
             console.log('✅ CSS de fuentes aplicado:', style.textContent);
           };
-          
+
           // PASO 3: Usar Font Face Observer para aplicar estilos cuando estén listas
           if (document.fonts && document.fonts.ready) {
             // Opción A: Esperar a que TODAS las fuentes carguen
             document.fonts.ready.then(() => {
               console.log('✅ Todas las fuentes cargadas vía fonts.ready');
               applyFontStyles();
-              
+
               // Forzar repaint
               document.body.style.opacity = '0.99999';
               requestAnimationFrame(() => {
@@ -300,7 +300,7 @@ function App() {
               console.warn('⚠️ Error en fonts.ready, aplicando estilos de todos modos:', err);
               applyFontStyles();
             });
-            
+
             // Opción B: Timeout de seguridad (máximo 3 segundos)
             setTimeout(() => {
               if (!document.getElementById('site-fonts-style')?.textContent) {
@@ -308,19 +308,19 @@ function App() {
                 applyFontStyles();
               }
             }, 3000);
-            
+
           } else {
             // Fallback para navegadores antiguos: aplicar inmediatamente
             console.warn('⚠️ document.fonts.ready no disponible, aplicando estilos inmediatamente');
             applyFontStyles();
           }
-          
+
           // PASO 4: Verificación después de 1 segundo
           setTimeout(() => {
             const computedBody = window.getComputedStyle(document.body);
             const h1 = document.querySelector('h1');
             const computedH1 = h1 ? window.getComputedStyle(h1) : null;
-            
+
             console.log('🔍 Verificación de fuentes aplicadas:', {
               bodyFontFamily: computedBody.fontFamily,
               h1FontFamily: computedH1?.fontFamily,
@@ -330,7 +330,7 @@ function App() {
               styleContent: document.getElementById('site-fonts-style')?.textContent
             });
           }, 1000);
-          
+
         } else {
           console.log('⚠️ No hay fuentes configuradas en siteSettings');
         }
@@ -342,7 +342,7 @@ function App() {
             length: css.length,
             preview: css.substring(0, 100) + '...'
           });
-          
+
           let custom = document.getElementById('site-custom-css') as HTMLStyleElement | null;
           if (!custom) {
             custom = document.createElement('style');
@@ -352,7 +352,7 @@ function App() {
             console.log('🎨 Elemento <style> de CSS personalizado creado');
           }
           custom.textContent = css;
-          
+
           // Verificar que se aplicó
           setTimeout(() => {
             const appliedStyle = document.getElementById('site-custom-css');

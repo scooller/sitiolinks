@@ -26,3 +26,6 @@ Thumbs.db
 .gitattributes
 back-admin.zip
 /storage/media-library/temp
+/front-site/dist
+/front-site/dist
+/front-site/dist/assets

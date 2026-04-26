@@ -77,6 +77,7 @@ export default function CafesWithReviews({
             cafesWithReviews(limit: $limit, branches_per_cafe: $branchesPerCafe, reviews_per_branch: $reviewsPerBranch, city: $city, min_rating: $minRating, tag_id: $tagId, search: $search, order_by: $orderBy) {
               id
               name
+              slug
               description
               website
               image_url
@@ -277,7 +278,7 @@ export default function CafesWithReviews({
                     <div className="d-flex justify-content-between align-items-start gap-2">
                       <div>
                         <Card.Title className="mb-1">
-                          <Link to={`/cafes/${cafe.id}`} className="text-decoration-none text-dark">
+                          <Link to={`/cafes/${cafe.slug || cafe.id}`} className="text-decoration-none text-dark">
                             {cafe.name}
                           </Link>
                         </Card.Title>
@@ -327,7 +328,7 @@ export default function CafesWithReviews({
                       </a>
                     )}
 
-                    <Link to={`/cafes/${cafe.id}`} className="btn btn-dark btn-sm">
+                    <Link to={`/cafes/${cafe.slug || cafe.id}`} className="btn btn-dark btn-sm">
                       <i className="fas fa-mug-hot me-2"></i>
                       {t('cafes.detail.view')}
                     </Link>
