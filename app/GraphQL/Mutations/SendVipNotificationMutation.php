@@ -47,15 +47,23 @@ class SendVipNotificationMutation extends Mutation
 
     public function resolve($root, array $args)
     {
-        $sender = auth('web')->user();
+        $authenticatedUser = auth('web')->user();
 
-        if (! $sender) {
+        if (! $authenticatedUser) {
             throw new UserError('Debes estar autenticado para enviar mensajes VIP.');
         }
 
+        if (! $authenticatedUser instanceof User) {
+            throw new UserError('No se pudo resolver el usuario autenticado.');
+        }
+
+        $sender = $authenticatedUser;
+
         $recipient = User::findOrFail((int) $args['recipient_id']);
 
-        if (! $recipient->hasRole('vip')) {
+        $senderIsVip = $sender->hasRole('vip');
+
+        if (! $senderIsVip && ! $recipient->hasRole('vip')) {
             throw new UserError('Solo puedes enviar mensajes a usuarios VIP.');
         }
 

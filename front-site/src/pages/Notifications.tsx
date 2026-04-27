@@ -1,11 +1,12 @@
 import { type ReactElement, useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Badge, Button, Alert, Spinner, ButtonGroup } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Card, Badge, Button, Alert, Spinner, ButtonGroup, Modal, Form } from 'react-bootstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { useAuth } from '../contexts/AuthContext';
 import { initEcho, getEcho } from '../lib/echo';
 import { useTranslation } from 'react-i18next';
 import { queries } from '../lib/graphql/queries';
+import { mutations } from '../lib/graphql/mutations';
 
 interface Notification {
   id: string | number;
@@ -18,14 +19,29 @@ interface Notification {
   created_at: string;
 }
 
+const isValidFilter = (value: string | null): value is 'all' | 'unread' | 'vip' => {
+  return value === 'all' || value === 'unread' || value === 'vip';
+};
+
 export default function Notifications(): ReactElement {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread' | 'vip'>('all');
+  const [showReplyModal, setShowReplyModal] = useState<boolean>(false);
+  const [replyRecipientId, setReplyRecipientId] = useState<number | null>(null);
+  const [replyRecipientUsername, setReplyRecipientUsername] = useState<string>('');
+  const [replyMessage, setReplyMessage] = useState<string>('');
+  const [replySending, setReplySending] = useState<boolean>(false);
+  const [replyStatus, setReplyStatus] = useState<{ variant: 'success' | 'danger'; text: string } | null>(null);
   const { t, i18n } = useTranslation();
+  const viewerRoles: string[] = Array.isArray((user as any)?.roles)
+    ? (user as any).roles.map((role: any) => (typeof role === 'string' ? role : role?.name)).filter(Boolean)
+    : [];
+  const isVipViewer = viewerRoles.includes('vip');
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -35,6 +51,46 @@ export default function Notifications(): ReactElement {
 
     fetchNotifications();
   }, [isAuthenticated, filter, navigate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const filterParam = params.get('filter');
+
+    if (!isValidFilter(filterParam)) {
+      return;
+    }
+
+    setFilter((previous) => (previous === filterParam ? previous : filterParam));
+  }, [location.search]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !isVipViewer) {
+      return;
+    }
+
+    const params = new URLSearchParams(location.search);
+    const replyToRaw = params.get('reply_to');
+
+    if (!replyToRaw) {
+      return;
+    }
+
+    const replyTo = Number(replyToRaw);
+
+    if (!Number.isInteger(replyTo) || replyTo <= 0) {
+      return;
+    }
+
+    if (user?.id && Number(user.id) === replyTo) {
+      return;
+    }
+
+    setReplyRecipientId(replyTo);
+    setReplyRecipientUsername(params.get('reply_username') || '');
+    setReplyMessage('');
+    setReplyStatus(null);
+    setShowReplyModal(true);
+  }, [isAuthenticated, isVipViewer, location.search, user?.id]);
 
   // Suscripción en tiempo real al canal privado de notificaciones
   useEffect(() => {
@@ -184,23 +240,109 @@ export default function Notifications(): ReactElement {
     }
   };
 
-  const getSenderText = (notification: Notification): string | null => {
-    if (notification.type !== 'vip_user_message' || !notification.data) {
+  const parseNotificationData = (notification: Notification): Record<string, any> | null => {
+    if (!notification.data) {
       return null;
     }
 
     try {
-      const parsed = JSON.parse(notification.data);
-      const username = parsed?.sender_username;
-
-      if (typeof username === 'string' && username.trim() !== '') {
-        return `@${username}`;
-      }
+      return JSON.parse(notification.data);
     } catch {
       return null;
     }
+  };
+
+  const getSenderText = (notification: Notification): string | null => {
+    if (notification.type !== 'vip_user_message') {
+      return null;
+    }
+
+    const parsed = parseNotificationData(notification);
+    const username = parsed?.sender_username;
+
+    if (typeof username === 'string' && username.trim() !== '') {
+      return `@${username}`;
+    }
 
     return null;
+  };
+
+  const getReplyTarget = (notification: Notification): { id: number; username: string } | null => {
+    if (notification.type !== 'vip_user_message') {
+      return null;
+    }
+
+    const parsed = parseNotificationData(notification);
+    const senderId = Number(parsed?.sender_id ?? 0);
+
+    if (!Number.isInteger(senderId) || senderId <= 0) {
+      return null;
+    }
+
+    if (user?.id && Number(user.id) === senderId) {
+      return null;
+    }
+
+    const senderUsername = typeof parsed?.sender_username === 'string' ? parsed.sender_username : '';
+
+    return { id: senderId, username: senderUsername };
+  };
+
+  const openReplyModal = (notification: Notification): void => {
+    const target = getReplyTarget(notification);
+
+    if (!target) {
+      return;
+    }
+
+    setReplyRecipientId(target.id);
+    setReplyRecipientUsername(target.username);
+    setReplyMessage('');
+    setReplyStatus(null);
+    setShowReplyModal(true);
+  };
+
+  const handleReplySend = async (event: React.FormEvent): Promise<void> => {
+    event.preventDefault();
+
+    if (!replyRecipientId) {
+      setReplyStatus({ variant: 'danger', text: 'No se encontro destinatario para la respuesta.' });
+
+      return;
+    }
+
+    const cleanedMessage = replyMessage.trim();
+
+    if (cleanedMessage.length < 3) {
+      setReplyStatus({ variant: 'danger', text: 'El mensaje debe tener al menos 3 caracteres.' });
+
+      return;
+    }
+
+    setReplySending(true);
+    setReplyStatus(null);
+
+    try {
+      await graphqlRequest({
+        query: mutations.sendVipNotification,
+        variables: {
+          recipientId: replyRecipientId,
+          message: cleanedMessage,
+          title: 'Respuesta de creador VIP',
+          url: '/notificaciones',
+        },
+        schema: 'default',
+        authenticated: true,
+      });
+
+      setReplyStatus({ variant: 'success', text: 'Respuesta enviada correctamente.' });
+      setReplyMessage('');
+      setShowReplyModal(false);
+    } catch (err: any) {
+      setReplyStatus({ variant: 'danger', text: err?.message || 'No se pudo enviar la respuesta.' });
+    } finally {
+      setReplySending(false);
+    }
   };
 
   if (loading) {
@@ -291,7 +433,7 @@ export default function Notifications(): ReactElement {
                       >
                         <i className={`fas ${getTypeIcon(notif.type)} fa-lg text-${getTypeColor(notif.type)}`}></i>
                       </div>
-                      <div className="flex-grow-1 text-start">
+                      <div className="grow text-start">
                         <div className="d-flex justify-content-between align-items-start mb-2">
                           <h5 className="mb-0">{notif.title}</h5>
                           {!notif.read_at && (
@@ -317,6 +459,21 @@ export default function Notifications(): ReactElement {
                             minute: '2-digit',
                           })}
                         </small>
+                        {isVipViewer && getReplyTarget(notif) && (
+                          <div className="mt-3">
+                            <Button
+                              size="sm"
+                              variant="outline-warning"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                openReplyModal(notif);
+                              }}
+                            >
+                              <i className="fas fa-reply me-1"></i>
+                              Responder
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </Card.Body>
@@ -326,6 +483,42 @@ export default function Notifications(): ReactElement {
           )}
         </Col>
       </Row>
+
+      <Modal show={showReplyModal} onHide={() => setShowReplyModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="fas fa-reply me-2"></i>
+            Responder {replyRecipientUsername ? `a @${replyRecipientUsername}` : 'mensaje VIP'}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {replyStatus && (
+            <Alert variant={replyStatus.variant}>{replyStatus.text}</Alert>
+          )}
+          <Form onSubmit={handleReplySend}>
+            <Form.Group className="mb-3">
+              <Form.Label>Mensaje</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                maxLength={500}
+                value={replyMessage}
+                onChange={(event) => setReplyMessage(event.target.value)}
+                placeholder="Escribe tu respuesta"
+                required
+              />
+            </Form.Group>
+            <div className="d-flex justify-content-end gap-2">
+              <Button variant="outline-secondary" onClick={() => setShowReplyModal(false)} disabled={replySending}>
+                Cerrar
+              </Button>
+              <Button type="submit" variant="warning" disabled={replySending}>
+                {replySending ? 'Enviando...' : 'Enviar respuesta'}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 }

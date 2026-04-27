@@ -12,9 +12,17 @@
         .notification { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 10px 0; }
         .footer { font-size: 12px; color: #666; text-align: center; margin-top: 20px; }
         .button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+        .button-secondary { background-color: #ffc107; color: #111; }
     </style>
 </head>
 <body>
+    @php
+        $frontendBase = rtrim((string) config('app.frontend_url', config('app.url')), '/');
+        $notificationsUrl = $frontendBase.'/notificaciones';
+        $vipNotificationsUrl = $notificationsUrl.'?'.http_build_query(['filter' => 'vip']);
+        $replyToId = data_get($notification->data, 'sender_id');
+        $replyToUsername = data_get($notification->data, 'sender_username');
+    @endphp
     <div class="container">
         <div class="header">
             <h1>{{ config('app.name') }}</h1>
@@ -33,8 +41,19 @@
             </div>
 
             <p>
-                <a href="{{ url('/notificaciones') }}" class="button">Ver todas las notificaciones</a>
+                <a href="{{ $vipNotificationsUrl }}" class="button">Ver todas las notificaciones</a>
             </p>
+
+            @if($notification->type === 'vip_user_message' && !empty($replyToId))
+                <p>
+                    <a
+                        href="{{ $notificationsUrl.'?'.http_build_query(['filter' => 'vip', 'reply_to' => $replyToId, 'reply_username' => $replyToUsername]) }}"
+                        class="button button-secondary"
+                    >
+                        Responder
+                    </a>
+                </p>
+            @endif
 
             <p>Si no deseas recibir estos emails, puedes desactivar las notificaciones por email en tu perfil.</p>
         </div>
