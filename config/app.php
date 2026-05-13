@@ -56,6 +56,10 @@ return [
 
     'frontend_url' => env('FRONTEND_URL', 'http://127.0.0.1:3000'),
 
+    'currency' => env('APP_CURRENCY', 'CLP'),
+
+    'currency_fraction_digits' => (int) env('APP_CURRENCY_FRACTION_DIGITS', 0),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

@@ -69,7 +69,7 @@ class CafeBranchType extends GraphQLType
 
                     if ($media) {
                         return rtrim((string) config('app.url'), '/')
-                            .route('branch.media', ['media' => $media->id], false);
+                            . route('branch.media', ['media' => $media->id], false);
                     }
 
                     return null;

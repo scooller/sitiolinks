@@ -18,6 +18,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { APP_CURRENCY, APP_CURRENCY_FRACTION_DIGITS } from '../config/constants';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import type { Cafe, CafeBranch } from '../types';
 
@@ -168,8 +169,8 @@ export default function CafeDetail(): React.ReactElement {
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
-      currency: 'CLP',
-      maximumFractionDigits: 0,
+      currency: APP_CURRENCY,
+      maximumFractionDigits: APP_CURRENCY_FRACTION_DIGITS,
     }).format(value);
   };
 

@@ -82,15 +82,15 @@ class BranchesRelationManager extends RelationManager
 
                 TextColumn::make('entry_price')
                     ->label('Precio')
-                    ->money('USD', 2),
+                    ->money(config('app.currency', 'CLP'), config('app.currency_fraction_digits', 0)),
 
                 TextColumn::make('consumo_individual')
                     ->label('Consumo individual')
-                    ->money('USD', 2),
+                    ->money(config('app.currency', 'CLP'), config('app.currency_fraction_digits', 0)),
 
                 TextColumn::make('consumo_chica')
                     ->label('Consumo chica')
-                    ->money('USD', 2),
+                    ->money(config('app.currency', 'CLP'), config('app.currency_fraction_digits', 0)),
 
                 TextColumn::make('reviews_count')
                     ->label('Reseñas')
