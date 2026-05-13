@@ -97,6 +97,20 @@ class CafeBranchForm
                             ->step(0.01)
                             ->columnSpan(1),
 
+                        TextInput::make('consumo_individual')
+                            ->label('Consumo individual')
+                            ->numeric()
+                            ->nullable()
+                            ->step(0.01)
+                            ->columnSpan(1),
+
+                        TextInput::make('consumo_chica')
+                            ->label('Consumo chica')
+                            ->numeric()
+                            ->nullable()
+                            ->step(0.01)
+                            ->columnSpan(1),
+
                         Select::make('tags')
                             ->label('Etiquetas')
                             ->relationship('tags', 'name', modifyQueryUsing: function (Builder $query) {

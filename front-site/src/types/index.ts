@@ -226,6 +226,8 @@ export interface CafeBranch {
   google_maps_url?: string;
   menu_qr_url?: string;
   entry_price?: number;
+  consumo_individual?: number;
+  consumo_chica?: number;
   image_url?: string;
   tags?: Tag[];
   creators?: User[];

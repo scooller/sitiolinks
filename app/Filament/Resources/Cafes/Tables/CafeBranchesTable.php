@@ -31,6 +31,14 @@ class CafeBranchesTable
                 ->label('Precio')
                 ->money('USD', 2),
 
+            TextColumn::make('consumo_individual')
+                ->label('Consumo individual')
+                ->money('USD', 2),
+
+            TextColumn::make('consumo_chica')
+                ->label('Consumo chica')
+                ->money('USD', 2),
+
             TextColumn::make('reviews_count')
                 ->label('Reseñas')
                 ->counts('reviews')

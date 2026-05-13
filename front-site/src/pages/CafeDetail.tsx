@@ -88,6 +88,8 @@ export default function CafeDetail(): React.ReactElement {
               google_maps_url
               menu_qr_url
               entry_price
+              consumo_individual
+              consumo_chica
               image_url
               reviews_count
               average_rating
@@ -161,6 +163,14 @@ export default function CafeDetail(): React.ReactElement {
   const branchLocationLabel = (branch: CafeBranch): string => {
     const comuna = (branch.city ?? branch.state ?? '').trim();
     return comuna !== '' ? `${branch.name}/${comuna}` : branch.name;
+  };
+
+  const formatCurrency = (value: number): string => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      maximumFractionDigits: 0,
+    }).format(value);
   };
 
   const handleSubmitReview = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -387,8 +397,20 @@ export default function CafeDetail(): React.ReactElement {
                             <ListGroup.Item>
                               <strong>{t('cafes.detail.fields.entry_price')}:</strong>{' '}
                               {typeof branch.entry_price === 'number' && branch.entry_price > 0
-                                ? branch.entry_price
+                                ? formatCurrency(branch.entry_price)
                                 : t('cafes.detail.free_entry')}
+                            </ListGroup.Item>
+                            <ListGroup.Item>
+                              <strong>Consumo individual:</strong>{' '}
+                              {typeof branch.consumo_individual === 'number' && branch.consumo_individual > 0
+                                ? formatCurrency(branch.consumo_individual)
+                                : '-'}
+                            </ListGroup.Item>
+                            <ListGroup.Item>
+                              <strong>Consumo chica:</strong>{' '}
+                              {typeof branch.consumo_chica === 'number' && branch.consumo_chica > 0
+                                ? formatCurrency(branch.consumo_chica)
+                                : '-'}
                             </ListGroup.Item>
                             {branch.website && (
                               <ListGroup.Item>

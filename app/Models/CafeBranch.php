@@ -29,10 +29,14 @@ class CafeBranch extends Model implements HasMedia
         'google_maps_url',
         'menu_qr_url',
         'entry_price',
+        'consumo_individual',
+        'consumo_chica',
     ];
 
     protected $casts = [
         'entry_price' => 'decimal:2',
+        'consumo_individual' => 'decimal:2',
+        'consumo_chica' => 'decimal:2',
     ];
 
     /**

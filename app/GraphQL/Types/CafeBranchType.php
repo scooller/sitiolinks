@@ -81,6 +81,18 @@ class CafeBranchType extends GraphQLType
                     return $branch->entry_price !== null ? (float) $branch->entry_price : null;
                 },
             ],
+            'consumo_individual' => [
+                'type' => Type::float(),
+                'resolve' => function (CafeBranch $branch): ?float {
+                    return $branch->consumo_individual !== null ? (float) $branch->consumo_individual : null;
+                },
+            ],
+            'consumo_chica' => [
+                'type' => Type::float(),
+                'resolve' => function (CafeBranch $branch): ?float {
+                    return $branch->consumo_chica !== null ? (float) $branch->consumo_chica : null;
+                },
+            ],
             'reviews_count' => [
                 'type' => Type::int(),
                 'resolve' => function (CafeBranch $branch): int {
