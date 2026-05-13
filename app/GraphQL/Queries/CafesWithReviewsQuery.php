@@ -80,8 +80,6 @@ class CafesWithReviewsQuery extends Query
 
         $query = Cafe::query()
             ->whereHas('branches', function ($branchQuery) use ($cityFilter, $minRatingInt, $tagId) {
-                $branchQuery->whereHas('reviews');
-
                 if ($cityFilter !== '') {
                     $branchQuery->where('city', 'like', "%{$cityFilter}%");
                 }
@@ -114,11 +112,13 @@ class CafesWithReviewsQuery extends Query
             ->with([
                 'branches' => function ($branchQuery) use ($branchesPerCafe, $reviewsPerBranch, $cityFilter, $minRatingInt, $tagId) {
                     $branchQuery
-                        ->whereHas('reviews')
                         ->withCount('reviews')
                         ->withAvg('reviews', 'rating')
                         ->orderByRaw('(select count(*) from `cafe_branch_reviews` where `cafe_branch_reviews`.`cafe_branch_id` = `cafe_branches`.`id`) desc')
                         ->limit($branchesPerCafe)
+                        ->when($minRatingInt !== null, function ($query) {
+                            $query->whereHas('reviews');
+                        })
                         ->when($cityFilter !== '', function ($query) use ($cityFilter) {
                             $query->where('city', 'like', "%{$cityFilter}%");
                         })
