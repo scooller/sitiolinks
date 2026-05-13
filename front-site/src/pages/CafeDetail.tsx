@@ -386,12 +386,12 @@ export default function CafeDetail(): React.ReactElement {
                   <Tab key={branch.id} eventKey={String(branch.id)} title={branchLocationLabel(branch)}>
                     <Row className="g-4 mt-1">
                       <Col lg={6}>
-                        <Card className="h-100">
+                        <Card className="h-100" style={{ paddingTop: 0 }}>
                           <Card.Header>{t('cafes.detail.branch_data')}</Card.Header>
                           <ListGroup variant="flush">
                             <ListGroup.Item><strong>{t('cafes.detail.fields.name')}:</strong> {branch.name}</ListGroup.Item>
-                            {branch.description && <ListGroup.Item><strong>{t('cafes.detail.fields.description')}:</strong> {branch.description}</ListGroup.Item>}
-                            {branch.address && <ListGroup.Item><strong>{t('cafes.detail.fields.address')}:</strong> {branch.address}</ListGroup.Item>}
+                                {branch.description && <ListGroup.Item><strong>{t('cafes.detail.fields.description')}:</strong> {branch.description}</ListGroup.Item>}
+                                {branch.address && <ListGroup.Item><strong>{t('cafes.detail.fields.address')}:</strong> <span className="badge text-bg-success">{branch.address}</span></ListGroup.Item>}
                             {(branch.city || branch.state) && <ListGroup.Item><strong>{t('cafes.detail.fields.comuna')}:</strong> {(branch.city ?? branch.state) || '-'}</ListGroup.Item>}
                             {branch.postal_code && <ListGroup.Item><strong>{t('cafes.detail.fields.postal_code')}:</strong> {branch.postal_code}</ListGroup.Item>}
                             {branch.phone && <ListGroup.Item><strong>{t('cafes.detail.fields.phone')}:</strong> {branch.phone}</ListGroup.Item>}
@@ -402,16 +402,18 @@ export default function CafeDetail(): React.ReactElement {
                                 : t('cafes.detail.free_entry')}
                             </ListGroup.Item>
                             <ListGroup.Item>
-                              <strong>Consumo individual:</strong>{' '}
+                                <strong>{t('cafes.detail.fields.individual_consumption')}:</strong>{' '}
+                                <span className="badge text-bg-info">
                               {typeof branch.consumo_individual === 'number' && branch.consumo_individual > 0
                                 ? formatCurrency(branch.consumo_individual)
-                                : '-'}
+                                : '-'}</span>
                             </ListGroup.Item>
                             <ListGroup.Item>
-                              <strong>Consumo chica:</strong>{' '}
+                                <strong>{t('cafes.detail.fields.small_consumption')}:</strong>{' '}
+                                <span className="badge text-bg-info">
                               {typeof branch.consumo_chica === 'number' && branch.consumo_chica > 0
                                 ? formatCurrency(branch.consumo_chica)
-                                : '-'}
+                                : '-'}</span>
                             </ListGroup.Item>
                             {branch.website && (
                               <ListGroup.Item>
@@ -431,7 +433,7 @@ export default function CafeDetail(): React.ReactElement {
                                     allowFullScreen
                                     loading="lazy"
                                     referrerPolicy="no-referrer-when-downgrade"
-                                    title="Google Maps"
+                                    title={t('cafes.detail.fields.maps_iframe_title')}
                                   />
                                 </div>
                               </ListGroup.Item>
@@ -447,7 +449,7 @@ export default function CafeDetail(): React.ReactElement {
                       </Col>
 
                       <Col lg={6}>
-                        <Card className="mb-3">
+                        <Card className="mb-3" style={{ paddingTop: 0 }}>
                           <Card.Header>{t('cafes.detail.branch_creators')}</Card.Header>
                           <Card.Body>
                             {(branch.creators ?? []).length === 0 ? (
@@ -508,7 +510,7 @@ export default function CafeDetail(): React.ReactElement {
                           </Card.Body>
                         </Card>
 
-                        <Card>
+                        <Card style={{ paddingTop: 0 }}>
                           <Card.Header className="d-flex justify-content-between align-items-center">
                             <span>{t('cafes.detail.branch_reviews')}</span>
                             <Badge bg="warning" text="dark">

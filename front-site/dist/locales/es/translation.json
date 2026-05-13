@@ -113,8 +113,11 @@
                 "postal_code": "Código postal",
                 "phone": "Teléfono",
                 "entry_price": "Precio entrada",
+                "individual_consumption": "Consumo individual",
+                "small_consumption": "Consumo chica",
                 "website": "Sitio web",
-                "maps": "Mapa"
+                "maps": "Mapa",
+                "maps_iframe_title": "Mapa de Google"
             },
             "form": {
                 "rating": "Calificación",
