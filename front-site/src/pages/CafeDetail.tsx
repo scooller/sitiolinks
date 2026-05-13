@@ -398,8 +398,19 @@ export default function CafeDetail(): React.ReactElement {
                             )}
                             {branch.google_maps_url && (
                               <ListGroup.Item>
-                                <strong>{t('cafes.detail.fields.maps')}:</strong>{' '}
-                                <a href={branch.google_maps_url} target="_blank" rel="noreferrer">Google Maps</a>
+                                <strong>{t('cafes.detail.fields.maps')}</strong>
+                                <div className="mt-2">
+                                  <iframe
+                                    src={branch.google_maps_url}
+                                    width="100%"
+                                    height="300"
+                                    style={{ border: 0 }}
+                                    allowFullScreen
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                    title="Google Maps"
+                                  />
+                                </div>
                               </ListGroup.Item>
                             )}
                             {branch.menu_qr_url && (

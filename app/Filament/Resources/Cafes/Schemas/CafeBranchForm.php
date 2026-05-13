@@ -63,12 +63,26 @@ class CafeBranchForm
                             ->nullable()
                             ->columnSpanFull(),
 
-                        TextInput::make('google_maps_url')
-                            ->label('URL Google Maps')
-                            ->url()
+                        Textarea::make('google_maps_url')
+                            ->label('Mapa (Google Maps)')
+                            ->rows(3)
                             ->nullable()
                             ->columnSpanFull()
-                            ->helperText('URL completa a Google Maps'),
+                            ->helperText('Pega el código iframe de "Insertar mapa" de Google Maps o una URL directa de Google Maps')
+                            ->dehydrateStateUsing(function (?string $state): ?string {
+                                if (blank($state)) {
+                                    return null;
+                                }
+
+                                // If it's a full <iframe> tag, extract the src attribute
+                                if (str_contains($state, '<iframe')) {
+                                    if (preg_match('/src=["\']([^"\']+)["\']/', $state, $matches)) {
+                                        return $matches[1];
+                                    }
+                                }
+
+                                return $state;
+                            }),
 
                         TextInput::make('menu_qr_url')
                             ->label('URL del QR del Menú')
