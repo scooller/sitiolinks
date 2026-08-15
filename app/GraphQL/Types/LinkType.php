@@ -29,6 +29,10 @@ class LinkType extends GraphQLType
             'icon' => [
                 'type' => Type::string(),
             ],
+            'is_adult' => [
+                'type' => Type::nonNull(Type::boolean()),
+                'description' => 'Marca el link como contenido +18',
+            ],
             'order' => [
                 'type' => Type::int(),
             ],

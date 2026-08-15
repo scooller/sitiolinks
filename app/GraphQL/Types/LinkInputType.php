@@ -27,6 +27,10 @@ class LinkInputType extends InputType
                 'type' => Type::string(),
                 'description' => 'Icono del link (ej: fas-link)',
             ],
+            'is_adult' => [
+                'type' => Type::boolean(),
+                'description' => 'Marca el link como contenido +18',
+            ],
         ];
     }
 }

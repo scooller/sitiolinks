@@ -57,6 +57,7 @@ class UpdateLinksMutation extends Mutation
                     'name' => $linkData['name'] ?? '',
                     'url' => $linkData['url'] ?? '',
                     'icon' => $linkData['icon'] ?? 'fas-link',
+                    'is_adult' => (bool) ($linkData['is_adult'] ?? false),
                     'order' => $index,
                 ]);
             }

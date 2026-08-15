@@ -11,10 +11,12 @@ class Link extends Model
         'name',
         'url',
         'icon',
+        'is_adult',
         'order',
     ];
 
     protected $casts = [
+        'is_adult' => 'boolean',
         'order' => 'integer',
     ];
 

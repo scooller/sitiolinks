@@ -38,6 +38,9 @@ class UpdateLinkMutation extends Mutation
             'icon' => [
                 'type' => Type::string(),
             ],
+            'is_adult' => [
+                'type' => Type::boolean(),
+            ],
             'order' => [
                 'type' => Type::int(),
             ],
@@ -58,9 +61,13 @@ class UpdateLinkMutation extends Mutation
         }
 
         $update = [];
-        foreach (['name', 'url', 'icon', 'order'] as $field) {
+        foreach (['name', 'url', 'icon', 'is_adult', 'order'] as $field) {
             if (array_key_exists($field, $args) && $args[$field] !== null) {
-                $update[$field] = $field === 'order' ? (int) $args[$field] : $args[$field];
+                $update[$field] = match ($field) {
+                    'order' => (int) $args[$field],
+                    'is_adult' => (bool) $args[$field],
+                    default => $args[$field],
+                };
             }
         }
 

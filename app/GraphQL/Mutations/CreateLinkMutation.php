@@ -39,6 +39,9 @@ class CreateLinkMutation extends Mutation
             'icon' => [
                 'type' => Type::string(),
             ],
+            'is_adult' => [
+                'type' => Type::boolean(),
+            ],
             'order' => [
                 'type' => Type::int(),
             ],
@@ -69,6 +72,7 @@ class CreateLinkMutation extends Mutation
             'name' => $args['name'],
             'url' => $args['url'],
             'icon' => $args['icon'] ?? 'fas-link',
+            'is_adult' => (bool) ($args['is_adult'] ?? false),
             'order' => (int) $order,
         ]);
 
