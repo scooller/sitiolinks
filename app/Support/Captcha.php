@@ -29,14 +29,10 @@ class Captcha
 
         try {
             $altcha = new Altcha($secret);
-            // verifySolution returns true/false or payload; we return boolean
-            $verified = $altcha->verifySolution($token, true);
 
-            return (bool) $verified;
-
-            return $payload !== null; // Valid if payload is returned
+            return (bool) $altcha->verifySolution($token, true);
         } catch (\Exception $e) {
-            Log::error('ALTCHA verification failed: '.$e->getMessage());
+            Log::error('ALTCHA verification failed: ' . $e->getMessage());
 
             return false;
         }

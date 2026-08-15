@@ -1,66 +1,36 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Link Persons (only-models)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Monorepo del proyecto **only-models**: backend Laravel con API GraphQL y panel de administración, más un frontend SPA en `front-site/`.
 
-## About Laravel
+## Estructura
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Raíz del repositorio** — Backend **Laravel 12** (PHP 8.2+) con API GraphQL ([rebing/graphql-laravel](https://github.com/rebing/graphql-laravel)) y panel de administración **Filament v5** con **Shield** (roles y permisos).
+- **`front-site/`** — SPA **React 18 + Vite** (TypeScript) con PWA; consume la API GraphQL del backend. Ver su propio `front-site/README.md`.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Entornos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Entorno | URL |
+| --- | --- |
+| Backend / API / Admin (local) | `http://127.0.0.1:8000` (`/admin`, `/graphql`, `/api/*`) |
+| Frontend (local) | `http://127.0.0.1:3000` (Vite, con proxy al backend) |
+| Producción | `only-models.online` (frontend) · `admin.only-models.online` (backend/admin) |
 
-## Learning Laravel
+## Puesta en marcha (backend)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+npm install
+npm run build
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Después continúa con la generación de permisos de Filament Shield (ver siguiente sección).
 
 ---
 
-## Panel de Administración (Filament v4)
+## Panel de Administración (Filament v5)
 
 ### Post-instalación (Shield)
 
@@ -84,42 +54,22 @@ php artisan db:seed --class=AssignDocumentationPermissionSeeder
 
 ## ALTCHA (captcha libre)
 
-ALTCHA se usa como captcha por defecto. Es de código abierto y se valida localmente en el servidor.
+ALTCHA es el captcha por defecto (código abierto, prueba de trabajo resuelta en el navegador y verificada localmente en el servidor).
 
-Para usar ALTCHA:
-
-- Agrega en `.env`:
+Configuración en `.env` (backend):
 
 ```
 ALTCHA_ENABLED=true
 ALTCHA_SECRET=tu_secret_aleatorio
 ```
 
-- Instala la librería en el backend:
+El paquete PHP `altcha-org/altcha` ya está en `composer.json`; la configuración vive en `config/services.php` (`services.altcha`).
 
-```bash
-cd back-admin
-composer require altcha-org/altcha
-```
-
-Notas:
-
+- Endpoint del challenge: `GET /api/altcha/challenge` (`AltchaController::challenge`), con `maxNumber: 50000`.
+- Verificación: `App\Support\Captcha::verify(?string $token)` usa `AltchaOrg\Altcha\Altcha::verifySolution()`; devuelve `true` si ALTCHA está deshabilitado.
+- Se aplica en registro (`/api/register`) y contacto (`CreateContactMessageMutation`).
 - ALTCHA requiere HTTPS para usar WebCrypto API en producción.
-- El frontend consume el challenge en `/api/altcha/challenge` (proxy Vite lo redirige al backend en desarrollo).
-
-### ALTCHA
-
-Para usar ALTCHA en reemplazo de Google reCAPTCHA:
-
-- Agrega a `.env`:
-```
-CAPTCHA_PROVIDER=altcha
-ALTCHA_SECRET=tu_secret
-ALTCHA_SITE_KEY=tu_site_key
-```
-- El frontend debe añadir `VITE_CAPTCHA_PROVIDER=altcha` y la URL del challenge `VITE_ALTCHA_CHALLENGE_URL=/altcha/challenge`.
-- Asegúrate de instalar el paquete PHP `altcha-org/altcha` con `composer require altcha-org/altcha`.
-- `App\\Support\\Captcha::verify` verificará las soluciones localmente con la librería ALTCHA.
+- En desarrollo el widget usa el proxy de Vite; en producción apunta a `VITE_BACKEND_URL + /api/altcha/challenge` (ver `front-site/README.md`).
 
 ## Módulo GraphQL (Auditoría y Configuración)
 
@@ -132,7 +82,7 @@ ALTCHA_SITE_KEY=tu_site_key
 - Tipos globales: `PaginatorInfo`, `GalleryPaginator`, `UserPaginator` (config/graphql.php:199–210).
 
 ### Estructura de directorios
-- `app/GraphQL/Queries`: consultas (`UsersQuery`, `UserQuery`, `GalleriesQuery`, etc.).
+- `app/GraphQL/Queries`: consultas (`UsersQuery`, `UserQuery`, `GalleriesQuery`, `CafesWithReviewsQuery`, `CafeDetailQuery`, `TicketsQuery`, `SiteSettingsQuery`, etc.).
 - `app/GraphQL/Mutations`: mutaciones (`CreateLinkMutation`, `UpdateProfileMutation`, etc.).
 - `app/GraphQL/Types`: tipos (`UserType`, `TagType`, `GalleryType`, `ContactMessageType`, etc.).
 
@@ -178,6 +128,18 @@ ALTCHA_SITE_KEY=tu_site_key
 - Preferir `UserError` para errores que debe ver el cliente; reservar excepciones para fallos del servidor.
 - Mantener los `use` ordenados y sin duplicados; eliminar imports no usados.
 - Validar con `php artisan test` y revisar que la ruta `/graphql` esté accesible con las políticas/middlewares esperados.
+
+## Módulos del panel (Filament)
+
+Recursos disponibles en `/admin`: **Analytics**, **Cafes** (cafés, sucursales y reseñas), **ContactMessages**, **Galleries**, **Media**, **Pages**, **SiteSettings**, **Tags**, **Tickets**, **Users** y **VipNotifications**.
+
+Comandos de mantenimiento (Media Library):
+
+```bash
+php artisan media:clean-orphans [--dry-run]      # limpiar media huérfana
+php artisan media:regenerate [--watermark-only]  # regenerar conversiones
+php artisan users:fix-country-codes             # normalizar códigos de país
+```
 
 ## Cafés y Sucursales: Imágenes con Media Library
 

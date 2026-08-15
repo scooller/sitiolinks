@@ -4,7 +4,6 @@ import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './i18n';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
 
 // Registrar Service Worker simple para cache estático si soportado
 if ('serviceWorker' in navigator) {
@@ -22,5 +21,3 @@ if (container) {
     </React.StrictMode>
   );
 }
-
-reportWebVitals();
