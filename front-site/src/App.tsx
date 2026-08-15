@@ -33,6 +33,7 @@ const MyGalleries = React.lazy(() => import('./pages/MyGalleries.tsx'));
 const NewGallery = React.lazy(() => import('./pages/NewGallery.tsx'));
 const EditGallery = React.lazy(() => import('./pages/EditGallery.tsx'));
 const EditProfile = React.lazy(() => import('./pages/EditProfile.tsx'));
+const Go = React.lazy(() => import('./pages/Go.tsx'));
 const NotFound = React.lazy(() => import('./pages/NotFound.tsx'));
 import AnimatedPage from './components/AnimatedPage.tsx';
 import { graphqlRequest } from './lib/graphql/graphqlRequest';
@@ -107,6 +108,7 @@ const AnimatedRoutes: React.FC<{ transitionType?: string }> = ({ transitionType 
         <Route path="/tickets" element={<VerifiedRoute><AnimatedPage id="tickets" transitionType={transitionType}><Tickets /></AnimatedPage></VerifiedRoute>} />
         <Route path="/tickets/nuevo" element={<VerifiedRoute><AnimatedPage id="nuevo-ticket" transitionType={transitionType}><NewTicket /></AnimatedPage></VerifiedRoute>} />
         <Route path="/tickets/:id" element={<VerifiedRoute><AnimatedPage id="detalle-ticket" transitionType={transitionType}><TicketDetail /></AnimatedPage></VerifiedRoute>} />
+        <Route path="/go/:id" element={<AnimatedPage id="go" transitionType={transitionType}><Go /></AnimatedPage>} />
         <Route path="*" element={<AnimatedPage id="not-found" transitionType={transitionType}><NotFound /></AnimatedPage>} />
       </Routes>
     </AnimatePresence>

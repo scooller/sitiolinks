@@ -36,6 +36,7 @@ interface ProfileLink {
   url: string;
   icon: string;
   order?: number;
+  is_adult?: boolean;
 }
 
 interface CountriesData {
@@ -112,6 +113,7 @@ export default function EditProfile(): ReactElement {
               url
               icon
               order
+              is_adult
             }
             roles {
               name
@@ -220,14 +222,14 @@ export default function EditProfile(): ReactElement {
     }));
   };
 
-  const handleLinkChange = (index: number, field: keyof ProfileLink, value: string) => {
+  const handleLinkChange = (index: number, field: keyof ProfileLink, value: string | boolean) => {
     const newLinks = [...links];
     newLinks[index] = { ...newLinks[index], [field]: value };
     setLinks(newLinks);
   };
 
   const addLink = () => {
-    setLinks([...links, { name: '', url: '', icon: 'fas-link' }]);
+    setLinks([...links, { name: '', url: '', icon: 'fas-link', is_adult: false }]);
   };
 
   const removeLink = (index: number) => {
@@ -684,6 +686,12 @@ export default function EditProfile(): ReactElement {
                               </Button>
                             </Col>
                           </Row>
+                          <Form.Check
+                            type="checkbox"
+                            label={t('profile.link_is_adult')}
+                            checked={!!link.is_adult}
+                            onChange={(e) => handleLinkChange(index, 'is_adult', e.target.checked)}
+                          />
                         </Card.Body>
                       </Card>
                     ))}

@@ -58,6 +58,7 @@ export interface Link {
   icon?: string;
   order?: number;
   user_id?: string | number;
+  is_adult?: boolean;
 }
 
 export interface Gallery {

@@ -211,6 +211,7 @@
         "link_name_placeholder": "Mi sitio web",
         "link_url_placeholder": "https://ejemplo.com",
         "add_link": "Agregar Link",
+        "link_is_adult": "Contenido +18 (requiere verificación para abrirlo)",
         "tag_search_placeholder": "Buscar etiquetas por nombre o icono...",
         "tags_visible_count": "{{visible}} / {{total}} etiquetas visibles",
         "tags_no_results": "Sin resultados para \"{{term}}\"",
@@ -221,6 +222,15 @@
         "save_changes": "Guardar Cambios",
         "must_be_adult": "Debes ser mayor de 18 años",
         "error_updating": "Error al actualizar el perfil"
+    },
+    "go": {
+        "title": "Contenido +18",
+        "warning": "Estás a punto de salir de {{site}} hacia un enlace marcado como contenido para adultos.",
+        "meta_notice": "Este enlace está protegido para evitar rastreadores y bots.",
+        "continue": "Soy mayor de edad, continuar",
+        "loading": "Redirigiendo...",
+        "back": "Volver",
+        "error": "No se pudo verificar el enlace. Inténtalo de nuevo."
     },
     "galleries": {
         "my_galleries": "Mis Galerías",

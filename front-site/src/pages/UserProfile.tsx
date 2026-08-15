@@ -1018,17 +1018,19 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                           .sort((a: UserLink, b: UserLink) => (a.order ?? 0) - (b.order ?? 0))
                           .map((l: UserLink) => {
                             const iconClass = l.icon ? l.icon.replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-') : null;
+                            const isAdult = !!l.is_adult;
                             return (
                               <ListGroup.Item
                                 as="a"
-                                href={l.url}
-                                target="_blank"
-                                rel="noreferrer"
+                                href={isAdult ? `/go/${l.id}` : l.url}
+                                {...(isAdult ? {} : { target: '_blank' })}
+                                rel={isAdult ? 'nofollow noopener noreferrer' : 'noreferrer'}
                                 key={`${l.name}-${l.url}`}
                                 className="d-flex align-items-center profile-link"
                               >
                                 {iconClass && <i className={`${iconClass} me-2`}></i>}
                                 <span className="flex-grow-1">{l.name || l.url}</span>
+                                {isAdult && <span className="badge bg-danger me-2">+18</span>}
                                 <i className="fas fa-external-link-alt text-muted ms-2" aria-hidden="true"></i>
                               </ListGroup.Item>
                             );

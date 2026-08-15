@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 use App\GraphQL\Mutations\AddMediaToGalleryMutation;
 use App\GraphQL\Mutations\AddTicketCommentMutation;
 use App\GraphQL\Mutations\AssignUserTagsMutation;
@@ -44,6 +45,7 @@ use App\GraphQL\Queries\GalleryQuery;
 use App\GraphQL\Queries\NotificationsQuery;
 use App\GraphQL\Queries\PageQuery;
 use App\GraphQL\Queries\PagesQuery;
+use App\GraphQL\Queries\ResolveAdultLinkQuery;
 use App\GraphQL\Queries\SiteSettingsQuery;
 use App\GraphQL\Queries\SystemStatsQuery;
 use App\GraphQL\Queries\TagsQuery;
@@ -268,6 +270,7 @@ return [
                 CafesWithReviewsQuery::class,
                 CafeDetailQuery::class,
                 CountriesQuery::class,
+                ResolveAdultLinkQuery::class,
             ],
             'mutation' => [
                 CreateContactMessageMutation::class,

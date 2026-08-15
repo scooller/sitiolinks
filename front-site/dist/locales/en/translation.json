@@ -211,6 +211,7 @@
         "link_name_placeholder": "My website",
         "link_url_placeholder": "https://example.com",
         "add_link": "Add Link",
+        "link_is_adult": "18+ content (requires verification to open)",
         "tag_search_placeholder": "Search tags by name or icon...",
         "tags_visible_count": "{{visible}} / {{total}} visible tags",
         "tags_no_results": "No results for \"{{term}}\"",
@@ -221,6 +222,15 @@
         "save_changes": "Save Changes",
         "must_be_adult": "You must be over 18 years old",
         "error_updating": "Error updating profile"
+    },
+    "go": {
+        "title": "18+ Content",
+        "warning": "You are about to leave this site towards a link marked as adult content.",
+        "meta_notice": "This link is protected against trackers and bots.",
+        "continue": "I am of legal age, continue",
+        "loading": "Redirecting...",
+        "back": "Go back",
+        "error": "Could not verify the link. Please try again."
     },
     "galleries": {
         "my_galleries": "My Galleries",

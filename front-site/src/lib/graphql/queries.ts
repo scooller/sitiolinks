@@ -145,7 +145,7 @@ export const queries = {
         roles { name }
         galleries_count
         tags { id name color icon weight is_fixed }
-        links { id name url icon order }
+        links { id name url icon order is_adult }
       }
     }
   `,

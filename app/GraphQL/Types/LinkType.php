@@ -25,6 +25,18 @@ class LinkType extends GraphQLType
             ],
             'url' => [
                 'type' => Type::string(),
+                'selectable' => false,
+                'resolve' => function (Link $link) {
+                    if (! $link->is_adult) {
+                        return $link->url;
+                    }
+
+                    $viewer = auth()->user();
+
+                    return ($viewer && ($viewer->id === $link->user_id || $viewer->hasAnyRole(['admin', 'moderator'])))
+                        ? $link->url
+                        : null;
+                },
             ],
             'icon' => [
                 'type' => Type::string(),
