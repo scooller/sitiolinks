@@ -50,7 +50,7 @@ class CreateCafeSuggestionMutation extends Mutation
 
         // Rate limit: 5 sugerencias por usuario por hora
         $key = sprintf('cafe_suggestion:%d', $user->id);
-        if (! RateLimiter::attempt($key, 5, fn () => null, 3600)) {
+        if (! RateLimiter::attempt($key, 5, fn() => null, 3600)) {
             throw new UserError('Has alcanzado el límite de sugerencias. Intenta más tarde.');
         }
 
@@ -80,7 +80,7 @@ class CreateCafeSuggestionMutation extends Mutation
                 Mail::to($adminEmail)->send(new CafeSuggestionReceived($suggestion));
             }
         } catch (\Exception $e) {
-            Log::error('Error sending cafe suggestion email: '.$e->getMessage());
+            Log::error('Error sending cafe suggestion email: ' . $e->getMessage());
         }
 
         return true;
