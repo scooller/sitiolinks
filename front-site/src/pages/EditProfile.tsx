@@ -1,6 +1,6 @@
 import React, { type ReactElement, useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Modal } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { getCountryFlag } from '../lib/countryUtils.ts';
@@ -46,7 +46,7 @@ interface CountriesData {
 
 export default function EditProfile(): ReactElement {
   const navigate = useNavigate();
-  const { user: currentUser, refreshUser } = useAuth();
+  const { user: currentUser, refreshUser, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +76,10 @@ export default function EditProfile(): ReactElement {
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<(string | number)[]>([]);
   const [tagSearch, setTagSearch] = useState<string>('');
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [deleteEmail, setDeleteEmail] = useState<string>('');
+  const [deleting, setDeleting] = useState<boolean>(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -234,6 +238,29 @@ export default function EditProfile(): ReactElement {
 
   const removeLink = (index: number) => {
     setLinks(links.filter((_, i) => i !== index));
+  };
+
+  const handleDeleteProfile = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await graphqlRequest<boolean>({
+        query: `
+          mutation DeleteProfile($email: String!) {
+            deleteProfile(email: $email)
+          }
+        `,
+        variables: { email: deleteEmail },
+        schema: 'default',
+        authenticated: true,
+      });
+      await logout();
+      navigate('/');
+    } catch (err: any) {
+      setDeleteError(err?.response?.[0]?.message || err?.message || t('profile.delete_error'));
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -784,10 +811,60 @@ export default function EditProfile(): ReactElement {
                   </Button>
                 </div>
               </Form>
+
+              <hr className="my-4" />
+
+              <Alert variant="danger" className="mb-3">
+                <Alert.Heading className="h6">
+                  <i className="fas fa-triangle-exclamation me-2"></i>
+                  {t('profile.danger_zone')}
+                </Alert.Heading>
+                <p className="mb-2 small">{t('profile.delete_warning')}</p>
+                <Button
+                  variant="danger"
+                  onClick={() => {
+                    setShowDeleteModal(true);
+                    setDeleteEmail('');
+                    setDeleteError(null);
+                  }}
+                >
+                  <i className="fas fa-user-slash me-2"></i>
+                  {t('profile.delete_button')}
+                </Button>
+              </Alert>
             </Card.Body>
           </Card>
         </Col>
       </Row>
+
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title className="text-danger">{t('profile.delete_confirm_title')}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Alert variant="danger" className="small">{t('profile.delete_permanent_warning')}</Alert>
+          <p className="small">{t('profile.delete_type_email', { email: currentUser.email })}</p>
+          {deleteError && <Alert variant="danger" className="small">{deleteError}</Alert>}
+          <Form.Control
+            type="email"
+            value={deleteEmail}
+            onChange={(e) => setDeleteEmail(e.target.value)}
+            placeholder={t('profile.delete_email_placeholder')}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)} disabled={deleting}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            variant="danger"
+            disabled={deleting || deleteEmail.trim().toLowerCase() !== (currentUser.email || '').toLowerCase()}
+            onClick={handleDeleteProfile}
+          >
+            {deleting ? <Spinner animation="border" size="sm" /> : t('profile.delete_confirm_button')}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }
