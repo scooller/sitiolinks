@@ -2,12 +2,14 @@ import React, { type ReactElement, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Alert, Spinner } from 'react-bootstrap';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 import { useTranslation } from 'react-i18next';
 
 export default function Go(): ReactElement {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
   const [altchaPayload, setAltchaPayload] = useState<string>('');
   const [verified, setVerified] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -66,7 +68,7 @@ export default function Go(): ReactElement {
             <Card.Header className="text-center"><h3 className="mb-0">🔞 {t('go.title')}</h3></Card.Header>
             <Card.Body className="text-center">
               {error && <Alert variant="danger">{error}</Alert>}
-              <p>{t('go.warning')}</p>
+              <p>{t('go.warning', { site: settings?.site_title || 'el sitio' })}</p>
               <p className="text-muted small">{t('go.meta_notice')}</p>
               <div className="d-flex justify-content-center mb-3">
                 {/* @ts-ignore */}
