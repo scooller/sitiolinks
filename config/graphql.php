@@ -12,6 +12,7 @@ use App\GraphQL\Mutations\CreateLinkMutation;
 use App\GraphQL\Mutations\CreateTicketMutation;
 use App\GraphQL\Mutations\DeleteGalleryMutation;
 use App\GraphQL\Mutations\DeleteLinkMutation;
+use App\GraphQL\Mutations\DeleteProfileMutation;
 use App\GraphQL\Mutations\DismissWarningMutation;
 use App\GraphQL\Mutations\FollowUserMutation;
 use App\GraphQL\Mutations\MarkAllNotificationsAsReadMutation;
@@ -197,6 +198,7 @@ return [
                 RemoveMediaFromGalleryMutation::class,
                 ReorderGalleryMediaMutation::class,
                 UpdateProfileMutation::class,
+                DeleteProfileMutation::class,
                 UpdateLinksMutation::class,
                 UpdateAvatarMutation::class,
                 ModerateGalleryMutation::class,
