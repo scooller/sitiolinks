@@ -1,4 +1,18 @@
 {
+    "suggest": {
+        "title": "Suggest a Café",
+        "notice": "Suggestions are reviewed by an administrator before publishing. Images cannot be uploaded.",
+        "name": "Café name",
+        "city": "City",
+        "address": "Address",
+        "website": "Website",
+        "google_maps": "Google Maps URL",
+        "notes": "Additional notes",
+        "submit": "Submit suggestion",
+        "success": "Suggestion sent! An administrator will review it soon.",
+        "error": "Error sending suggestion",
+        "login_required": "You must be logged in to suggest a café."
+    },
     "app": {
         "title": "..."
     },
@@ -6,6 +20,7 @@
         "home": "Home",
         "explore": "Explore",
         "cafes": "Cafes",
+        "suggest_cafe": "Suggest Café",
         "login": "Login",
         "register": "Register",
         "my_profile": "My Profile",

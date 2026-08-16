@@ -226,6 +226,12 @@ const Navigation: React.FC = () => {
                 {t('nav.cafes')}
               </AnimatedHover>
             </Nav.Link>
+            <Nav.Link as={Link} to="/sugerir-cafe">
+              <AnimatedHover>
+                <i className="fas fa-circle-plus me-1"></i>
+                {t('nav.suggest_cafe')}
+              </AnimatedHover>
+            </Nav.Link>
             <Nav.Link as={Link} to="/ranking">
               <AnimatedHover>
                 <i className="fas fa-trophy me-1"></i>{t('nav.ranking')}

@@ -34,6 +34,7 @@ const NewGallery = React.lazy(() => import('./pages/NewGallery.tsx'));
 const EditGallery = React.lazy(() => import('./pages/EditGallery.tsx'));
 const EditProfile = React.lazy(() => import('./pages/EditProfile.tsx'));
 const Go = React.lazy(() => import('./pages/Go.tsx'));
+const SuggestCafe = React.lazy(() => import('./pages/SuggestCafe.tsx'));
 const NotFound = React.lazy(() => import('./pages/NotFound.tsx'));
 import AnimatedPage from './components/AnimatedPage.tsx';
 import { graphqlRequest } from './lib/graphql/graphqlRequest';
@@ -82,6 +83,7 @@ const AnimatedRoutes: React.FC<{ transitionType?: string }> = ({ transitionType 
         <Route path="/" element={<AnimatedPage id="home" transitionType={transitionType}><Home /></AnimatedPage>} />
         <Route path="/explorar" element={<AnimatedPage id="explorar" transitionType={transitionType}><Explore /></AnimatedPage>} />
         <Route path="/cafes" element={<AnimatedPage id="cafes" transitionType={transitionType}><Cafes /></AnimatedPage>} />
+        <Route path="/sugerir-cafe" element={<AnimatedPage id="sugerir-cafe" transitionType={transitionType}><SuggestCafe /></AnimatedPage>} />
         <Route path="/cafes/:slug" element={<AnimatedPage id="cafe-detalle" transitionType={transitionType}><CafeDetail /></AnimatedPage>} />
         <Route path="/ranking" element={<AnimatedPage id="ranking" transitionType={transitionType}><Ranking /></AnimatedPage>} />
         <Route path="/login" element={<AnimatedPage id="login" transitionType={transitionType}><Login /></AnimatedPage>} />
