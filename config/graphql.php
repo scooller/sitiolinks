@@ -6,6 +6,7 @@ use App\GraphQL\Mutations\AddMediaToGalleryMutation;
 use App\GraphQL\Mutations\AddTicketCommentMutation;
 use App\GraphQL\Mutations\AssignUserTagsMutation;
 use App\GraphQL\Mutations\CreateCafeBranchReviewMutation;
+use App\GraphQL\Mutations\CreateCafeSuggestionMutation;
 use App\GraphQL\Mutations\CreateContactMessageMutation;
 use App\GraphQL\Mutations\CreateGalleryMutation;
 use App\GraphQL\Mutations\CreateLinkMutation;
@@ -97,7 +98,7 @@ return [
 
         // The controller/method to use in GraphQL request.
         // Also supported array syntax: `[\Rebing\GraphQL\GraphQLController::class, 'query']`
-        'controller' => GraphQLController::class.'@query',
+        'controller' => GraphQLController::class . '@query',
 
         // Any middleware for the graphql route group
         // This middleware will apply to all schemas
@@ -199,6 +200,7 @@ return [
                 ReorderGalleryMediaMutation::class,
                 UpdateProfileMutation::class,
                 DeleteProfileMutation::class,
+                CreateCafeSuggestionMutation::class,
                 UpdateLinksMutation::class,
                 UpdateAvatarMutation::class,
                 ModerateGalleryMutation::class,
@@ -413,7 +415,7 @@ return [
         'cache_driver' => env('GRAPHQL_APQ_CACHE_DRIVER', config('cache.default')),
 
         // The cache prefix
-        'cache_prefix' => config('cache.prefix').':graphql.apq',
+        'cache_prefix' => config('cache.prefix') . ':graphql.apq',
 
         // The cache ttl in seconds - See https://www.apollographql.com/docs/apollo-server/performance/apq/#adjusting-cache-time-to-live-ttl
         'cache_ttl' => 300,
