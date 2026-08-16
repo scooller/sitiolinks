@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,6 +23,22 @@ export default function SuggestCafe(): React.ReactElement {
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [altchaPayload, setAltchaPayload] = useState<string>('');
+  const altchaRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    import('altcha');
+  }, []);
+
+  useEffect(() => {
+    const widget = altchaRef.current?.querySelector('altcha-widget');
+    const onVerified = (ev: any) => {
+      setAltchaPayload(ev?.detail?.payload ?? '');
+    };
+
+    widget?.addEventListener('verified', onVerified as EventListener);
+    return () => { widget?.removeEventListener('verified', onVerified as EventListener); };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -34,6 +50,10 @@ export default function SuggestCafe(): React.ReactElement {
     setError(null);
     setSuccess(false);
     try {
+      let captchaToken = '';
+      const altInput = altchaRef.current?.querySelector('input[name="captcha"]') as HTMLInputElement | null;
+      captchaToken = altInput?.value || altchaPayload || '';
+
       await graphqlRequest<boolean>({
         query: `
           mutation CreateCafeSuggestion(
@@ -42,7 +62,8 @@ export default function SuggestCafe(): React.ReactElement {
             $address: String,
             $website: String,
             $google_maps_url: String,
-            $notes: String
+            $notes: String,
+            $captcha: String!
           ) {
             createCafeSuggestion(
               name: $name,
@@ -50,7 +71,8 @@ export default function SuggestCafe(): React.ReactElement {
               address: $address,
               website: $website,
               google_maps_url: $google_maps_url,
-              notes: $notes
+              notes: $notes,
+              captcha: $captcha
             )
           }
         `,
@@ -61,6 +83,7 @@ export default function SuggestCafe(): React.ReactElement {
           website: formData.website.trim() || null,
           google_maps_url: formData.google_maps_url.trim() || null,
           notes: formData.notes.trim() || null,
+          captcha: captchaToken,
         },
         schema: 'default',
         authenticated: true,
@@ -130,6 +153,11 @@ export default function SuggestCafe(): React.ReactElement {
                   <Form.Label>{t('suggest.notes')}</Form.Label>
                   <Form.Control as="textarea" rows={3} name="notes" value={formData.notes} onChange={handleChange} maxLength={3000} />
                 </Form.Group>
+
+                <div ref={altchaRef} className="mb-3">
+                  {/* @ts-ignore */}
+                  <altcha-widget challengeurl={(import.meta.env.DEV ? '' : (import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')) + '/api/altcha/challenge'} name="captcha" />
+                </div>
 
                 <Button type="submit" variant="primary" disabled={loading}>
                   {loading ? t('common.saving') : t('suggest.submit')}

@@ -220,18 +220,10 @@ const Navigation: React.FC = () => {
                 {t('nav.explore')}
               </AnimatedHover>
             </Nav.Link>
-            <Nav.Link as={Link} to="/cafes">
-              <AnimatedHover>
-                <i className="fas fa-mug-hot me-1"></i>
-                {t('nav.cafes')}
-              </AnimatedHover>
-            </Nav.Link>
-            <Nav.Link as={Link} to="/sugerir-cafe">
-              <AnimatedHover>
-                <i className="fas fa-circle-plus me-1"></i>
-                {t('nav.suggest_cafe')}
-              </AnimatedHover>
-            </Nav.Link>
+            <NavDropdown title={<><i className="fas fa-mug-hot me-1"></i> {t('nav.cafes')}</>} id="cafes-dropdown">
+              <NavDropdown.Item as={Link} to="/cafes">{t('nav.cafes')}</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/sugerir-cafe">{t('nav.suggest_cafe')}</NavDropdown.Item>
+            </NavDropdown>
             <Nav.Link as={Link} to="/ranking">
               <AnimatedHover>
                 <i className="fas fa-trophy me-1"></i>{t('nav.ranking')}

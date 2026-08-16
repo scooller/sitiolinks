@@ -1,6 +1,7 @@
 import React from 'react';
-import { Col, Container, Row } from 'react-bootstrap';
+import { Button, Col, Container, Row } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import CafesWithReviews from '../components/CafesWithReviews';
 
 export default function Cafes(): React.ReactElement {
@@ -13,6 +14,10 @@ export default function Cafes(): React.ReactElement {
           <Col md={8} className="text-center">
             <h1 className="mb-3">{t('cafes.title')}</h1>
             <p className="lead mb-0">{t('cafes.subtitle')}</p>
+            <Button as={Link} to="/sugerir-cafe" variant="outline-primary" className="mt-3 rounded-pill">
+              <i className="fas fa-circle-plus me-1"></i>
+              {t('suggest.title')}
+            </Button>
           </Col>
         </Row>
       </Container>

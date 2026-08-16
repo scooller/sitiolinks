@@ -6,6 +6,7 @@ namespace App\GraphQL\Mutations;
 
 use App\Mail\CafeSuggestionReceived;
 use App\Models\CafeSuggestion;
+use App\Support\Captcha;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Facades\Log;
@@ -35,6 +36,7 @@ class CreateCafeSuggestionMutation extends Mutation
             'website' => ['type' => Type::string(), 'description' => 'Website'],
             'google_maps_url' => ['type' => Type::string(), 'description' => 'URL de Google Maps'],
             'notes' => ['type' => Type::string(), 'description' => 'Notas adicionales'],
+            'captcha' => ['type' => Type::string(), 'description' => 'Payload de ALTCHA (opcional)'],
         ];
     }
 
@@ -48,8 +50,13 @@ class CreateCafeSuggestionMutation extends Mutation
 
         // Rate limit: 5 sugerencias por usuario por hora
         $key = sprintf('cafe_suggestion:%d', $user->id);
-        if (! RateLimiter::attempt($key, 5, fn() => null, 3600)) {
+        if (! RateLimiter::attempt($key, 5, fn () => null, 3600)) {
             throw new UserError('Has alcanzado el límite de sugerencias. Intenta más tarde.');
+        }
+
+        // Verificación captcha (se omite si ALTCHA está deshabilitado)
+        if (! Captcha::verify($args['captcha'] ?? null)) {
+            throw new UserError('Captcha inválido. Por favor, intenta nuevamente.');
         }
 
         Validator::make($args, [
@@ -73,7 +80,7 @@ class CreateCafeSuggestionMutation extends Mutation
                 Mail::to($adminEmail)->send(new CafeSuggestionReceived($suggestion));
             }
         } catch (\Exception $e) {
-            Log::error('Error sending cafe suggestion email: ' . $e->getMessage());
+            Log::error('Error sending cafe suggestion email: '.$e->getMessage());
         }
 
         return true;
