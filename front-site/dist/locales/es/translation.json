@@ -1,4 +1,18 @@
 {
+    "suggest": {
+        "title": "Sugerir un Café",
+        "notice": "Las sugerencias son revisadas por un administrador antes de publicarse. No se pueden subir imágenes.",
+        "name": "Nombre del café",
+        "city": "Ciudad",
+        "address": "Dirección",
+        "website": "Sitio web",
+        "google_maps": "URL de Google Maps",
+        "notes": "Notas adicionales",
+        "submit": "Enviar sugerencia",
+        "success": "¡Sugerencia enviada! Un administrador la revisará pronto.",
+        "error": "Error al enviar la sugerencia",
+        "login_required": "Debes iniciar sesión para sugerir un café."
+    },
     "app": {
         "title": "..."
     },
@@ -6,6 +20,7 @@
         "home": "Inicio",
         "explore": "Explorar",
         "cafes": "Cafés",
+        "suggest_cafe": "Sugerir Café",
         "login": "Iniciar Sesión",
         "register": "Registrarse",
         "my_profile": "Mi Perfil",
