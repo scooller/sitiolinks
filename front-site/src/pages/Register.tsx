@@ -22,6 +22,7 @@ export default function Register(): ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', username: '', password: '', password_confirmation: '', birth_date: '', gender: '' });
   const [altchaPayload, setAltchaPayload] = useState<string>('');
+  const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
   const altchaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => { if (isAuthenticated) navigate('/'); }, [isAuthenticated, navigate]);
@@ -53,11 +54,12 @@ export default function Register(): ReactElement {
     setError(null);
     if (formData.password !== formData.password_confirmation) { setError(t('auth.password_mismatch')); setLoading(false); return; }
     if (formData.password.length < 12) { setError(t('auth.password_too_short')); setLoading(false); return; }
+    if (!acceptedTerms) { setError(t('auth.terms_required')); setLoading(false); return; }
     try {
       let captchaToken = '';
       const altInput = document.querySelector('input[name="captcha"]') as HTMLInputElement | null;
       captchaToken = altInput?.value || altchaPayload || '';
-      
+
       await register(formData.name, formData.email, formData.username, formData.password, formData.password_confirmation, formData.birth_date, formData.gender, captchaToken as any);
       navigate('/verify-email');
     } catch (err: any) {
@@ -87,6 +89,18 @@ export default function Register(): ReactElement {
                 </Row>
                 <Form.Group className="mb-3"><Form.Label>{t('auth.password')} *</Form.Label><Form.Control type="password" name="password" value={formData.password} onChange={handleChange} required minLength={12} placeholder={t('auth.password_min_placeholder')} /><Form.Text className="text-muted">{t('auth.password_help')}</Form.Text></Form.Group>
                 <Form.Group className="mb-3"><Form.Label>{t('auth.password_confirm')} *</Form.Label><Form.Control type="password" name="password_confirmation" value={formData.password_confirmation} onChange={handleChange} required minLength={12} placeholder={t('auth.password_confirm_placeholder')} /></Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Check
+                    type="checkbox"
+                    id="accept-terms"
+                    label={<>{t('auth.terms_accept')} <Link to="/terminos-y-condiciones" target="_blank">{t('auth.terms_link')}</Link></>}
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    required
+                    feedback={t('auth.terms_required')}
+                    feedbackType="invalid"
+                  />
+                </Form.Group>
                 <Button type="submit" variant="primary" className="w-100 mb-3" disabled={loading}>{loading ? (<><Spinner animation="border" size="sm" className="me-2" />{t('auth.registering')}</>) : (t('auth.register'))}</Button>
                 <div className="text-center"><p className="mb-0">{t('auth.have_account')} <Link to="/login">{t('auth.login_here')}</Link></p></div>
               </Form>

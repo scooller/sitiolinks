@@ -221,7 +221,16 @@
         "loading": "Loading profile data...",
         "save_changes": "Save Changes",
         "must_be_adult": "You must be over 18 years old",
-        "error_updating": "Error updating profile"
+        "error_updating": "Error updating profile",
+        "danger_zone": "Danger zone",
+        "delete_warning": "This action will permanently delete your profile, links, galleries and all your content. This cannot be undone.",
+        "delete_button": "DELETE PROFILE",
+        "delete_confirm_title": "Permanently delete profile",
+        "delete_permanent_warning": "⚠️ Warning: this action is IRREVERSIBLE. Your profile, links, galleries and media will be deleted.",
+        "delete_type_email": "To confirm, type your email: <strong>{{email}}</strong>",
+        "delete_email_placeholder": "Type your email to confirm",
+        "delete_confirm_button": "Delete permanently",
+        "delete_error": "Error deleting profile"
     },
     "go": {
         "title": "18+ Content",
@@ -423,7 +432,10 @@
         "registering": "Registering...",
         "have_account": "Already have an account?",
         "login_here": "Login here",
-        "error_register": "Error registering user"
+        "error_register": "Error registering user",
+        "terms_accept": "I have read and accept the",
+        "terms_link": "terms and conditions",
+        "terms_required": "You must accept the terms and conditions to register"
     },
 
     "filepond": {
