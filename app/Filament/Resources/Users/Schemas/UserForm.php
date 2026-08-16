@@ -47,7 +47,7 @@ class UserForm
                     ->helperText('Imagen de perfil. Se recortará automáticamente según la configuración del sitio. Si no subes una imagen, se usará el avatar genérico configurado en el sitio.')
                     ->columnSpanFull()
                     ->rules([
-                        fn (): \Closure => function (string $attribute, $value, \Closure $fail) {
+                        fn(): \Closure => function (string $attribute, $value, \Closure $fail) {
                             if ($value instanceof UploadedFile) {
                                 $originalName = $value->getClientOriginalName();
                                 if (mb_strlen($originalName) > 90) {
@@ -85,11 +85,11 @@ class UserForm
                         Action::make('generateSecurePassword')
                             ->label('Generar')
                             ->icon('heroicon-o-key')
-                            ->action(fn ($set) => $set('password', Str::password(16)))
+                            ->action(fn($set) => $set('password', Str::password(16)))
                     )
-                    ->dehydrateStateUsing(fn (string $state) => Hash::make($state))
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->dehydrateStateUsing(fn(string $state) => Hash::make($state))
+                    ->dehydrated(fn($state) => filled($state))
+                    ->required(fn(string $operation): bool => $operation === 'create')
                     ->revealable()
                     ->helperText('Mínimo 12 caracteres, con mayúsculas, números y símbolos.'),
 
@@ -156,13 +156,13 @@ class UserForm
                             }),
                         Select::make('city')
                             ->label('Ciudad')
-                            ->options(fn ($get) => self::cityOptions($get('country')))
+                            ->options(fn($get) => self::cityOptions($get('country')))
                             ->reactive()
                             ->searchable()
                             ->preload()
                             ->native(false)
                             ->required()
-                            ->disabled(fn ($get) => blank($get('country')))
+                            ->disabled(fn($get) => blank($get('country')))
                             ->hint('Selecciona primero el país'),
                         Select::make('gender')
                             ->label('Sexo')
@@ -200,7 +200,7 @@ class UserForm
                             ->native(false)
                             ->required()
                             ->maxDate(Carbon::now()->subYears(18))
-                            ->rule('before_or_equal:'.now()->subYears(18)->toDateString())
+                            ->rule('before_or_equal:' . now()->subYears(18)->toDateString())
                             ->validationMessages([
                                 'before_or_equal' => 'Debes ser mayor de 18 años.',
                                 'required' => 'La fecha de nacimiento es obligatoria.',
@@ -365,6 +365,12 @@ class UserForm
                                     ->default('fas-link')
                                     ->options(self::getIconOptions())
                                     ->searchable(),
+
+                                Toggle::make('is_adult')
+                                    ->label('+18')
+                                    ->helperText('Oscurece el link: interstitial con captcha antes de redirigir')
+                                    ->default(false)
+                                    ->columnSpanFull(),
                             ])
                             ->columns(3)
                             ->reorderable()
@@ -372,7 +378,7 @@ class UserForm
                             ->defaultItems(0)
                             ->addActionLabel('Agregar Link')
                             ->collapsible()
-                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
                             ->columnSpanFull(),
                     ])
                     ->collapsible()
@@ -415,7 +421,7 @@ class UserForm
         $cities = self::$citiesCache[$countryCode] ?? [];
 
         // options as [ 'City' => 'City' ]
-        return collect($cities)->mapWithKeys(fn ($c) => [$c => $c])->all();
+        return collect($cities)->mapWithKeys(fn($c) => [$c => $c])->all();
     }
 
     /**
