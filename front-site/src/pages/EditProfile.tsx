@@ -843,7 +843,7 @@ export default function EditProfile(): ReactElement {
         </Modal.Header>
         <Modal.Body>
           <Alert variant="danger" className="small">{t('profile.delete_permanent_warning')}</Alert>
-          <p className="small">{t('profile.delete_type_email', { email: currentUser.email })}</p>
+          <p className="small">{t('profile.delete_type_email')} <strong>{currentUser.email}</strong></p>
           {deleteError && <Alert variant="danger" className="small">{deleteError}</Alert>}
           <Form.Control
             type="email"

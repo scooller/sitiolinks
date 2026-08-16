@@ -227,7 +227,7 @@
         "delete_button": "DELETE PROFILE",
         "delete_confirm_title": "Permanently delete profile",
         "delete_permanent_warning": "⚠️ Warning: this action is IRREVERSIBLE. Your profile, links, galleries and media will be deleted.",
-        "delete_type_email": "To confirm, type your email: <strong>{{email}}</strong>",
+        "delete_type_email": "To confirm, type your email:",
         "delete_email_placeholder": "Type your email to confirm",
         "delete_confirm_button": "Delete permanently",
         "delete_error": "Error deleting profile"

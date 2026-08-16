@@ -227,7 +227,7 @@
         "delete_button": "BORRAR PERFIL",
         "delete_confirm_title": "Eliminar perfil definitivamente",
         "delete_permanent_warning": "⚠️ Atención: esta acción es IRREVERSIBLE. Se eliminarán tu perfil, links, galerías y multimedia.",
-        "delete_type_email": "Para confirmar, escribe tu email: <strong>{{email}}</strong>",
+        "delete_type_email": "Para confirmar, escribe tu email:",
         "delete_email_placeholder": "Escribe tu email para confirmar",
         "delete_confirm_button": "Eliminar definitivamente",
         "delete_error": "Error al eliminar el perfil"
