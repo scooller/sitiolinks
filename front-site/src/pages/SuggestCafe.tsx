@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,21 +23,9 @@ export default function SuggestCafe(): React.ReactElement {
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [altchaPayload, setAltchaPayload] = useState<string>('');
-  const altchaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     import('altcha');
-  }, []);
-
-  useEffect(() => {
-    const widget = altchaRef.current?.querySelector('altcha-widget');
-    const onVerified = (ev: any) => {
-      setAltchaPayload(ev?.detail?.payload ?? '');
-    };
-
-    widget?.addEventListener('verified', onVerified as EventListener);
-    return () => { widget?.removeEventListener('verified', onVerified as EventListener); };
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -50,9 +38,7 @@ export default function SuggestCafe(): React.ReactElement {
     setError(null);
     setSuccess(false);
     try {
-      let captchaToken = '';
-      const altInput = altchaRef.current?.querySelector('input[name="captcha"]') as HTMLInputElement | null;
-      captchaToken = altInput?.value || altchaPayload || '';
+      const captchaToken = (e.currentTarget.querySelector('input[name="captcha"]') as HTMLInputElement | null)?.value ?? '';
 
       await graphqlRequest<boolean>({
         query: `
@@ -154,10 +140,8 @@ export default function SuggestCafe(): React.ReactElement {
                   <Form.Control as="textarea" rows={3} name="notes" value={formData.notes} onChange={handleChange} maxLength={3000} />
                 </Form.Group>
 
-                <div ref={altchaRef} className="mb-3">
-                  {/* @ts-ignore */}
-                  <altcha-widget challengeurl={(import.meta.env.DEV ? '' : (import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')) + '/api/altcha/challenge'} name="captcha" />
-                </div>
+                {/* @ts-ignore */}
+                <altcha-widget challengeurl={(import.meta.env.DEV ? '' : (import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')) + '/api/altcha/challenge'} name="captcha" />
 
                 <Button type="submit" variant="primary" disabled={loading}>
                   {loading ? t('common.saving') : t('suggest.submit')}
