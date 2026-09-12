@@ -43,11 +43,14 @@ class TopViewedUsersQuery extends Query
         $with = $fields->getRelations();
 
         $limit = $args['limit'] ?? 10;
+        $currentUser = auth('web')->user();
 
-        return User::select($select)
+        $query = User::select($select)
             ->with($with)
-            ->orderBy('views', 'desc')
-            ->limit($limit)
-            ->get();
+            ->orderBy('views', 'desc');
+
+        app(\App\Services\GeoLocationService::class)->applyCountryBlockScope($query, $currentUser);
+
+        return $query->limit($limit)->get();
     }
 }

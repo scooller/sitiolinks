@@ -87,40 +87,15 @@ class UsersQuery extends Query
         $currentUser = auth('web')->user();
         $isAdminOrModerator = $currentUser && $currentUser->hasAnyRole(['admin', 'moderator']);
 
-        $viewerCountryHeader = strtoupper((string) (request()->header('CF-IPCountry') ?? request()->header('X-Country-Code') ?? ''));
-        $viewerCountry = $viewerCountryHeader;
-        if (! $viewerCountry) {
-            $ipHeader = (string) (request()->header('CF-Connecting-IP') ?? request()->header('X-Forwarded-For') ?? '');
-            $ip = $ipHeader ? trim(explode(',', $ipHeader)[0]) : request()->ip();
-            $validPublicIp = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) ? $ip : null;
-            $ipToCheck = $validPublicIp ?: request()->ip();
-            $detected = Cache::remember('ip_country_'.$ipToCheck, now()->addHours(12), function () use ($ipToCheck) {
-                try {
-                    $res = Http::timeout(3)->get('https://ipapi.co/'.$ipToCheck.'/json/');
-                    $code = strtoupper((string) ($res->json('country') ?? ''));
-
-                    return $code ?: null;
-                } catch (\Throwable $e) {
-                    return null;
-                }
-            });
-            $viewerCountry = $detected ?: '';
-        }
-
         if (! $isAdminOrModerator) {
             // Mostrar solo creadores en todos los listados públicos
             try {
                 $q->role('creator');
             } catch (RoleDoesNotExist $e) {
             }
-            $q->where(function ($w) use ($viewerCountry) {
-                $w->where('country_block', false)
-                    ->orWhereNull('country_block');
-                if ($viewerCountry) {
-                    $w->orWhere('country', '!=', $viewerCountry);
-                    // No incluir usuarios normales por defecto
-                }
-            });
+
+            // Aplicar filtro centralizado de bloqueo por país y evasión por VPN
+            app(\App\Services\GeoLocationService::class)->applyCountryBlockScope($q, $currentUser);
         }
 
         // Búsqueda por texto

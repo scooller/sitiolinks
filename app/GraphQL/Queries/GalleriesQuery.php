@@ -79,6 +79,12 @@ class GalleriesQuery extends Query
         }
         $query = Gallery::with($with)->withCount('likes')->orderBy('order');
 
+        if (! ($hasAdmin || $hasSuper || $hasModerator)) {
+            $query->whereHas('user', function ($userQuery) use ($user) {
+                app(\App\Services\GeoLocationService::class)->applyCountryBlockScope($userQuery, $user);
+            });
+        }
+
         if (isset($args['user_id'])) {
             $query->where('user_id', $args['user_id']);
         }

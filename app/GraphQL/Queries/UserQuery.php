@@ -69,32 +69,9 @@ class UserQuery extends Query
             }
         }
 
-        $viewerCountryHeader = strtoupper((string) (request()->header('CF-IPCountry') ?? request()->header('X-Country-Code') ?? ''));
-        $viewerCountry = $viewerCountryHeader;
-        if (! $viewerCountry) {
-            $ipHeader = (string) (request()->header('CF-Connecting-IP') ?? request()->header('X-Forwarded-For') ?? '');
-            $ip = $ipHeader ? trim(explode(',', $ipHeader)[0]) : request()->ip();
-            $validPublicIp = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) ? $ip : null;
-            $ipToCheck = $validPublicIp ?: request()->ip();
-            $detected = Cache::remember('ip_country_'.$ipToCheck, now()->addHours(12), function () use ($ipToCheck) {
-                try {
-                    $res = Http::timeout(3)->get('https://ipapi.co/'.$ipToCheck.'/json/');
-                    $code = strtoupper((string) ($res->json('country') ?? ''));
-
-                    return $code ?: null;
-                } catch (\Throwable $e) {
-                    return null;
-                }
-            });
-            $viewerCountry = $detected ?: '';
-        }
-        $targetCountry = strtoupper((string) ($user->country ?? ''));
-        if ($user->country_block && $viewerCountry && $targetCountry && ($viewerCountry === $targetCountry)) {
-            $isOwnProfile = $currentUser && $currentUser->id === $user->id;
-            $isAdminOrModerator = $currentUser && $currentUser->hasAnyRole(['admin', 'moderator']);
-            if (! $isOwnProfile && ! $isAdminOrModerator) {
-                return null;
-            }
+        // Verificar bloqueo por país y evasión automática por VPN / Proxy
+        if (app(\App\Services\GeoLocationService::class)->shouldBlockUser($user, $currentUser)) {
+            return null;
         }
 
         // Contar vista solo si no es su propio perfil

@@ -41,6 +41,10 @@ class GalleryQuery extends Query
             throw new \Exception('No tienes permiso para ver esta galería.');
         }
 
+        if ($gallery->user && app(\App\Services\GeoLocationService::class)->shouldBlockUser($gallery->user, $user)) {
+            throw new \Exception('No tienes permiso para ver esta galería.');
+        }
+
         return $gallery;
     }
 }

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25.0] - 2026-09-12
+
+### Added
+- **Automated VPN / Proxy / Datacenter Detection & Country Block Engine (`GeoLocationService.php`)**: Implemented intelligent geolocation service in Laravel with multi-provider detection (`ip-api.com` proxy and hosting analysis, ASN signatures, 24h caching).
+- **Anti-Bypass Protection for `country_block`**: Profiles with `country_block = true` automatically block visitors using known VPNs, proxies, Tor, or datacenter IPs, preventing local users from evading geographic blocks.
+- **Unified Query Scopes (`UserQuery`, `UsersQuery`, `TopViewedUsersQuery`, `GalleriesQuery`, `GalleryQuery`)**: Sealed privacy leaks across creator profiles, explore directory, ranking leaderboard, and galleries. Authenticated creators viewing their own profile and platform administrators retain full supervisory bypass.
+
 ## [0.24.1] - 2026-09-12
 
 ### Changed
