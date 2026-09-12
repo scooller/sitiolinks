@@ -17,6 +17,7 @@ Agents must **actively discover and leverage project skills and workflows** befo
      - `tailwindcss-development`: Tailwind utility conventions and theme consistency.
      - `ponytail` (`DietrichGebert/ponytail`): Minimalist engineering and YAGNI principle. Enforce the simplest, shortest solution that works, avoiding speculative abstractions, bloat, and redundant dependencies. Use `ponytail-review` or `ponytail-audit` to detect over-engineering.
      - `caveman` & `caveman-commit`: Ultra-compressed communication, terse code comments, and concise conventional commits.
+   - Use Graphify skill before starting work to understand the codebase.
    - Always read the relevant `SKILL.md` before starting work and apply its heuristics, techniques, and rules without taking shortcuts.
    - Update `front-site/public/llms.txt` and `front-site/public/llms-full.txt` to include all relevant information about the project, including the project name, description, and any other relevant information.
    - Run `Graphify` skill if needed after changes
