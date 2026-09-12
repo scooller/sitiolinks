@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.20.2] - 2026-09-12
+
+### Added
+- **Dynamic Contact Page Title & Subtitle from Backend (`Contact.tsx`, `queries.ts`)**: Integrated GraphQL `pageBySlug` query to dynamically load page title and intro description from the backend CMS `Page` model (`slug: 'contacto'` / `'contact'`) with DOM parsing to cleanly extract subtitle text without duplicate headers.
+- **Robust i18n Fallback**: Seamlessly falls back to local translation keys (`contact.title` and `contact.intro`) when backend records are loading, empty, or unavailable.
+
+## [0.20.1] - 2026-09-12
+
+### Added
+- **Interactive Google Maps Branch Address Link (`CafeDetail.tsx`, `cafes.css`)**: Converted static address badge into a tactile Apple pill link (`.apple-address-pill`) that opens Google Maps in a new tab with location pin icon and external link arrow.
+- **Smart Fallback Search Resolver**: If `google_maps_url` is not set or contains an iframe embed, dynamically constructs a query URL targeting `[cafe name, branch name, address, comuna/city]` on Google Maps.
+- **i18n Localization**: Added `open_in_maps` translation key in `es` and `en`.
+
+## [0.20.0] - 2026-09-12
+
+### Added
+- **Apple HIG Branch Selector Pop-Up Dropdown (`CafeDetail.tsx`, `cafes.css`)**: Replaced overflowing and overlapping branch tabs with an Apple Pop-Up Dropdown selector (`.apple-branch-picker-btn`, `.apple-branch-dropdown-menu`).
+- **Tactile Branch Stepper Navigation**: Added quick previous/next branch chevron buttons (`.apple-branch-step-btn`) allowing 1-tap switching between branches without opening the menu.
+- **Rich Branch List Items**: Dropdown menu displays each branch with optical icon, location name, address, and selected checkmark state with smooth scroll for large branch lists.
+- **Adaptive Responsive Layout**: Automatically activates the compact Dropdown on mobile viewports for all branch counts, and on desktop whenever a cafe has more than 3 branches. For <= 3 branches on desktop, tabs use non-overlapping flex bounds (`flex: 1 1 0`, `min-width: 0`, `text-truncate`).
+- **i18n Localization**: Added keys `select_branch`, `prev_branch`, and `next_branch` in `es` and `en`.
+
+### Fixed
+- Fixed visual overlap and text clipping occurring in cafe branch tabs when cafes have many branches or long address labels.
+
 ## [0.19.0] - 2026-09-12
 
 ### Added

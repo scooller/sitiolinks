@@ -142,6 +142,10 @@
             "review_error": "Could not submit the review.",
             "login_to_review": "You need to log in to leave a review.",
             "view_menu": "View menu",
+            "select_branch": "Select branch",
+            "prev_branch": "Previous branch",
+            "next_branch": "Next branch",
+            "open_in_maps": "Open in Google Maps",
             "sections": {
                 "details": "Details",
                 "branches": "Branches"

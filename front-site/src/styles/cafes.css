@@ -439,7 +439,266 @@
   gap: var(--space-2);
 }
 
-/* Apple Segmented Control para selección de sucursales */
+/* Apple HIG Branch Selector (Pop-up Button / Dropdown) */
+.apple-branch-picker-wrapper {
+  margin-bottom: var(--space-4);
+  width: 100%;
+}
+
+.apple-branch-picker-btn {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 0.65rem 1rem;
+  background: rgba(var(--cafe-border-rgb), 0.07);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-xl, 18px);
+  color: var(--cafe-title-color);
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.14s ease;
+  user-select: none;
+}
+
+[data-bs-theme="dark"] .apple-branch-picker-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.apple-branch-picker-btn:hover {
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.08);
+  border-color: rgba(var(--color-primary-rgb, 0, 113, 227), 0.3);
+  transform: translateY(-1px);
+}
+
+.apple-branch-picker-btn:active {
+  transform: scale(0.99);
+}
+
+.apple-branch-picker-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.apple-branch-picker-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--cafe-primary), var(--cafe-secondary));
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.apple-branch-picker-text {
+  flex-grow: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.apple-branch-picker-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cafe-primary);
+  line-height: 1.2;
+}
+
+.apple-branch-picker-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cafe-title-color);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apple-branch-picker-comuna {
+  font-weight: 500;
+  color: var(--cafe-desc-color);
+  font-size: 0.85rem;
+}
+
+.apple-branch-picker-trailing {
+  display: flex;
+  align-items: center;
+  color: var(--cafe-desc-color);
+  font-size: 0.85rem;
+  transition: transform 0.2s ease;
+}
+
+.show > .apple-branch-picker-btn .apple-branch-picker-trailing {
+  transform: rotate(180deg);
+  color: var(--cafe-primary);
+}
+
+/* Botones de navegación rápida entre sucursales (Prev / Next) */
+.apple-branch-step-btn {
+  width: 44px;
+  height: 52px;
+  min-width: 44px;
+  border-radius: var(--rounded-lg, 14px);
+  background: rgba(var(--cafe-border-rgb), 0.07);
+  border: 1px solid var(--apple-glass-border);
+  color: var(--cafe-title-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.16s ease, transform 0.14s ease, border-color 0.16s ease;
+}
+
+[data-bs-theme="dark"] .apple-branch-step-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.apple-branch-step-btn:hover {
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.1);
+  border-color: rgba(var(--color-primary-rgb, 0, 113, 227), 0.3);
+  color: var(--color-primary);
+}
+
+.apple-branch-step-btn:active {
+  transform: scale(0.95);
+}
+
+/* Dropdown Menu styling */
+.apple-branch-dropdown-menu {
+  border-radius: var(--rounded-2xl, 20px) !important;
+  padding: 0.5rem !important;
+  background: var(--apple-glass-bg, rgba(255, 255, 255, 0.9)) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid var(--apple-glass-border) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+  max-height: 380px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-bs-theme="dark"] .apple-branch-dropdown-menu {
+  background: rgba(30, 30, 32, 0.88) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+.apple-branch-dropdown-header {
+  padding: 0.5rem 0.75rem 0.4rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: var(--cafe-primary) !important;
+  border-bottom: 1px solid rgba(120, 120, 128, 0.12);
+  margin-bottom: 0.35rem;
+}
+
+.apple-branch-dropdown-scroll {
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.apple-branch-dropdown-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.apple-branch-dropdown-scroll::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 128, 0.25);
+  border-radius: 9999px;
+}
+
+.apple-branch-menu-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0.65rem 0.75rem !important;
+  border-radius: var(--rounded-lg, 12px) !important;
+  margin-bottom: 2px !important;
+  color: var(--cafe-title-color) !important;
+  text-decoration: none !important;
+  transition: background-color 0.14s ease, transform 0.14s ease !important;
+  white-space: normal !important;
+}
+
+.apple-branch-menu-item:hover,
+.apple-branch-menu-item:focus {
+  background-color: rgba(var(--color-primary-rgb, 0, 113, 227), 0.08) !important;
+}
+
+.apple-branch-menu-item.active {
+  background-color: rgba(var(--color-primary-rgb, 0, 113, 227), 0.14) !important;
+  color: var(--color-primary) !important;
+  font-weight: 600;
+}
+
+.apple-branch-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.apple-branch-item-icon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 8px;
+  background: rgba(120, 120, 128, 0.12);
+  color: var(--cafe-title-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.apple-branch-item-icon.active {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.apple-branch-item-info {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.apple-branch-item-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: inherit;
+}
+
+.apple-branch-item-address {
+  font-size: 0.78rem;
+  color: var(--cafe-desc-color);
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.apple-branch-item-check {
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Apple Segmented Control adaptativo para selección de sucursales (<= 3 sucursales en desktop) */
 .apple-segmented-control {
   display: flex;
   background: rgba(var(--cafe-border-rgb), 0.08);
@@ -447,19 +706,20 @@
   border-radius: var(--rounded-xl);
   gap: 4px;
   overflow-x: auto;
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-4);
   -webkit-overflow-scrolling: touch;
+  max-width: 100%;
 }
 
 .apple-segment-btn {
-  flex: 1;
-  min-width: 140px;
+  flex: 1 1 0;
+  min-width: 0;
   min-height: var(--size-touch-min);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: 6px var(--space-4);
+  padding: 8px var(--space-3);
   border: none;
   background: transparent;
   color: var(--cafe-desc-color);
@@ -468,6 +728,8 @@
   border-radius: var(--rounded-lg);
   transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .apple-segment-btn:hover {
@@ -486,6 +748,7 @@
   color: var(--cafe-primary);
   box-shadow: var(--shadow-button);
 }
+
 
 /* Filas de Información Estilo Lista Inset Apple */
 .apple-list-rows {
@@ -521,6 +784,58 @@
   font-weight: var(--fw-semibold);
   text-align: right;
 }
+
+/* Enlace Táctil de Dirección a Google Maps */
+.apple-address-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.95rem;
+  border-radius: 9999px;
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.1);
+  border: 1px solid rgba(var(--color-primary-rgb, 0, 113, 227), 0.25);
+  color: var(--color-primary) !important;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: background-color 0.16s ease, transform 0.14s ease, box-shadow 0.16s ease;
+  user-select: none;
+  max-width: 100%;
+  text-align: left;
+}
+
+[data-bs-theme="dark"] .apple-address-pill {
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.18);
+  border-color: rgba(var(--color-primary-rgb, 0, 113, 227), 0.35);
+  color: #60a5fa !important;
+}
+
+.apple-address-pill:hover {
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.22);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--color-primary-rgb, 0, 113, 227), 0.22);
+}
+
+.apple-address-pill:active {
+  transform: scale(0.97);
+}
+
+.apple-address-text {
+  word-break: break-word;
+}
+
+.apple-address-ext-icon {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  transition: transform 0.14s ease;
+  flex-shrink: 0;
+}
+
+.apple-address-pill:hover .apple-address-ext-icon {
+  opacity: 1;
+  transform: translate(1px, -1px);
+}
+
 
 /* Grilla de Creadores */
 .cafe-creators-list {

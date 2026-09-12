@@ -5,6 +5,7 @@ import {
   Button,
   Col,
   Container,
+  Dropdown,
   Form,
   Modal,
   Row,
@@ -217,6 +218,26 @@ export default function CafeDetail(): React.ReactElement {
     const comuna = (branch.city ?? branch.state ?? '').trim();
     return comuna !== '' ? `${branch.name} · ${comuna}` : branch.name;
   };
+
+  const branches = useMemo(() => cafe?.branches ?? [], [cafe?.branches]);
+  const isManyBranches = branches.length > 3;
+  const currentBranchIndex = useMemo(() => {
+    const idx = branches.findIndex((b) => String(b.id) === activeBranchKey);
+    return idx >= 0 ? idx : 0;
+  }, [branches, activeBranchKey]);
+
+  const handlePrevBranch = () => {
+    if (branches.length <= 1) return;
+    const nextIdx = (currentBranchIndex - 1 + branches.length) % branches.length;
+    setActiveBranchKey(String(branches[nextIdx].id));
+  };
+
+  const handleNextBranch = () => {
+    if (branches.length <= 1) return;
+    const nextIdx = (currentBranchIndex + 1) % branches.length;
+    setActiveBranchKey(String(branches[nextIdx].id));
+  };
+
 
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('es-CL', {
@@ -507,23 +528,129 @@ export default function CafeDetail(): React.ReactElement {
               </Alert>
             ) : (
               <>
-                {/* Selector Segmentado de Sucursales */}
-                {(cafe.branches ?? []).length > 1 && (
-                  <div className="apple-segmented-control" role="tablist">
-                    {(cafe.branches ?? []).map((branch) => (
-                      <button
-                        key={branch.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={activeBranchKey === String(branch.id)}
-                        className={`apple-segment-btn ${activeBranchKey === String(branch.id) ? 'active' : ''}`}
-                        onClick={() => setActiveBranchKey(String(branch.id))}
-                      >
-                        <i className="fas fa-store" aria-hidden="true"></i>
-                        {branchLocationLabel(branch)}
-                      </button>
-                    ))}
-                  </div>
+                {/* Selector de Sucursales: Dropdown Pop-Up y Segmentado Adaptativo */}
+                {branches.length > 1 && (
+                  <>
+                    {/* Pop-Up Button Dropdown (Visible siempre en móvil, y en escritorio si hay más de 3 sucursales) */}
+                    <div className={`apple-branch-picker-wrapper ${isManyBranches ? 'd-flex' : 'd-flex d-md-none'}`}>
+                      <div className="d-flex align-items-center gap-2 w-100">
+                        <Dropdown className="flex-grow-1 apple-branch-dropdown">
+                          <Dropdown.Toggle
+                            as="button"
+                            id="branch-picker-dropdown"
+                            className="apple-branch-picker-btn"
+                            aria-label={t('cafes.detail.select_branch')}
+                          >
+                            <div className="apple-branch-picker-content">
+                              <div className="apple-branch-picker-icon">
+                                <i className="fas fa-store" aria-hidden="true"></i>
+                              </div>
+                              <div className="apple-branch-picker-text text-start">
+                                <div className="apple-branch-picker-kicker">
+                                  {t('cafes.detail.sections.branches')} ({currentBranchIndex + 1} / {branches.length})
+                                </div>
+                                <div className="apple-branch-picker-title">
+                                  {activeBranch?.name}
+                                  {(activeBranch?.city || activeBranch?.state) && (
+                                    <span className="apple-branch-picker-comuna">
+                                      {' '}· {(activeBranch?.city ?? activeBranch?.state)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="apple-branch-picker-trailing">
+                              <i className="fas fa-chevron-down" aria-hidden="true"></i>
+                            </div>
+                          </Dropdown.Toggle>
+
+                          <Dropdown.Menu className="apple-liquid-glass-dropdown apple-branch-dropdown-menu w-100 shadow-lg">
+                            <Dropdown.Header className="apple-branch-dropdown-header">
+                              <i className="fas fa-location-dot me-2 text-primary" aria-hidden="true"></i>
+                              {t('cafes.detail.select_branch')} ({branches.length})
+                            </Dropdown.Header>
+                            <div className="apple-branch-dropdown-scroll">
+                              {branches.map((branch) => {
+                                const isSelected = activeBranchKey === String(branch.id);
+                                const comuna = (branch.city ?? branch.state ?? '').trim();
+                                return (
+                                  <Dropdown.Item
+                                    key={branch.id}
+                                    onClick={() => setActiveBranchKey(String(branch.id))}
+                                    className={`apple-branch-menu-item ${isSelected ? 'active' : ''}`}
+                                  >
+                                    <div className="apple-branch-item-left">
+                                      <div className={`apple-branch-item-icon ${isSelected ? 'active' : ''}`}>
+                                        <i className="fas fa-store" aria-hidden="true"></i>
+                                      </div>
+                                      <div className="apple-branch-item-info">
+                                        <div className="apple-branch-item-name">
+                                          {branch.name}
+                                          {comuna && <span className="text-muted fw-normal ms-1">· {comuna}</span>}
+                                        </div>
+                                        {branch.address && (
+                                          <div className="apple-branch-item-address">
+                                            <i className="fas fa-map-pin me-1 opacity-50" aria-hidden="true"></i>
+                                            {branch.address}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    {isSelected && (
+                                      <div className="apple-branch-item-check text-primary">
+                                        <i className="fas fa-check" aria-hidden="true"></i>
+                                      </div>
+                                    )}
+                                  </Dropdown.Item>
+                                );
+                              })}
+                            </div>
+                          </Dropdown.Menu>
+                        </Dropdown>
+
+                        {/* Botones Stepper Anterior / Siguiente */}
+                        <div className="apple-branch-stepper d-flex align-items-center gap-1">
+                          <button
+                            type="button"
+                            className="apple-branch-step-btn"
+                            onClick={handlePrevBranch}
+                            title={t('cafes.detail.prev_branch')}
+                            aria-label={t('cafes.detail.prev_branch')}
+                          >
+                            <i className="fas fa-chevron-left" aria-hidden="true"></i>
+                          </button>
+                          <button
+                            type="button"
+                            className="apple-branch-step-btn"
+                            onClick={handleNextBranch}
+                            title={t('cafes.detail.next_branch')}
+                            aria-label={t('cafes.detail.next_branch')}
+                          >
+                            <i className="fas fa-chevron-right" aria-hidden="true"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Selector Segmentado de Sucursales (Solo escritorio si hay <= 3 sucursales) */}
+                    {!isManyBranches && (
+                      <div className="apple-segmented-control d-none d-md-flex" role="tablist">
+                        {branches.map((branch) => (
+                          <button
+                            key={branch.id}
+                            type="button"
+                            role="tab"
+                            aria-selected={activeBranchKey === String(branch.id)}
+                            className={`apple-segment-btn ${activeBranchKey === String(branch.id) ? 'active' : ''}`}
+                            onClick={() => setActiveBranchKey(String(branch.id))}
+                          >
+                            <i className="fas fa-store" aria-hidden="true"></i>
+                            <span className="text-truncate">{branchLocationLabel(branch)}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* Ficha de Información de la Sucursal Activa */}
@@ -544,9 +671,24 @@ export default function CafeDetail(): React.ReactElement {
                           {t('cafes.detail.fields.address')}
                         </span>
                         <span className="apple-list-row-value">
-                          <span className="badge text-bg-success rounded-pill px-3 py-2">
-                            {activeBranch.address}
-                          </span>
+                          <a
+                            href={
+                              activeBranch.google_maps_url && activeBranch.google_maps_url.startsWith('http') && !activeBranch.google_maps_url.includes('embed')
+                                ? activeBranch.google_maps_url
+                                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                                    [cafe.name, activeBranch.name, activeBranch.address, activeBranch.city ?? activeBranch.state].filter(Boolean).join(', ')
+                                  )}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="apple-address-pill"
+                            title={t('cafes.detail.open_in_maps')}
+                            aria-label={`${activeBranch.address} - ${t('cafes.detail.open_in_maps')}`}
+                          >
+                            <i className="fas fa-location-dot me-1 text-danger" aria-hidden="true"></i>
+                            <span className="apple-address-text">{activeBranch.address}</span>
+                            <i className="fas fa-arrow-up-right-from-square ms-1 apple-address-ext-icon" aria-hidden="true"></i>
+                          </a>
                         </span>
                       </div>
                     )}

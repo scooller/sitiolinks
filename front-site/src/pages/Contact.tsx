@@ -1,9 +1,56 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { motion } from 'motion/react';
 import { fadeIn, defaultTransition } from '../lib/animations';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
+import { queries } from '../lib/graphql/queries';
 import { useTranslation } from 'react-i18next';
+import type { Page } from '../types';
+
+/**
+ * Parsea el contenido HTML de la página de contacto para extraer título y subtítulo limpios.
+ */
+function parseContactContent(
+  rawTitle: string | undefined,
+  rawContent: string | undefined,
+  defaultTitle: string,
+  defaultSubtitle: string
+): { title: string; subtitle: string } {
+  let finalTitle = rawTitle?.trim() || '';
+  let finalSubtitle = '';
+
+  if (rawContent && rawContent.trim()) {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(rawContent, 'text/html');
+
+      const h1 = doc.body.querySelector('h1');
+      if (!finalTitle && h1?.textContent?.trim()) {
+        finalTitle = h1.textContent.trim();
+      }
+
+      doc.body.querySelectorAll('h1, h2, h3').forEach(el => el.remove());
+
+      const paragraphs = Array.from(doc.body.querySelectorAll('p'))
+        .map(p => p.textContent?.trim())
+        .filter(Boolean);
+
+      if (paragraphs.length > 0) {
+        finalSubtitle = paragraphs.join(' ');
+      } else {
+        finalSubtitle = doc.body.textContent?.trim() || '';
+      }
+    } catch {
+      finalSubtitle = rawContent.replace(/<[^>]*>?/gm, '').trim();
+    }
+  }
+
+  return {
+    title: finalTitle || defaultTitle,
+    subtitle: finalSubtitle || defaultSubtitle,
+  };
+}
 
 const CREATE_CONTACT_MESSAGE = `
   mutation CreateContactMessage($name: String!, $email: String!, $subject: String!, $message: String!, $website: String, $captcha: String!) {
@@ -31,13 +78,79 @@ type Errors = Partial<Record<keyof FormData, string>>;
 type Status = { type: '' | 'success' | 'danger'; message: string };
 
 const Contact: React.FC = () => {
-  const { t } = useTranslation();
+  const location = useLocation();
+  const { t, i18n, ready } = useTranslation();
+  const [pageInfo, setPageInfo] = useState<{ title: string; subtitle: string }>({
+    title: t('contact.title'),
+    subtitle: t('contact.intro'),
+  });
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', subject: '', message: '', website: '' });
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<Status>({ type: '', message: '' });
   const [loading, setLoading] = useState<boolean>(false);
   const [altchaPayload, setAltchaPayload] = useState<string>('');
   const altchaRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!ready) return;
+
+    let isMounted = true;
+    const fetchPage = async () => {
+      const raw = location.pathname.slice(1).toLowerCase();
+      const lang = (i18n.language || 'es').split('-')[0];
+      const isEnglish = lang === 'en' || raw === 'contact';
+      const preferredSlug = isEnglish ? 'contact' : 'contacto';
+      const fallbackSlug = isEnglish ? 'contacto' : 'contact';
+
+      try {
+        let pageResult: Page | null = null;
+        try {
+          const resp = await graphqlRequest<{ page: Page | null }>({
+            query: queries.pageBySlug,
+            variables: { slug: preferredSlug },
+            schema: 'public',
+          });
+          if (resp?.page) {
+            pageResult = resp.page;
+          }
+        } catch {
+          // fallback
+        }
+
+        if (!pageResult) {
+          const respFallback = await graphqlRequest<{ page: Page | null }>({
+            query: queries.pageBySlug,
+            variables: { slug: fallbackSlug },
+            schema: 'public',
+          });
+          pageResult = respFallback?.page ?? null;
+        }
+
+        if (!isMounted) return;
+
+        if (pageResult) {
+          setPageInfo(parseContactContent(pageResult.title, pageResult.content, t('contact.title'), t('contact.intro')));
+        } else {
+          setPageInfo({
+            title: t('contact.title'),
+            subtitle: t('contact.intro'),
+          });
+        }
+      } catch {
+        if (!isMounted) return;
+        setPageInfo({
+          title: t('contact.title'),
+          subtitle: t('contact.intro'),
+        });
+      }
+    };
+
+    fetchPage();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [location.pathname, i18n.language, ready, t]);
 
   useEffect(() => {
     import('altcha');
@@ -114,8 +227,8 @@ const Contact: React.FC = () => {
             <span className="contact-kicker">
               <i className="fas fa-sparkles"></i> {t('contact.kicker')}
             </span>
-            <h1 className="contact-title">{t('contact.title')}</h1>
-            <p className="contact-subtitle">{t('contact.intro')}</p>
+            <h1 className="contact-title">{pageInfo.title}</h1>
+            <p className="contact-subtitle">{pageInfo.subtitle}</p>
           </div>
 
           <Row className="g-4 align-items-stretch">

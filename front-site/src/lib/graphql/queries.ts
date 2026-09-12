@@ -300,4 +300,14 @@ export const queries = {
       vipUnreadNotificationsCount
     }
   `,
+  pageBySlug: `
+    query PageBySlug($slug: String!) {
+      page(slug: $slug) {
+        id
+        title
+        slug
+        content
+      }
+    }
+  `,
 } as const;

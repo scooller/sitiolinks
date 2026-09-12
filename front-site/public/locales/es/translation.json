@@ -142,6 +142,10 @@
             "review_error": "No se pudo enviar la reseña.",
             "login_to_review": "Debes iniciar sesión para dejar una reseña.",
             "view_menu": "Ver menú",
+            "select_branch": "Seleccionar sucursal",
+            "prev_branch": "Sucursal anterior",
+            "next_branch": "Siguiente sucursal",
+            "open_in_maps": "Abrir en Google Maps",
             "sections": {
                 "details": "Detalles",
                 "branches": "Sucursales"
