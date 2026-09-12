@@ -79,6 +79,7 @@ class EmailCampaign extends Model
             'vip' => $query->whereHas('roles', fn ($q) => $q->where('name', 'vip')),
             'unverified_email' => $query->whereNull('email_verified_at'),
             'verified_only' => $query->whereNotNull('email_verified_at'),
+            'privacy_consent_pending' => $query->where(fn ($q) => $q->where('privacy_consent', false)->orWhereNull('privacy_consent')),
             'subscribers_only' => $query->where('email_notifications', true),
             'inactive_30_days' => $query->where('updated_at', '<', Carbon::now()->subDays(30)),
             default => $query,

@@ -37,6 +37,14 @@ class EmailTemplateSeeder extends Seeder
                 'content' => '<p>Estimado/a <strong>{{ user.name }}</strong>,</p><p>Queremos compartir contigo las últimas mejoras y nuevos espacios agregados a la plataforma:</p><ul><li>Nuevas cafeterías recomendadas por la comunidad.</li><li>Mejoras de rendimiento y seguridad.</li><li>Nuevas funcionalidades en galerías y perfiles.</li></ul><p><a href="{{ site.url }}">Explorar las Novedades</a></p>',
                 'is_active' => true,
             ],
+            [
+                'name' => 'Aceptación de Nueva Política de Privacidad (Ley N° 21.719)',
+                'slug' => 'consentimiento_ley_21719',
+                'subject' => 'Actualización importante: Nueva Política de Protección de Datos en {{ site.name }}',
+                'description' => 'Solicitud formal para que los usuarios registrados revisen y acepten el tratamiento de datos y derechos ARCOP bajo la Ley N° 21.719.',
+                'content' => '<p>Hola <strong>{{ user.name }}</strong>,</p><p>En <strong>{{ site.name }}</strong> nos comprometemos con la seguridad y privacidad de tu información. Conforme a la nueva <strong>Ley N° 21.719</strong> sobre Protección de Datos Personales en Chile, hemos actualizado nuestro marco de privacidad y fortalecido el ejercicio de tus <strong>Derechos ARCOP</strong> (Acceso, Rectificación, Cancelación, Oposición y Portabilidad).</p><p>Para continuar utilizando tu cuenta con total normalidad y validar tus preferencias de privacidad, por favor ingresa a tu perfil para confirmar tu consentimiento:</p><p style="text-align: center; margin: 30px 0;"><a href="{{ action_url }}/perfil/editar" style="background-color: #0284c7; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: bold; display: inline-block; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">Revisar y Aceptar Políticas</a></p><p>También puedes informarte en profundidad sobre el tratamiento de tus datos visitando nuestro <a href="{{ action_url }}/privacidad-datos">Centro de Privacidad y Derechos ARCOP</a>.</p><p>Muchas gracias por formar parte de nuestra comunidad.</p>',
+                'is_active' => true,
+            ],
         ];
 
         foreach ($templates as $data) {

@@ -63,6 +63,7 @@ class EmailCampaignForm
                                 'vip' => 'Solo Usuarios VIP',
                                 'unverified_email' => 'Usuarios con email pendiente de verificación',
                                 'verified_only' => 'Solo usuarios verificados',
+                                'privacy_consent_pending' => 'Usuarios sin consentimiento de privacidad (Ley N° 21.719)',
                                 'subscribers_only' => 'Usuarios con notificaciones por email activas',
                                 'inactive_30_days' => 'Usuarios inactivos hace más de 30 días',
                             ])

@@ -36,6 +36,7 @@ class EmailCampaignsTable
                         'vip' => 'Usuarios VIP',
                         'unverified_email' => 'Sin verificar',
                         'verified_only' => 'Verificados',
+                        'privacy_consent_pending' => 'Pendiente Privacidad (Ley 21.719)',
                         'subscribers_only' => 'Suscritos a email',
                         'inactive_30_days' => 'Inactivos +30d',
                         default => $state,
