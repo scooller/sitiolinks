@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Events\NotificationCreated;
+use App\Listeners\LogSentMessageListener;
 use App\Listeners\SendNotificationEmail;
 use App\Models\Gallery;
 use App\Models\SiteSettings;
@@ -16,6 +17,7 @@ use App\Observers\TagObserver;
 use App\Observers\TicketObserver;
 use App\Observers\UserObserver;
 use App\Support\WatermarkManipulator;
+use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Spatie\MediaLibrary\Conversions\Events\ConversionHasBeenCompletedEvent;
@@ -48,6 +50,12 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             NotificationCreated::class,
             SendNotificationEmail::class
+        );
+
+        // Registrar listener para auditoría y log de todos los emails enviados
+        Event::listen(
+            MessageSent::class,
+            LogSentMessageListener::class
         );
 
         // Aplicar watermark al archivo original cuando se agrega

@@ -2,17 +2,25 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Jobs\SendBulkEmailJob;
+use App\Models\EmailTemplate;
 use App\Models\SiteSettings;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 
 class UsersTable
@@ -122,6 +130,67 @@ class UsersTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkAction::make('send_bulk_email')
+                        ->label('Enviar Email Masivo')
+                        ->icon(Heroicon::OutlinedPaperAirplane)
+                        ->color('primary')
+                        ->modalHeading('Enviar Correo Masivo a Usuarios Seleccionados')
+                        ->modalWidth('3xl')
+                        ->form([
+                            Select::make('template_id')
+                                ->label('Cargar desde plantilla (opcional)')
+                                ->options(fn () => EmailTemplate::where('is_active', true)->pluck('name', 'id'))
+                                ->searchable()
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    if ($state) {
+                                        $template = EmailTemplate::find($state);
+                                        if ($template) {
+                                            $set('subject', $template->subject);
+                                            $set('content', $template->content);
+                                        }
+                                    }
+                                }),
+                            TextInput::make('subject')
+                                ->label('Asunto del correo')
+                                ->required()
+                                ->maxLength(255)
+                                ->placeholder('Ej: Novedades importantes en Link Persons')
+                                ->helperText('Puedes usar variables como {{ user.name }} o {{ site.name }}'),
+                            RichEditor::make('content')
+                                ->label('Contenido del Mensaje')
+                                ->required()
+                                ->columnSpanFull(),
+                        ])
+                        ->action(function (Collection $records, array $data): void {
+                            $userIds = $records->pluck('id')->all();
+                            $total = count($userIds);
+
+                            if ($total === 0) {
+                                Notification::make()
+                                    ->title('Sin destinatarios')
+                                    ->body('No seleccionaste ningún usuario con email válido.')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            $chunks = array_chunk($userIds, 50);
+                            foreach ($chunks as $chunk) {
+                                SendBulkEmailJob::dispatch(
+                                    userIds: $chunk,
+                                    subject: $data['subject'],
+                                    content: $data['content'],
+                                    templateId: !empty($data['template_id']) ? (int) $data['template_id'] : null,
+                                );
+                            }
+
+                            Notification::make()
+                                ->title('Envíos masivos encolados')
+                                ->body("Se han programado envíos para {$total} usuarios a través de la cola de trabajo.")
+                                ->success()
+                                ->send();
+                        }),
                     DeleteBulkAction::make(),
                 ]),
             ]);

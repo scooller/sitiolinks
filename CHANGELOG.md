@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.0] - 2026-09-12
+
+### Added
+- **Native Email Management & Automation Engine in Filament (Laravel 12 / Filament v5)**: Complete built-in communications subsystem without third-party plugin incompatibilities.
+- **Email Logs & Auditing (`EmailLogResource`, `LogSentMessageListener`)**: Automatic transparent capture of all system emails (tickets, notifications, contact messages) with full HTML preview modal in sandboxed iframe and 1-click resend capability.
+- **Dynamic Email Templates (`EmailTemplateResource`, `EmailTemplateSeeder`)**: Rich editor template builder supporting reusable dynamic placeholders (`{{ user.name }}`, `{{ user.email }}`, `{{ user.username }}`, `{{ site.name }}`, `{{ action_url }}`) with live test email dispatch action.
+- **Bulk Manual Emailing (`UsersTable.php`, `SendBulkEmailJob`)**: Bulk Action in Filament Users table allowing selection of users with checkboxes to compose and send queued personalized emails in chunks of 50.
+- **Scheduled & Recurring Email Campaigns (`EmailCampaignResource`, `ProcessEmailCampaignsCommand`)**: Campaign manager supporting audience segmentation (*All Users*, *Creators*, *VIPs*, *Unverified Email*, *Active Subscribers*, *Inactive 30+ Days*), one-time scheduling, and automated recurrence (daily, weekly, monthly) processed through Laravel Queue and Scheduler.
+- **Responsive Dynamic Email Layout (`dynamic-template.blade.php`, `DynamicTemplateMail`)**: High-contrast, mobile-first email layout with official branding, dynamic body, and customizable notification preference link.
+
 ## [0.21.0] - 2026-09-12
 
 ### Added
