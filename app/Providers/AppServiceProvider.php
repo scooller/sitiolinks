@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Events\NotificationCreated;
-use App\Listeners\LogSentMessageListener;
 use App\Listeners\SendNotificationEmail;
 use App\Models\Gallery;
 use App\Models\SiteSettings;
@@ -50,12 +49,6 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             NotificationCreated::class,
             SendNotificationEmail::class
-        );
-
-        // Registrar listener para auditoría y log de todos los emails enviados
-        Event::listen(
-            MessageSent::class,
-            LogSentMessageListener::class
         );
 
         // Aplicar watermark al archivo original cuando se agrega
