@@ -26,8 +26,9 @@ Thumbs.db
 .gitattributes
 back-admin.zip
 /storage/media-library/temp
-/front-site/dist
-/front-site/dist
-/front-site/dist/assets
-/front-site/dist
+/front-site/dist/
 /graphify-out
+/.agents
+/.sf
+
+skills-lock.json

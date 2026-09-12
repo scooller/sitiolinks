@@ -1,0 +1,348 @@
+/* ==========================================================================
+   Apple HIG Tag Explorer Module (/t/:tag)
+   Discipline: Apple Editorial Header, Liquid Glass Filter Bar & Empty State
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Contenedor y Navegación Superior
+   -------------------------------------------------------------------------- */
+.tag-page-wrapper {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-12);
+  min-height: 75vh;
+}
+
+.tag-top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.tag-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-touch-min, 44px);
+  padding: 0 var(--space-4);
+  border-radius: var(--rounded-xl);
+  background: var(--apple-glass-dropdown-bg);
+  color: var(--text-main);
+  border: 1px solid var(--apple-glass-border);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  box-shadow: var(--shadow-2xs);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-apple),
+              color var(--duration-fast) var(--ease-apple),
+              transform var(--duration-fast) var(--ease-apple),
+              box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.tag-back-btn:hover {
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.12);
+  color: var(--color-primary, #0071e3);
+  transform: translateX(-2px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.tag-back-btn:active {
+  transform: translateX(0);
+}
+
+/* --------------------------------------------------------------------------
+   2. Cabecera Hero Editorial Apple
+   -------------------------------------------------------------------------- */
+.tag-hero {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.tag-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-primary, #0071e3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+.tag-hero-title {
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-main);
+  line-height: var(--lh-tight);
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tag-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 14px;
+  border-radius: var(--rounded-full);
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb, 0, 113, 227), 0.14) 0%, rgba(var(--color-primary-rgb, 0, 113, 227), 0.28) 100%);
+  color: var(--color-primary, #0071e3);
+  border: 1px solid rgba(var(--color-primary-rgb, 0, 113, 227), 0.35);
+  box-shadow: 0 0 16px rgba(var(--color-primary-rgb, 0, 113, 227), 0.22);
+  font-weight: var(--fw-bold);
+}
+
+.tag-hero-subtitle {
+  color: var(--text-muted);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   3. Barra de Filtros Liquid Glass
+   -------------------------------------------------------------------------- */
+.tag-filters-card {
+  background: var(--apple-glass-bg);
+  -webkit-backdrop-filter: var(--glass-filter-nav);
+  backdrop-filter: var(--glass-filter-nav);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-2xl);
+  box-shadow: var(--apple-glass-shadow);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  transition: box-shadow var(--duration-normal) var(--ease-apple);
+}
+
+.tag-filter-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.tag-filter-icon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.tag-filter-input,
+.tag-filter-select {
+  min-height: 48px;
+  border-radius: var(--rounded-xl) !important;
+  background: var(--apple-glass-dropdown-bg) !important;
+  border: 1px solid var(--apple-glass-border) !important;
+  color: var(--text-main) !important;
+  font-size: var(--fs-sm) !important;
+  padding-left: calc(var(--space-3) + 20px) !important;
+  box-shadow: var(--shadow-2xs);
+  width: 100%;
+  transition: border-color var(--duration-fast) var(--ease-apple),
+              box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.tag-filter-input:focus,
+.tag-filter-select:focus {
+  border-color: var(--color-primary, #0071e3) !important;
+  box-shadow: var(--shadow-focus-ring) !important;
+  outline: none;
+}
+
+.tag-filter-reset-btn {
+  min-height: 48px;
+  border-radius: var(--rounded-xl) !important;
+  border: 1px solid var(--apple-glass-border) !important;
+  background: var(--apple-glass-dropdown-bg) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-button);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+  width: 100%;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-apple),
+              color var(--duration-fast) var(--ease-apple),
+              transform var(--duration-fast) var(--ease-apple),
+              box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.tag-filter-reset-btn:hover:not(:disabled) {
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.12) !important;
+  color: var(--color-primary, #0071e3) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.tag-filter-reset-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.tag-filter-reset-btn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   4. Meta de Resultados
+   -------------------------------------------------------------------------- */
+.tag-results-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding: 0 var(--space-1);
+}
+
+.tag-results-count {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+}
+
+.tag-results-count strong {
+  color: var(--text-main);
+}
+
+/* --------------------------------------------------------------------------
+   5. Estado Vacío Apple (Empty State)
+   -------------------------------------------------------------------------- */
+.tag-empty-card {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  background: var(--apple-glass-bg);
+  -webkit-backdrop-filter: var(--glass-filter-nav);
+  backdrop-filter: var(--glass-filter-nav);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-2xl);
+  box-shadow: var(--apple-glass-shadow);
+  margin: var(--space-6) 0;
+}
+
+.tag-empty-halo {
+  width: 76px;
+  height: 76px;
+  border-radius: var(--rounded-circle);
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.1);
+  display: grid;
+  place-items: center;
+  margin: 0 auto var(--space-4);
+  font-size: 1.85rem;
+  color: var(--color-primary, #0071e3);
+  box-shadow: 0 0 24px rgba(var(--color-primary-rgb, 0, 113, 227), 0.16);
+}
+
+.tag-empty-title {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-main);
+  margin-bottom: var(--space-2);
+}
+
+.tag-empty-desc {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  max-width: 440px;
+  margin: 0 auto var(--space-6);
+  line-height: var(--lh-normal);
+}
+
+.tag-empty-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 0 var(--space-6);
+  border-radius: var(--rounded-full);
+  background: var(--color-primary, #0071e3);
+  color: #ffffff !important;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  box-shadow: var(--shadow-primary-btn);
+  text-decoration: none;
+  border: none;
+  transition: transform var(--duration-fast) var(--ease-apple),
+              box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.tag-empty-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-primary-btn-hover);
+  color: #ffffff !important;
+}
+
+.tag-empty-cta:active {
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   6. Paginación Apple
+   -------------------------------------------------------------------------- */
+.tag-pagination-wrapper {
+  margin-top: var(--space-8);
+  padding: var(--space-4) 0;
+  display: flex;
+  justify-content: center;
+}
+
+.tag-pagination-wrapper .pagination {
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.tag-pagination-wrapper .page-item .page-link {
+  min-height: var(--size-touch-min, 44px);
+  min-width: var(--size-touch-min, 44px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rounded-lg) !important;
+  border: 1px solid var(--apple-glass-border);
+  background: var(--apple-glass-dropdown-bg);
+  color: var(--text-main);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  box-shadow: var(--shadow-2xs);
+  transition: background-color var(--duration-fast) var(--ease-apple),
+              color var(--duration-fast) var(--ease-apple),
+              transform var(--duration-fast) var(--ease-apple);
+}
+
+.tag-pagination-wrapper .page-item .page-link:hover {
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.12);
+  color: var(--color-primary, #0071e3);
+  transform: translateY(-1px);
+}
+
+.tag-pagination-wrapper .page-item.active .page-link {
+  background: var(--color-primary, #0071e3) !important;
+  border-color: var(--color-primary, #0071e3) !important;
+  color: #ffffff !important;
+  box-shadow: var(--shadow-button);
+}
+
+/* --------------------------------------------------------------------------
+   7. Reducción de movimiento
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .tag-back-btn,
+  .tag-filter-reset-btn,
+  .tag-empty-cta,
+  .tag-pagination-wrapper .page-item .page-link {
+    transition: none !important;
+    transform: none !important;
+  }
+}

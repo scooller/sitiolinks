@@ -1,9 +1,11 @@
 import React, { type ReactElement, useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Form, Button, Alert, Spinner, Modal } from 'react-bootstrap';
+import { useNavigate, Link } from 'react-router-dom';
+import { Container, Row, Col, Modal, Spinner } from 'react-bootstrap';
+import { motion, AnimatePresence } from 'motion/react';
+import { fadeIn, appleEase } from '../lib/animations';
 import { useAuth } from '../contexts/AuthContext';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
-import { getCountryFlag } from '../lib/countryUtils.ts';
+import { getCountryFlag } from '../lib/countryUtils';
 import { FilePond, registerPlugin } from 'react-filepond';
 import type { FilePondFile } from 'filepond';
 import 'filepond/dist/filepond.min.css';
@@ -44,15 +46,20 @@ interface CountriesData {
   cities?: Record<string, string[]>;
 }
 
+type TabType = 'general' | 'creator' | 'links' | 'tags' | 'security';
+
 export default function EditProfile(): ReactElement {
   const navigate = useNavigate();
   const { user: currentUser, refreshUser, logout } = useAuth();
   const { t, i18n } = useTranslation();
+
+  const [activeTab, setActiveTab] = useState<TabType>('general');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
   const [countries, setCountries] = useState<Record<string, string>>({});
   const [cities, setCities] = useState<string[]>([]);
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -111,6 +118,8 @@ export default function EditProfile(): ReactElement {
             country_block
             card_bg_color
             card_bg_opacity
+            avatar_url
+            avatar_thumb
             links {
               id
               name
@@ -136,6 +145,7 @@ export default function EditProfile(): ReactElement {
 
       if (data?.user) {
         const userData = data.user;
+        setCurrentAvatarUrl(userData.avatar_thumb || userData.avatar_url || null);
         setFormData({
           name: userData.name || '',
           description: userData.description || '',
@@ -146,12 +156,12 @@ export default function EditProfile(): ReactElement {
           birth_date: userData.birth_date || '',
           price_from: String(userData.price_from || ''),
           country_block: (userData as any).country_block || false,
-          card_bg_color: (userData as any).card_bg_color || '',
+          card_bg_color: (userData as any).card_bg_color || '#ffffff',
           card_bg_opacity: typeof (userData as any).card_bg_opacity === 'number' ? (userData as any).card_bg_opacity : 1,
         });
 
         setLinks((userData as any).links || []);
-        const userTagIds = ((userData as any).tags || []).map((t: Tag) => t.id);
+        const userTagIds = ((userData as any).tags || []).map((tg: Tag) => tg.id);
         setSelectedTagIds(userTagIds);
       }
 
@@ -175,6 +185,7 @@ export default function EditProfile(): ReactElement {
         setCities(countryCities);
       }
     } catch (err) {
+      // Ignorar fallback
     }
   };
 
@@ -186,18 +197,19 @@ export default function EditProfile(): ReactElement {
       });
       const tags = data.tags || [];
       setAllTags(tags);
-      const fixedUserTags = tags.filter((t) => t.is_fixed && selectedTagIds.includes(t.id)).map((t) => t.id);
+      const fixedUserTags = tags.filter((tg) => tg.is_fixed && selectedTagIds.includes(tg.id)).map((tg) => tg.id);
       if (fixedUserTags.length) {
         setSelectedTagIds((prev) => Array.from(new Set([...prev, ...fixedUserTags])));
       }
     } catch (e) {
+      // Ignorar fallback
     }
   };
 
   const filteredTags = useMemo(() => {
     const term = tagSearch.trim().toLowerCase();
     return allTags
-      .filter((t) => !term || (t.name && t.name.toLowerCase().includes(term)) || (t.name_en && t.name_en.toLowerCase().includes(term)) || (t.icon && t.icon.toLowerCase().includes(term)))
+      .filter((tg) => !term || (tg.name && tg.name.toLowerCase().includes(term)) || (tg.name_en && tg.name_en.toLowerCase().includes(term)) || (tg.icon && tg.icon.toLowerCase().includes(term)))
       .sort((a, b) => (Number(b.weight) || 0) - (Number(a.weight) || 0));
   }, [allTags, tagSearch]);
 
@@ -208,6 +220,7 @@ export default function EditProfile(): ReactElement {
       const parsed: CountriesData = JSON.parse(data.countries);
       setCities(parsed.cities?.[countryCode] || []);
     } catch (err) {
+      // Ignorar fallback
     }
   };
 
@@ -342,8 +355,8 @@ export default function EditProfile(): ReactElement {
         }
       }
 
-      const isCreator = (currentUser as any).roles?.some((role: any) => role.name === 'creator') || (currentUser as any).roles?.includes('creator');
-      if (isCreator) {
+      const isUserCreator = (currentUser as any).roles?.some((role: any) => role.name === 'creator') || (currentUser as any).roles?.includes('creator');
+      if (isUserCreator) {
         const linksMutation = `
           mutation UpdateLinks($links: [LinkInput]) {
             updateLinks(links: $links) {
@@ -364,13 +377,13 @@ export default function EditProfile(): ReactElement {
       }
 
       try {
-        const isAdmin =
+        const isUserAdmin =
           (currentUser as any).roles?.some((r: any) => r.name === 'admin' || r.name === 'super_admin') ||
           (currentUser as any).roles?.includes('admin') ||
           (currentUser as any).roles?.includes('super_admin');
         let tagIdsToSend = selectedTagIds.slice();
-        if (!isAdmin) {
-          const fixedUserTagIds = allTags.filter((t) => t.is_fixed && selectedTagIds.includes(t.id)).map((t) => t.id);
+        if (!isUserAdmin) {
+          const fixedUserTagIds = allTags.filter((tg) => tg.is_fixed && selectedTagIds.includes(tg.id)).map((tg) => tg.id);
           tagIdsToSend = Array.from(new Set([...tagIdsToSend, ...fixedUserTagIds]));
         }
         if (allTags.length) {
@@ -390,6 +403,7 @@ export default function EditProfile(): ReactElement {
           });
         }
       } catch (tagErr) {
+        // Tag sync non-fatal
       }
 
       setSuccess(true);
@@ -397,7 +411,7 @@ export default function EditProfile(): ReactElement {
 
       setTimeout(() => {
         navigate(`/u/${currentUser?.username}`);
-      }, 2000);
+      }, 1500);
     } catch (err: any) {
       setError(err?.message || t('profile.error_updating'));
     } finally {
@@ -407,42 +421,188 @@ export default function EditProfile(): ReactElement {
 
   if (!currentUser) {
     return (
-      <Container className="mt-4">
-        <Alert variant="warning">{t('auth.login_required_edit_profile')}</Alert>
+      <Container className="mt-5 text-center">
+        <div className="apple-glass-card p-4 mx-auto" style={{ maxWidth: 480 }}>
+          <i className="fas fa-lock text-warning fa-2x mb-3"></i>
+          <h5>{t('auth.login_required_edit_profile')}</h5>
+          <button className="apple-btn-primary mt-3" onClick={() => navigate('/login')}>
+            {t('nav.login')}
+          </button>
+        </div>
       </Container>
     );
   }
 
   if (loadingData) {
     return (
-      <Container className="mt-4 text-center">
-        <Spinner animation="border" role="status" />
-        <p className="mt-3">{t('profile.loading')}</p>
+      <Container className="mt-5 text-center">
+        <div className="d-flex flex-column align-items-center justify-content-center py-5">
+          <Spinner animation="border" variant="primary" style={{ width: '3rem', height: '3rem' }} />
+          <p className="mt-3 text-muted fw-semibold">{t('profile.loading')}</p>
+        </div>
       </Container>
     );
   }
 
-  const isCreator = (currentUser as any).roles?.some((role: any) => role.name === 'creator') || (currentUser as any).roles?.includes('creator');
+  const isCreator =
+    (currentUser as any).roles?.some((role: any) => role.name === 'creator') ||
+    (currentUser as any).roles?.includes('creator');
+
   const isAdmin =
     (currentUser as any).roles?.some((r: any) => r.name === 'admin' || r.name === 'super_admin') ||
     (currentUser as any).roles?.includes('admin') ||
     (currentUser as any).roles?.includes('super_admin');
 
-  return (
-    <Container className="mt-4">
-      <Row>
-        <Col md={{ span: 8, offset: 2 }}>
-          <Card>
-            <Card.Header>
-              <h4>{t('profile.edit_profile')}</h4>
-            </Card.Header>
-            <Card.Body>
-              {error && <Alert variant="danger">{error}</Alert>}
-              {success && <Alert variant="success">{t('profile.success_updated')}</Alert>}
+  // Cálculo de luminancia para live preview de card
+  const previewBgColor = formData.card_bg_color || '#ffffff';
+  const previewOpacity = typeof formData.card_bg_opacity === 'number' ? formData.card_bg_opacity : 1;
+  const hex = previewBgColor.replace('#', '');
+  const r = hex.length === 6 ? parseInt(hex.substring(0, 2), 16) : 255;
+  const g = hex.length === 6 ? parseInt(hex.substring(2, 4), 16) : 255;
+  const b = hex.length === 6 ? parseInt(hex.substring(4, 6), 16) : 255;
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  const previewTextColor = lum > 0.6 ? '#111827' : '#ffffff';
 
-              <Form onSubmit={handleSubmit}>
-                <h5 className="mb-3">{t('profile.avatar')}</h5>
-                <Form.Group className="mb-4">
+  return (
+    <div className="edit-profile-wrapper">
+      {/* 1. Cabecera Editorial Apple */}
+      <div className="edit-profile-hero">
+        <Link to={`/u/${currentUser.username}`} className="edit-profile-back-link">
+          <i className="fas fa-arrow-left"></i>
+          <span>{t('profile.view_public')}</span>
+        </Link>
+        <div className="edit-profile-kicker">
+          <i className="fas fa-user-gear"></i>
+          <span>{t('profile.kicker')}</span>
+        </div>
+        <h1 className="edit-profile-title">{t('profile.edit_profile')}</h1>
+        <p className="edit-profile-subtitle">
+          <span>{t('profile.subtitle')}</span>
+          <span className="badge rounded-pill bg-secondary bg-opacity-25 text-body">@{currentUser.username}</span>
+        </p>
+      </div>
+
+      {/* 2. Apple Segmented Control Navigation */}
+      <nav className="edit-profile-segmented" aria-label="Secciones de perfil">
+        <button
+          type="button"
+          className={`edit-profile-tab-btn ${activeTab === 'general' ? 'active' : ''}`}
+          onClick={() => setActiveTab('general')}
+        >
+          <i className="fas fa-user"></i>
+          <span>{t('profile.tab_general')}</span>
+        </button>
+
+        {isCreator && (
+          <button
+            type="button"
+            className={`edit-profile-tab-btn ${activeTab === 'creator' ? 'active' : ''}`}
+            onClick={() => setActiveTab('creator')}
+          >
+            <i className="fas fa-wand-magic-sparkles"></i>
+            <span>{t('profile.tab_creator')}</span>
+          </button>
+        )}
+
+        {isCreator && (
+          <button
+            type="button"
+            className={`edit-profile-tab-btn ${activeTab === 'links' ? 'active' : ''}`}
+            onClick={() => setActiveTab('links')}
+          >
+            <i className="fas fa-link"></i>
+            <span>{t('profile.tab_links')}</span>
+            {links.length > 0 && <span className="badge rounded-pill bg-primary ms-1">{links.length}</span>}
+          </button>
+        )}
+
+        {isCreator && (
+          <button
+            type="button"
+            className={`edit-profile-tab-btn ${activeTab === 'tags' ? 'active' : ''}`}
+            onClick={() => setActiveTab('tags')}
+          >
+            <i className="fas fa-tags"></i>
+            <span>{t('profile.tab_tags')}</span>
+            {selectedTagIds.length > 0 && <span className="badge rounded-pill bg-primary ms-1">{selectedTagIds.length}</span>}
+          </button>
+        )}
+
+        <button
+          type="button"
+          className={`edit-profile-tab-btn ${activeTab === 'security' ? 'active' : ''}`}
+          onClick={() => setActiveTab('security')}
+        >
+          <i className="fas fa-shield-halved"></i>
+          <span>{t('profile.tab_security')}</span>
+        </button>
+      </nav>
+
+      {/* Alertas de Notificación Apple */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="alert alert-danger rounded-4 d-flex align-items-center gap-2 mb-4 shadow-sm"
+        >
+          <i className="fas fa-circle-exclamation fs-5"></i>
+          <span className="fw-medium">{error}</span>
+        </motion.div>
+      )}
+
+      {success && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="alert alert-success rounded-4 d-flex align-items-center gap-2 mb-4 shadow-sm"
+        >
+          <i className="fas fa-circle-check fs-5"></i>
+          <span className="fw-medium">{t('profile.success_updated')}</span>
+        </motion.div>
+      )}
+
+      {/* Formulario Principal con Pestañas */}
+      <form onSubmit={handleSubmit}>
+        <AnimatePresence mode="wait">
+          {/* ================= PESTAÑA: GENERAL ================= */}
+          {activeTab === 'general' && (
+            <motion.div
+              key="tab-general"
+              initial={fadeIn.initial}
+              animate={fadeIn.animate}
+              exit={fadeIn.exit}
+              transition={{ duration: 0.22, ease: appleEase }}
+            >
+              <div className="edit-profile-card">
+                <div className="edit-profile-section-header">
+                  <div className="edit-profile-icon-plate icon-plate-blue">
+                    <i className="fas fa-camera"></i>
+                  </div>
+                  <div>
+                    <h4>{t('profile.avatar')}</h4>
+                    <p>{t('profile.avatar_help')}</p>
+                  </div>
+                </div>
+
+                <div className="edit-profile-avatar-row">
+                  {currentAvatarUrl ? (
+                    <img
+                      src={currentAvatarUrl}
+                      alt={formData.name || currentUser.username}
+                      className="edit-profile-avatar-squircle"
+                    />
+                  ) : (
+                    <div className="edit-profile-avatar-squircle">
+                      <i className="fas fa-user"></i>
+                    </div>
+                  )}
+                  <div className="edit-profile-avatar-info">
+                    <h6>{t('profile.current_avatar')}</h6>
+                    <p>{t('profile.change_avatar')}</p>
+                  </div>
+                </div>
+
+                <div className="edit-profile-filepond mb-4">
                   <FilePond
                     ref={filePondRef}
                     name="file"
@@ -470,6 +630,7 @@ export default function EditProfile(): ReactElement {
                               return String(id);
                             }
                           } catch (e) {
+                            // Ignorar fallback
                           }
                           const plainId = parseInt(String(responseText).trim(), 10);
                           if (Number.isSafeInteger(plainId) && plainId > 0 && plainId <= 2147483647) {
@@ -477,9 +638,9 @@ export default function EditProfile(): ReactElement {
                           }
                           return '';
                         },
-                        onerror: (response: any) => {
+                        onerror: (res: any) => {
                           setUploadingAvatar(false);
-                          return response;
+                          return res;
                         },
                       },
                       revert: {
@@ -490,381 +651,676 @@ export default function EditProfile(): ReactElement {
                     }}
                     credits={false}
                   />
-                  <Form.Text className="text-muted">{t('profile.avatar_help')}</Form.Text>
-                </Form.Group>
+                </div>
 
-                <h5 className="mb-3">{t('profile.basic_info')}</h5>
+                <div className="edit-profile-section-header mt-4">
+                  <div className="edit-profile-icon-plate icon-plate-teal">
+                    <i className="fas fa-id-card"></i>
+                  </div>
+                  <div>
+                    <h4>{t('profile.basic_info')}</h4>
+                    <p>{t('profile.full_name')} &amp; {t('profile.description')}</p>
+                  </div>
+                </div>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>
+                <div className="mb-3">
+                  <label className="apple-label">
                     {t('profile.full_name')} <span className="text-danger">*</span>
-                  </Form.Label>
-                  <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} required />
-                </Form.Group>
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    className="apple-input"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>
+                <div className="mb-3">
+                  <label className="apple-label">
                     {t('profile.description')} <span className="text-danger">*</span>
-                  </Form.Label>
-                  <Form.Control as="textarea" rows={4} name="description" value={formData.description} onChange={handleChange} required />
-                </Form.Group>
+                  </label>
+                  <textarea
+                    name="description"
+                    className="apple-textarea"
+                    rows={4}
+                    value={formData.description}
+                    onChange={handleChange}
+                    required
+                  ></textarea>
+                </div>
 
-                {isCreator && (
-                  <>
-                    <h5 className="mb-3 mt-4">{t('profile.card_customization')}</h5>
-                    <Row className="mb-3">
-                      <Col md={6}>
-                        <Form.Group>
-                          <Form.Label>{t('profile.card_bg_color')}</Form.Label>
-                          <Form.Control type="color" name="card_bg_color" value={formData.card_bg_color || '#ffffff'} onChange={handleChange} />
-                          <Form.Label className="mt-2">{t('profile.opacity')}</Form.Label>
-                          <Form.Range
-                            name="card_bg_opacity"
-                            min={0.1}
-                            max={1}
-                            step={0.01}
-                            value={formData.card_bg_opacity}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, card_bg_opacity: parseFloat(e.target.value) }))}
-                          />
-                          <div className="small text-muted">{t('profile.card_bg_opacity_help')}</div>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6} className="d-flex align-items-end">
-                        <div className="w-100">
+                <Row className="g-3 mb-3">
+                  <Col md={6}>
+                    <label className="apple-label">
+                      {t('profile.gender')} <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      name="gender"
+                      className="apple-select"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">{t('common.select')}</option>
+                      <option value="hombre">{t('explore.gender_male').replace('Gender: ', '')}</option>
+                      <option value="mujer">{t('explore.gender_female').replace('Gender: ', '')}</option>
+                      <option value="trans">{t('explore.gender_trans').replace('Gender: ', '')}</option>
+                      <option value="otro">{t('explore.gender_other').replace('Gender: ', '')}</option>
+                    </select>
+                  </Col>
+
+                  <Col md={6}>
+                    <label className="apple-label">
+                      {t('profile.birth_date')} <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="birth_date"
+                      className="apple-input"
+                      value={formData.birth_date}
+                      onChange={handleChange}
+                      required
+                    />
+                    <div className="apple-form-hint">{t('profile.must_be_adult')}</div>
+                  </Col>
+                </Row>
+
+                <div className="edit-profile-section-header mt-4">
+                  <div className="edit-profile-icon-plate icon-plate-orange">
+                    <i className="fas fa-globe"></i>
+                  </div>
+                  <div>
+                    <h4>{t('profile.location')}</h4>
+                    <p>{t('profile.nationality')}, {t('profile.country')} &amp; {t('profile.city')}</p>
+                  </div>
+                </div>
+
+                <Row className="g-3 mb-3">
+                  <Col md={6}>
+                    <label className="apple-label">
+                      {t('profile.nationality')} <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      name="nationality"
+                      className="apple-select"
+                      value={formData.nationality}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">{t('common.select')}</option>
+                      {Object.entries(countries).map(([code, countryName]) => (
+                        <option key={code} value={code}>
+                          {getCountryFlag(code)} {countryName}
+                        </option>
+                      ))}
+                    </select>
+                  </Col>
+
+                  <Col md={6}>
+                    <label className="apple-label">
+                      {t('profile.country')} <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      name="country"
+                      className="apple-select"
+                      value={formData.country}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">{t('common.select')}</option>
+                      {Object.entries(countries).map(([code, countryName]) => (
+                        <option key={code} value={code}>
+                          {getCountryFlag(code)} {countryName}
+                        </option>
+                      ))}
+                    </select>
+                  </Col>
+
+                  <Col md={12}>
+                    <label className="apple-label">
+                      {t('profile.city')} <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      name="city"
+                      className="apple-select"
+                      value={formData.city}
+                      onChange={handleChange}
+                      required
+                      disabled={!formData.country}
+                    >
+                      <option value="">{t('common.select')}</option>
+                      {cities.map((city) => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                    </select>
+                    {!formData.country && (
+                      <div className="apple-form-hint">{t('profile.select_first_country')}</div>
+                    )}
+                  </Col>
+                </Row>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ================= PESTAÑA: CREADOR ================= */}
+          {activeTab === 'creator' && isCreator && (
+            <motion.div
+              key="tab-creator"
+              initial={fadeIn.initial}
+              animate={fadeIn.animate}
+              exit={fadeIn.exit}
+              transition={{ duration: 0.22, ease: appleEase }}
+            >
+              <div className="edit-profile-card">
+                <div className="edit-profile-section-header">
+                  <div className="edit-profile-icon-plate icon-plate-purple">
+                    <i className="fas fa-wand-magic-sparkles"></i>
+                  </div>
+                  <div>
+                    <h4>{t('profile.creator_info')}</h4>
+                    <p>{t('profile.price_from_help')}</p>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="apple-label">
+                    {t('profile.price_from_label')}
+                  </label>
+                  <div className="position-relative">
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="price_from"
+                      className="apple-input ps-5"
+                      value={formData.price_from}
+                      onChange={handleChange}
+                      placeholder="0.00"
+                    />
+                    <span className="position-absolute top-50 start-0 translate-middle-y ps-3 text-muted fw-bold">
+                      $
+                    </span>
+                  </div>
+                  <div className="apple-form-hint">{t('profile.price_from_help')}</div>
+                </div>
+
+                <div className="apple-switch-wrapper">
+                  <div>
+                    <div className="apple-switch-label">{t('profile.country_block_label')}</div>
+                    <div className="apple-switch-desc">{t('profile.country_block_active')}</div>
+                  </div>
+                  <div className="form-check form-switch m-0">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      role="switch"
+                      id="country_block_switch"
+                      name="country_block"
+                      checked={formData.country_block}
+                      onChange={handleChange}
+                      style={{ width: '2.5rem', height: '1.4rem', cursor: 'pointer' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="edit-profile-section-header mt-4">
+                  <div className="edit-profile-icon-plate icon-plate-rose">
+                    <i className="fas fa-palette"></i>
+                  </div>
+                  <div>
+                    <h4>{t('profile.card_customization')}</h4>
+                    <p>{t('profile.card_bg_opacity_help')}</p>
+                  </div>
+                </div>
+
+                <Row className="g-3 align-items-center">
+                  <Col md={6}>
+                    <div className="mb-3">
+                      <label className="apple-label">{t('profile.card_bg_color')}</label>
+                      <div className="d-flex align-items-center gap-3">
+                        <input
+                          type="color"
+                          name="card_bg_color"
+                          value={formData.card_bg_color || '#ffffff'}
+                          onChange={handleChange}
+                          style={{
+                            width: '54px',
+                            height: '44px',
+                            padding: '2px',
+                            borderRadius: '12px',
+                            border: '1px solid var(--apple-glass-border)',
+                            cursor: 'pointer',
+                            backgroundColor: 'transparent',
+                          }}
+                        />
+                        <input
+                          type="text"
+                          name="card_bg_color"
+                          className="apple-input"
+                          value={formData.card_bg_color}
+                          onChange={handleChange}
+                          placeholder="#ffffff"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="apple-label d-flex justify-content-between">
+                        <span>{t('profile.opacity')}</span>
+                        <span className="badge bg-secondary bg-opacity-25 text-body">
+                          {Math.round((formData.card_bg_opacity ?? 1) * 100)}%
+                        </span>
+                      </label>
+                      <input
+                        type="range"
+                        className="form-range"
+                        name="card_bg_opacity"
+                        min={0.1}
+                        max={1}
+                        step={0.01}
+                        value={formData.card_bg_opacity}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            card_bg_opacity: parseFloat(e.target.value),
+                          }))
+                        }
+                      />
+                    </div>
+                  </Col>
+
+                  <Col md={6}>
+                    <div className="p-2">
+                      <div className="apple-label mb-2">{t('common.preview')}</div>
+                      <div
+                        className="apple-card-live-preview"
+                        style={{
+                          backgroundColor: `rgba(${r}, ${g}, ${b}, ${previewOpacity})`,
+                          color: previewTextColor,
+                        }}
+                      >
+                        <div className="d-flex align-items-center gap-2">
                           <div
-                            className="border rounded p-3 text-center"
                             style={{
-                              backgroundColor: (() => {
-                                const hex = formData.card_bg_color || '#ffffff';
-                                const opacity = typeof formData.card_bg_opacity === 'number' ? formData.card_bg_opacity : 1;
-                                const h = hex.replace('#', '');
-                                if (h.length !== 6) return hex;
-                                const r = parseInt(h.substring(0, 2), 16);
-                                const g = parseInt(h.substring(2, 4), 16);
-                                const b = parseInt(h.substring(4, 6), 16);
-                                return `rgba(${r},${g},${b},${opacity})`;
-                              })(),
+                              width: '38px',
+                              height: '38px',
+                              borderRadius: '10px',
+                              background: lum > 0.6 ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.2)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
                             }}
                           >
-                            <strong
-                              style={{
-                                color: (() => {
-                                  const h = (formData.card_bg_color || '#ffffff').replace('#', '');
-                                  if (h.length !== 6) return '#111';
-                                  const r = parseInt(h.substring(0, 2), 16);
-                                  const g = parseInt(h.substring(2, 4), 16);
-                                  const b = parseInt(h.substring(4, 6), 16);
-                                  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-                                  return lum > 0.6 ? '#111' : '#fff';
-                                })(),
-                              }}
-                            >
-                              {t('common.preview')}
-                            </strong>
+                            <i className="fas fa-user"></i>
+                          </div>
+                          <div>
+                            <div className="fw-bold" style={{ fontSize: '0.9rem' }}>
+                              {formData.name || currentUser.name}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.75 }}>
+                              @{currentUser.username}
+                            </div>
                           </div>
                         </div>
-                      </Col>
-                    </Row>
-                  </>
-                )}
 
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>
-                        {t('profile.gender')} <span className="text-danger">*</span>
-                      </Form.Label>
-                      <Form.Select name="gender" value={formData.gender} onChange={handleChange} required>
-                        <option value="">{t('common.select')}</option>
-                        <option value="hombre">{t('explore.gender_male').replace('Gender: ', '')}</option>
-                        <option value="mujer">{t('explore.gender_female').replace('Gender: ', '')}</option>
-                        <option value="trans">{t('explore.gender_trans').replace('Gender: ', '')}</option>
-                        <option value="otro">{t('explore.gender_other').replace('Gender: ', '')}</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>
-                        {t('profile.birth_date')} <span className="text-danger">*</span>
-                      </Form.Label>
-                      <Form.Control type="date" name="birth_date" value={formData.birth_date} onChange={handleChange} required />
-                      <Form.Text className="text-muted">{t('profile.must_be_adult')}</Form.Text>
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <h5 className="mb-3 mt-4">{t('profile.location')}</h5>
-
-                <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>
-                        {t('profile.nationality')} <span className="text-danger">*</span>
-                      </Form.Label>
-                      <Form.Select name="nationality" value={formData.nationality} onChange={handleChange} required>
-                        <option value="">{t('common.select')}</option>
-                        {Object.entries(countries).map(([code, name]) => (
-                          <option key={code} value={code}>
-                            {getCountryFlag(code)} {name}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>
-                        {t('profile.country')} <span className="text-danger">*</span>
-                      </Form.Label>
-                      <Form.Select name="country" value={formData.country} onChange={handleChange} required>
-                        <option value="">{t('common.select')}</option>
-                        {Object.entries(countries).map(([code, name]) => (
-                          <option key={code} value={code}>
-                            {getCountryFlag(code)} {name}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                  </Col>
-                </Row>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>
-                    {t('profile.city')} <span className="text-danger">*</span>
-                  </Form.Label>
-                  <Form.Select name="city" value={formData.city} onChange={handleChange} required disabled={!formData.country}>
-                    <option value="">{t('common.select')}</option>
-                    {cities.map((city) => (
-                      <option key={city} value={city}>
-                        {city}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  {!formData.country && <Form.Text className="text-muted">{t('profile.select_first_country')}</Form.Text>}
-                </Form.Group>
-
-                {isCreator && (
-                  <>
-                    <Form.Group className="mb-3">
-                      <Form.Check
-                        type="checkbox"
-                        name="country_block"
-                        label={t('profile.country_block_label')}
-                        checked={formData.country_block}
-                        onChange={handleChange}
-                      />
-                    </Form.Group>
-
-                    <h5 className="mb-3 mt-4">{t('profile.creator_info')}</h5>
-
-                    <Form.Group className="mb-3">
-                      <Form.Label>{t('profile.price_from_label')}</Form.Label>
-                      <Form.Control type="number" step="0.01" name="price_from" value={formData.price_from} onChange={handleChange} placeholder="0.00" />
-                      <Form.Text className="text-muted">{t('profile.price_from_help')}</Form.Text>
-                    </Form.Group>
-
-                    <h5 className="mb-3 mt-4">{t('profile.custom_links')}</h5>
-                    {links.map((link, index) => (
-                      <Card key={index} className="mb-3">
-                        <Card.Body>
-                          <Row>
-                            <Col md={4}>
-                              <Form.Group className="mb-2">
-                                <Form.Label>{t('common.name')}</Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  value={link.name}
-                                  onChange={(e) => handleLinkChange(index, 'name', e.target.value)}
-                                  placeholder={t('profile.link_name_placeholder')}
-                                />
-                              </Form.Group>
-                            </Col>
-                            <Col md={5}>
-                              <Form.Group className="mb-2">
-                                <Form.Label>{t('common.url')}</Form.Label>
-                                <Form.Control
-                                  type="url"
-                                  value={link.url}
-                                  onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
-                                  placeholder={t('profile.link_url_placeholder')}
-                                />
-                              </Form.Group>
-                            </Col>
-                            <Col md={2}>
-                              <Form.Group className="mb-2">
-                                <Form.Label>{t('common.icon')}</Form.Label>
-                                <Form.Select value={link.icon} onChange={(e) => handleLinkChange(index, 'icon', e.target.value)}>
-                                  <option value="fas-link">Link</option>
-                                  <option value="fas-globe">Web</option>
-                                  <option value="fab-facebook">Facebook</option>
-                                  <option value="fab-instagram">Instagram</option>
-                                  <option value="fab-twitter">Twitter</option>
-                                  <option value="fab-youtube">YouTube</option>
-                                  <option value="fab-tiktok">TikTok</option>
-                                </Form.Select>
-                              </Form.Group>
-                            </Col>
-                            <Col md={1} className="d-flex align-items-end">
-                              <Button variant="danger" size="sm" onClick={() => removeLink(index)} className="mb-2">
-                                <i className="fas fa-trash"></i>
-                              </Button>
-                            </Col>
-                          </Row>
-                          <Form.Check
-                            type="checkbox"
-                            label={t('profile.link_is_adult')}
-                            checked={!!link.is_adult}
-                            onChange={(e) => handleLinkChange(index, 'is_adult', e.target.checked)}
-                          />
-                        </Card.Body>
-                      </Card>
-                    ))}
-                      <Button variant="outline-dark" onClick={addLink} className="mb-3">
-                        <i className="fas fa-plus me-2"></i>
-                        {t('profile.add_link')}
-                      </Button>
-                  </>
-                )}
-
-                {isCreator && (
-                <>
-                <h5 className="mb-3 mt-4">{t('profile.tags')}</h5>
-                <Form.Group className="mb-3">
-                  {allTags.length === 0 && <div className="text-muted">{t('common.loading')}</div>}
-                  {allTags.length > 0 && (
-                    <>
-                      <div className="mb-2">
-                        <Form.Control
-                          type="text"
-                          placeholder={t('profile.tag_search_placeholder')}
-                          value={tagSearch}
-                          onChange={(e) => setTagSearch(e.target.value)}
-                          size="sm"
-                        />
-                        <div className="small text-muted mt-1">
-                          {t('profile.tags_visible_count', { visible: filteredTags.length, total: allTags.length })}
+                        <div className="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
+                          <span className="badge rounded-pill bg-primary bg-opacity-75" style={{ fontSize: '0.7rem' }}>
+                            VIP
+                          </span>
+                          <span className="fw-bold" style={{ fontSize: '0.85rem' }}>
+                            ${formData.price_from || '0.00'}
+                          </span>
                         </div>
                       </div>
-                      <div className="d-flex flex-wrap gap-2" style={{ maxHeight: '240px', overflowY: 'auto' }}>
-                        {filteredTags.map((tag) => {
-                          const isSelected = selectedTagIds.includes(tag.id);
-                          const disabled = tag.is_fixed && !isAdmin;
-                          const iconClass = tag.icon ? tag.icon.replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-') : null;
-                          return (
-                            <Button
-                              key={String(tag.id)}
-                              type="button"
-                              variant={isSelected ? (tag.color || 'primary') : `outline-${tag.color || 'secondary'}`}
-                              size="sm"
-                              className="d-flex align-items-center"
-                              disabled={disabled}
-                              onClick={() => {
-                                setSelectedTagIds((prev) => {
-                                  if (prev.includes(tag.id)) {
-                                    return prev.filter((id) => id !== tag.id);
-                                  }
-                                  return [...prev, tag.id];
-                                });
-                              }}
-                            >
-                              {iconClass && <i className={`${iconClass} me-1`}></i>}
-                              {i18n.language === 'en' && tag.name_en ? tag.name_en : tag.name}
-                              {tag.is_fixed && t('profile.fixed_tag_suffix')}
-                            </Button>
-                          );
-                        })}
-                        {filteredTags.length === 0 && <div className="text-muted small">{t('profile.tags_no_results', { term: tagSearch })}</div>}
-                      </div>
-                    </>
-                  )}
-                  <Form.Text className="text-muted d-block mt-2">
-                    {isAdmin ? t('profile.tags_help_admin') : t('profile.tags_help_non_admin')}
-                  </Form.Text>
-                </Form.Group>
-                </>
-              )}
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            </motion.div>
+          )}
 
-                <div className="d-flex gap-2 mt-4">
-                  <Button type="submit" variant="primary" disabled={loading || uploadingAvatar}>
-                    {uploadingAvatar ? (
-                      <>
-                        <Spinner animation="border" size="sm" className="me-2" />
-                        {t('common.uploading_avatar')}
-                      </>
-                    ) : loading ? (
-                      <>
-                        <Spinner animation="border" size="sm" className="me-2" />
-                        {t('common.saving')}
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-save me-2"></i>
-                        {t('profile.save_changes')}
-                      </>
-                    )}
-                  </Button>
-                  <Button variant="secondary" onClick={() => navigate(`/u/${currentUser.username}`)} disabled={loading || uploadingAvatar}>
-                    {t('common.cancel')}
-                  </Button>
+          {/* ================= PESTAÑA: ENLACES ================= */}
+          {activeTab === 'links' && isCreator && (
+            <motion.div
+              key="tab-links"
+              initial={fadeIn.initial}
+              animate={fadeIn.animate}
+              exit={fadeIn.exit}
+              transition={{ duration: 0.22, ease: appleEase }}
+            >
+              <div className="edit-profile-card">
+                <div className="edit-profile-section-header">
+                  <div className="edit-profile-icon-plate icon-plate-indigo">
+                    <i className="fas fa-link"></i>
+                  </div>
+                  <div className="flex-grow-1">
+                    <h4>{t('profile.custom_links')}</h4>
+                    <p>{t('profile.link_name_placeholder')}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="apple-btn-glass"
+                    onClick={addLink}
+                    style={{ minHeight: '40px', padding: '0.4rem 0.9rem' }}
+                  >
+                    <i className="fas fa-plus"></i>
+                    <span>{t('profile.add_link')}</span>
+                  </button>
                 </div>
-              </Form>
 
-              <hr className="my-4" />
+                {links.length === 0 ? (
+                  <div className="text-center py-5 text-muted">
+                    <i className="fas fa-link-slash fa-2x mb-2 opacity-50"></i>
+                    <p className="mb-3">{t('profile.custom_links')}</p>
+                    <button type="button" className="apple-btn-primary" onClick={addLink}>
+                      <i className="fas fa-plus me-1"></i>
+                      {t('profile.add_link')}
+                    </button>
+                  </div>
+                ) : (
+                  links.map((link, index) => (
+                    <div key={index} className="apple-link-card">
+                      <Row className="g-2 align-items-center">
+                        <Col md={4}>
+                          <label className="apple-label">{t('common.name')}</label>
+                          <input
+                            type="text"
+                            className="apple-input"
+                            value={link.name}
+                            onChange={(e) => handleLinkChange(index, 'name', e.target.value)}
+                            placeholder={t('profile.link_name_placeholder')}
+                          />
+                        </Col>
 
-              <Alert variant="danger" className="mb-3">
-                <Alert.Heading className="h6">
-                  <i className="fas fa-triangle-exclamation me-2"></i>
-                  {t('profile.danger_zone')}
-                </Alert.Heading>
-                <p className="mb-2 small">{t('profile.delete_warning')}</p>
-                <Button
-                  variant="danger"
-                  onClick={() => {
-                    setShowDeleteModal(true);
-                    setDeleteEmail('');
-                    setDeleteError(null);
+                        <Col md={5}>
+                          <label className="apple-label">{t('common.url')}</label>
+                          <input
+                            type="url"
+                            className="apple-input"
+                            value={link.url}
+                            onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
+                            placeholder={t('profile.link_url_placeholder')}
+                          />
+                        </Col>
+
+                        <Col md={2}>
+                          <label className="apple-label">{t('common.icon')}</label>
+                          <select
+                            className="apple-select"
+                            value={link.icon}
+                            onChange={(e) => handleLinkChange(index, 'icon', e.target.value)}
+                          >
+                            <option value="fas-link">Link</option>
+                            <option value="fas-globe">Web</option>
+                            <option value="fab-facebook">Facebook</option>
+                            <option value="fab-instagram">Instagram</option>
+                            <option value="fab-twitter">Twitter / X</option>
+                            <option value="fab-youtube">YouTube</option>
+                            <option value="fab-tiktok">TikTok</option>
+                          </select>
+                        </Col>
+
+                        <Col md={1} className="d-flex justify-content-end align-items-end pt-3 pt-md-0">
+                          <button
+                            type="button"
+                            className="apple-btn-danger-icon"
+                            onClick={() => removeLink(index)}
+                            title={t('common.delete')}
+                            aria-label={t('common.delete')}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </Col>
+
+                        <Col md={12} className="mt-2">
+                          <div className="form-check d-flex align-items-center gap-2">
+                            <input
+                              className="form-check-input m-0"
+                              type="checkbox"
+                              id={`adult_link_${index}`}
+                              checked={!!link.is_adult}
+                              onChange={(e) => handleLinkChange(index, 'is_adult', e.target.checked)}
+                              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            />
+                            <label
+                              className="form-check-label small text-muted"
+                              htmlFor={`adult_link_${index}`}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              <i className="fas fa-triangle-exclamation text-warning me-1"></i>
+                              {t('profile.link_is_adult')}
+                            </label>
+                          </div>
+                        </Col>
+                      </Row>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* ================= PESTAÑA: ETIQUETAS ================= */}
+          {activeTab === 'tags' && isCreator && (
+            <motion.div
+              key="tab-tags"
+              initial={fadeIn.initial}
+              animate={fadeIn.animate}
+              exit={fadeIn.exit}
+              transition={{ duration: 0.22, ease: appleEase }}
+            >
+              <div className="edit-profile-card">
+                <div className="edit-profile-section-header">
+                  <div className="edit-profile-icon-plate icon-plate-emerald">
+                    <i className="fas fa-tags"></i>
+                  </div>
+                  <div>
+                    <h4>{t('profile.tags')}</h4>
+                    <p>{isAdmin ? t('profile.tags_help_admin') : t('profile.tags_help_non_admin')}</p>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <div className="position-relative">
+                    <input
+                      type="text"
+                      className="apple-input ps-5"
+                      placeholder={t('profile.tag_search_placeholder')}
+                      value={tagSearch}
+                      onChange={(e) => setTagSearch(e.target.value)}
+                    />
+                    <i className="fas fa-search position-absolute top-50 start-0 translate-middle-y ps-3 text-muted"></i>
+                  </div>
+                  <div className="apple-form-hint">
+                    {t('profile.tags_visible_count', {
+                      visible: filteredTags.length,
+                      total: allTags.length,
+                    })}
+                  </div>
+                </div>
+
+                <div
+                  className="d-flex flex-wrap gap-2 p-2 border rounded-4"
+                  style={{
+                    maxHeight: '320px',
+                    overflowY: 'auto',
+                    backgroundColor: 'rgba(120, 120, 128, 0.04)',
+                    borderColor: 'var(--apple-glass-border)',
                   }}
                 >
-                  <i className="fas fa-user-slash me-2"></i>
-                  {t('profile.delete_button')}
-                </Button>
-              </Alert>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+                  {filteredTags.map((tg) => {
+                    const isSelected = selectedTagIds.includes(tg.id);
+                    const disabled = tg.is_fixed && !isAdmin;
+                    const iconClass = tg.icon ? tg.icon.replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-') : null;
+                    return (
+                      <button
+                        key={String(tg.id)}
+                        type="button"
+                        disabled={disabled}
+                        className={`apple-tag-pill ${isSelected ? 'active' : ''}`}
+                        onClick={() => {
+                          setSelectedTagIds((prev) => {
+                            if (prev.includes(tg.id)) {
+                              return prev.filter((id) => id !== tg.id);
+                            }
+                            return [...prev, tg.id];
+                          });
+                        }}
+                      >
+                        {iconClass && <i className={iconClass}></i>}
+                        <span>{i18n.language === 'en' && tg.name_en ? tg.name_en : tg.name}</span>
+                        {tg.is_fixed && (
+                          <span className="apple-tag-fixed-badge">
+                            {t('profile.fixed_tag_suffix').replace(/[()]/g, '').trim()}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                  {filteredTags.length === 0 && (
+                    <div className="text-muted p-4 text-center w-100">
+                      {t('profile.tags_no_results', { term: tagSearch })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
 
-      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title className="text-danger">{t('profile.delete_confirm_title')}</Modal.Title>
+          {/* ================= PESTAÑA: SEGURIDAD ================= */}
+          {activeTab === 'security' && (
+            <motion.div
+              key="tab-security"
+              initial={fadeIn.initial}
+              animate={fadeIn.animate}
+              exit={fadeIn.exit}
+              transition={{ duration: 0.22, ease: appleEase }}
+            >
+              <div className="edit-profile-card apple-danger-zone-card">
+                <div className="edit-profile-section-header border-danger border-opacity-25">
+                  <div className="edit-profile-icon-plate icon-plate-rose">
+                    <i className="fas fa-triangle-exclamation"></i>
+                  </div>
+                  <div>
+                    <h4 className="text-danger">{t('profile.danger_zone')}</h4>
+                    <p>{t('profile.delete_warning')}</p>
+                  </div>
+                </div>
+
+                <div className="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                  <div>
+                    <h6 className="fw-bold mb-1">{t('profile.delete_confirm_title')}</h6>
+                    <p className="small text-muted mb-0">{t('profile.delete_permanent_warning')}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="apple-btn-danger-solid"
+                    onClick={() => {
+                      setShowDeleteModal(true);
+                      setDeleteEmail('');
+                      setDeleteError(null);
+                    }}
+                  >
+                    <i className="fas fa-user-slash"></i>
+                    <span>{t('profile.delete_button')}</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Barra de Acciones Fija / Inferior */}
+        <div className="edit-profile-actions-bar">
+          <button
+            type="button"
+            className="apple-btn-glass"
+            onClick={() => navigate(`/u/${currentUser.username}`)}
+            disabled={loading || uploadingAvatar}
+          >
+            {t('common.cancel')}
+          </button>
+
+          <button
+            type="submit"
+            className="apple-btn-primary"
+            disabled={loading || uploadingAvatar}
+          >
+            {uploadingAvatar ? (
+              <>
+                <Spinner animation="border" size="sm" />
+                <span>{t('common.uploading_avatar')}</span>
+              </>
+            ) : loading ? (
+              <>
+                <Spinner animation="border" size="sm" />
+                <span>{t('common.saving')}</span>
+              </>
+            ) : (
+              <>
+                <i className="fas fa-check"></i>
+                <span>{t('profile.save_changes')}</span>
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+
+      {/* Modal de Confirmación de Borrado Apple HIG */}
+      <Modal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        centered
+        contentClassName="apple-glass-modal rounded-4 border-0 shadow-lg"
+      >
+        <Modal.Header closeButton className="border-bottom-0 pb-0">
+          <Modal.Title className="text-danger fw-bold d-flex align-items-center gap-2">
+            <i className="fas fa-triangle-exclamation"></i>
+            <span>{t('profile.delete_confirm_title')}</span>
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <Alert variant="danger" className="small">{t('profile.delete_permanent_warning')}</Alert>
-          <p className="small">{t('profile.delete_type_email')} <strong>{currentUser.email}</strong></p>
-          {deleteError && <Alert variant="danger" className="small">{deleteError}</Alert>}
-          <Form.Control
+        <Modal.Body className="py-3">
+          <div className="alert alert-danger rounded-3 py-2 px-3 small mb-3">
+            {t('profile.delete_permanent_warning')}
+          </div>
+          <p className="small mb-2">
+            {t('profile.delete_type_email')} <strong className="text-body">{currentUser.email}</strong>
+          </p>
+          {deleteError && (
+            <div className="alert alert-danger rounded-3 py-2 px-3 small mb-3">
+              {deleteError}
+            </div>
+          )}
+          <input
             type="email"
+            className="apple-input"
             value={deleteEmail}
             onChange={(e) => setDeleteEmail(e.target.value)}
             placeholder={t('profile.delete_email_placeholder')}
           />
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)} disabled={deleting}>
+        <Modal.Footer className="border-top-0 pt-0">
+          <button
+            type="button"
+            className="apple-btn-glass"
+            onClick={() => setShowDeleteModal(false)}
+            disabled={deleting}
+          >
             {t('common.cancel')}
-          </Button>
-          <Button
-            variant="danger"
+          </button>
+          <button
+            type="button"
+            className="apple-btn-danger-solid"
             disabled={deleting || deleteEmail.trim().toLowerCase() !== (currentUser.email || '').toLowerCase()}
             onClick={handleDeleteProfile}
           >
             {deleting ? <Spinner animation="border" size="sm" /> : t('profile.delete_confirm_button')}
-          </Button>
+          </button>
         </Modal.Footer>
       </Modal>
-    </Container>
+    </div>
   );
 }

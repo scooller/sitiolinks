@@ -5,10 +5,7 @@ import './App.css';
 import { AuthProvider } from './contexts/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import Navigation from './components/Navigation.tsx';
-import ThemeSwitcher from './components/ThemeSwitcher.tsx';
-import ProtectedRoute from './components/ProtectedRoute.tsx';
-import CreatorRoute from './components/CreatorRoute.tsx';
-import VerifiedRoute from './components/VerifiedRoute.tsx';
+import RouteGuard from './components/RouteGuard.tsx';
 // Lazy load ALL pages including Home for optimal initial bundle
 const Home = React.lazy(() => import('./pages/Home.tsx'));
 const Explore = React.lazy(() => import('./pages/Explore.tsx'));
@@ -16,6 +13,7 @@ const Cafes = React.lazy(() => import('./pages/Cafes.tsx'));
 const CafeDetail = React.lazy(() => import('./pages/CafeDetail.tsx'));
 const Ranking = React.lazy(() => import('./pages/Ranking.tsx'));
 const Contact = React.lazy(() => import('./pages/Contact.tsx'));
+const Faq = React.lazy(() => import('./pages/Faq.tsx'));
 const Page = React.lazy(() => import('./pages/Page.tsx'));
 const TagPage = React.lazy(() => import('./pages/Tag.tsx'));
 const UserProfile = React.lazy(() => import('./pages/UserProfile.tsx'));
@@ -42,7 +40,6 @@ import { queries } from './lib/graphql/queries';
 import InstallPWA from './components/InstallPWA.tsx';
 import OfflineIndicator from './components/OfflineIndicator.tsx';
 import LoadingFallback from './components/LoadingFallback.tsx';
-import PreloadCriticalAssets from './components/PreloadCriticalAssets.tsx';
 import WarningModal from './components/WarningModal.tsx';
 
 // Encapsula las rutas con animaciones de montaje/desmontaje.
@@ -88,7 +85,7 @@ const AnimatedRoutes: React.FC<{ transitionType?: string }> = ({ transitionType 
         <Route path="/ranking" element={<AnimatedPage id="ranking" transitionType={transitionType}><Ranking /></AnimatedPage>} />
         <Route path="/login" element={<AnimatedPage id="login" transitionType={transitionType}><Login /></AnimatedPage>} />
         <Route path="/register" element={<AnimatedPage id="register" transitionType={transitionType}><Register /></AnimatedPage>} />
-        <Route path="/verify-email" element={<ProtectedRoute><AnimatedPage id="verify-email" transitionType={transitionType}><VerifyEmail /></AnimatedPage></ProtectedRoute>} />
+        <Route path="/verify-email" element={<RouteGuard><AnimatedPage id="verify-email" transitionType={transitionType}><VerifyEmail /></AnimatedPage></RouteGuard>} />
         <Route path="/email-verified" element={<AnimatedPage id="email-verified" transitionType={transitionType}><EmailVerified /></AnimatedPage>} />
         <Route path="/terminos-y-condiciones" element={<AnimatedPage id="terminos" transitionType={transitionType}><Page /></AnimatedPage>} />
         <Route path="/politica-de-privacidad" element={<AnimatedPage id="privacidad" transitionType={transitionType}><Page /></AnimatedPage>} />
@@ -96,20 +93,20 @@ const AnimatedRoutes: React.FC<{ transitionType?: string }> = ({ transitionType 
         <Route path="/terms-and-conditions" element={<AnimatedPage id="terminos" transitionType={transitionType}><Page /></AnimatedPage>} />
         <Route path="/privacy-policy" element={<AnimatedPage id="privacidad" transitionType={transitionType}><Page /></AnimatedPage>} />
         <Route path="/contact" element={<AnimatedPage id="contacto" transitionType={transitionType}><Contact /></AnimatedPage>} />
-        <Route path="/preguntas-frecuentes" element={<AnimatedPage id="preguntas-frecuentes" transitionType={transitionType}><Page /></AnimatedPage>} />
-        <Route path="/faqs" element={<AnimatedPage id="faqs" transitionType={transitionType}><Page /></AnimatedPage>} />
+        <Route path="/preguntas-frecuentes" element={<AnimatedPage id="preguntas-frecuentes" transitionType={transitionType}><Faq /></AnimatedPage>} />
+        <Route path="/faqs" element={<AnimatedPage id="faqs" transitionType={transitionType}><Faq /></AnimatedPage>} />
         <Route path="/t/:tag" element={<AnimatedPage id="tag" transitionType={transitionType}><TagPage /></AnimatedPage>} />
         <Route path="/u/:username" element={<AnimatedPage id="perfil" transitionType={transitionType}><UserProfile /></AnimatedPage>} />
         <Route path="/u/:username/galleries" element={<AnimatedPage id="perfil-galerias" transitionType={transitionType}><UserGalleries /></AnimatedPage>} />
         <Route path="/galleries/:id" element={<AnimatedPage id="gallery" transitionType={transitionType}><GalleryDetail /></AnimatedPage>} />
-        <Route path="/perfil/editar" element={<ProtectedRoute><AnimatedPage id="editar-perfil" transitionType={transitionType}><EditProfile /></AnimatedPage></ProtectedRoute>} />
-        <Route path="/notificaciones" element={<ProtectedRoute><AnimatedPage id="notificaciones" transitionType={transitionType}><Notifications /></AnimatedPage></ProtectedRoute>} />
-        <Route path="/mis-galerias" element={<CreatorRoute><AnimatedPage id="mis-galerias" transitionType={transitionType}><MyGalleries /></AnimatedPage></CreatorRoute>} />
-        <Route path="/mis-galerias/nueva" element={<CreatorRoute><AnimatedPage id="nueva-galeria" transitionType={transitionType}><NewGallery /></AnimatedPage></CreatorRoute>} />
-        <Route path="/mis-galerias/:id/editar" element={<CreatorRoute><AnimatedPage id="editar-galeria" transitionType={transitionType}><EditGallery /></AnimatedPage></CreatorRoute>} />
-        <Route path="/tickets" element={<VerifiedRoute><AnimatedPage id="tickets" transitionType={transitionType}><Tickets /></AnimatedPage></VerifiedRoute>} />
-        <Route path="/tickets/nuevo" element={<VerifiedRoute><AnimatedPage id="nuevo-ticket" transitionType={transitionType}><NewTicket /></AnimatedPage></VerifiedRoute>} />
-        <Route path="/tickets/:id" element={<VerifiedRoute><AnimatedPage id="detalle-ticket" transitionType={transitionType}><TicketDetail /></AnimatedPage></VerifiedRoute>} />
+        <Route path="/perfil/editar" element={<RouteGuard><AnimatedPage id="editar-perfil" transitionType={transitionType}><EditProfile /></AnimatedPage></RouteGuard>} />
+        <Route path="/notificaciones" element={<RouteGuard><AnimatedPage id="notificaciones" transitionType={transitionType}><Notifications /></AnimatedPage></RouteGuard>} />
+        <Route path="/mis-galerias" element={<RouteGuard requiresCreator><AnimatedPage id="mis-galerias" transitionType={transitionType}><MyGalleries /></AnimatedPage></RouteGuard>} />
+        <Route path="/mis-galerias/nueva" element={<RouteGuard requiresCreator><AnimatedPage id="nueva-galeria" transitionType={transitionType}><NewGallery /></AnimatedPage></RouteGuard>} />
+        <Route path="/mis-galerias/:id/editar" element={<RouteGuard requiresCreator><AnimatedPage id="editar-galeria" transitionType={transitionType}><EditGallery /></AnimatedPage></RouteGuard>} />
+        <Route path="/tickets" element={<RouteGuard requiresVerified><AnimatedPage id="tickets" transitionType={transitionType}><Tickets /></AnimatedPage></RouteGuard>} />
+        <Route path="/tickets/nuevo" element={<RouteGuard requiresVerified><AnimatedPage id="nuevo-ticket" transitionType={transitionType}><NewTicket /></AnimatedPage></RouteGuard>} />
+        <Route path="/tickets/:id" element={<RouteGuard requiresVerified><AnimatedPage id="detalle-ticket" transitionType={transitionType}><TicketDetail /></AnimatedPage></RouteGuard>} />
         <Route path="/go/:id" element={<AnimatedPage id="go" transitionType={transitionType}><Go /></AnimatedPage>} />
         <Route path="*" element={<AnimatedPage id="not-found" transitionType={transitionType}><NotFound /></AnimatedPage>} />
       </Routes>
@@ -234,8 +231,7 @@ function App() {
               // Para fuentes variables: wght@100..900
               return `family=${encode(fontName)}:wght@100..900`;
             } else {
-              // Para fuentes estáticas: múltiples pesos
-              return `family=${encode(fontName)}:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900`;
+              return `family=${encode(fontName)}:wght@400;500;600;700`;
             }
           };
 
@@ -261,7 +257,7 @@ function App() {
             console.log('🔤 <link> de Google Fonts actualizado');
           }
 
-          // PASO 2: Esperar a que las fuentes carguen, LUEGO aplicar CSS
+          // Aplicar la familia inmediatamente; display=swap evita bloquear el primer render.
           const applyFontStyles = () => {
             let style = document.getElementById('site-fonts-style') as HTMLStyleElement | null;
             if (!style) {
@@ -288,36 +284,7 @@ function App() {
             console.log('✅ CSS de fuentes aplicado:', style.textContent);
           };
 
-          // PASO 3: Usar Font Face Observer para aplicar estilos cuando estén listas
-          if (document.fonts && document.fonts.ready) {
-            // Opción A: Esperar a que TODAS las fuentes carguen
-            document.fonts.ready.then(() => {
-              console.log('✅ Todas las fuentes cargadas vía fonts.ready');
-              applyFontStyles();
-
-              // Forzar repaint
-              document.body.style.opacity = '0.99999';
-              requestAnimationFrame(() => {
-                document.body.style.opacity = '1';
-              });
-            }).catch(err => {
-              console.warn('⚠️ Error en fonts.ready, aplicando estilos de todos modos:', err);
-              applyFontStyles();
-            });
-
-            // Opción B: Timeout de seguridad (máximo 3 segundos)
-            setTimeout(() => {
-              if (!document.getElementById('site-fonts-style')?.textContent) {
-                console.warn('⏱️ Timeout: aplicando estilos después de 3s');
-                applyFontStyles();
-              }
-            }, 3000);
-
-          } else {
-            // Fallback para navegadores antiguos: aplicar inmediatamente
-            console.warn('⚠️ document.fonts.ready no disponible, aplicando estilos inmediatamente');
-            applyFontStyles();
-          }
+          applyFontStyles();
 
           // PASO 4: Verificación después de 1 segundo
           setTimeout(() => {
@@ -476,11 +443,9 @@ function App() {
       <AuthProvider>
         <Router>
           <div className="App">
-            <PreloadCriticalAssets />
             <OfflineIndicator />
             <WarningModal />
             <Navigation />
-            <ThemeSwitcher />
             <InstallPWA />
             <React.Suspense fallback={<LoadingFallback />}>
               <AnimatedRoutes transitionType={transitionType} />

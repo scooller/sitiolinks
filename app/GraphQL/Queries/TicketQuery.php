@@ -30,6 +30,24 @@ class TicketQuery extends Query
 
     public function resolve($root, $args)
     {
-        return Ticket::with(['user', 'assignedTo', 'comments.user'])->find($args['id']);
+        $viewer = auth('web')->user() ?? auth('sanctum')->user();
+        if (! $viewer) {
+            return null;
+        }
+
+        $ticket = Ticket::with(['user', 'assignedTo', 'comments.user'])->find($args['id']);
+        if (! $ticket) {
+            return null;
+        }
+
+        $isAdmin = $viewer->hasAnyRole(['super_admin', 'admin', 'moderator']);
+        $isOwner = (int) $ticket->user_id === (int) $viewer->id;
+        $isAssigned = $ticket->assigned_to && (int) $ticket->assigned_to === (int) $viewer->id;
+
+        if (! ($isAdmin || $isOwner || $isAssigned)) {
+            return null;
+        }
+
+        return $ticket;
     }
 }

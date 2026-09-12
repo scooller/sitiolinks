@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Placeholder } from 'react-bootstrap';
 
 type OptimizedImageProps = {
   // URLs WebP en diferentes tamaños (responsive)
@@ -170,16 +169,17 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     />
   );
 
-  // Si skeleton está habilitado, envolver con placeholder
+  // Si skeleton está habilitado, envolver con shimmer Apple HIG
   if (showSkeleton && size) {
+    const isCircle = !className || className.includes('rounded-circle') || (!className.includes('rounded-') && size <= 96);
+    const radiusStyle = isCircle ? 'var(--rounded-circle)' : 'var(--rounded-2xl)';
+
     return (
       <div className="position-relative mx-auto" style={{ width: size, height: size }}>
         {!loaded && (
-          <Placeholder 
-            as="div" 
-            animation="wave" 
-            className="position-absolute top-0 start-0 rounded-circle w-100 h-100" 
-            style={{ backgroundColor: '#e9ecef' }}
+          <div 
+            className="apple-skeleton position-absolute top-0 start-0 w-100 h-100" 
+            style={{ borderRadius: radiusStyle }}
           />
         )}
         {imageElement}

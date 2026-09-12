@@ -1,0 +1,304 @@
+/* ==========================================================================
+   Apple HIG Age & Warning Modal - Link Persons (HIG 2026 Edition)
+   ========================================================================== */
+
+/* Bloqueo del Scroll cuando el modal está activo */
+body.warning-modal-open {
+  overflow: hidden !important;
+  touch-action: none !important;
+}
+
+/* Telón de Fondo Líquido / Frosted Glass Barrier */
+.warning-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100000;
+  backdrop-filter: blur(36px) saturate(180%);
+  -webkit-backdrop-filter: blur(36px) saturate(180%);
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+[data-bs-theme="dark"] .warning-modal-backdrop {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+/* Tarjeta Principal del Modal Apple Liquid Glass */
+.warning-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 490px;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-saturate));
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 28px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  padding: var(--space-8);
+  text-align: center;
+  transition: transform var(--duration-normal) var(--ease-apple), box-shadow var(--duration-normal) var(--ease-apple);
+}
+
+[data-bs-theme="dark"] .warning-modal-card {
+  background: rgba(24, 24, 27, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 575.98px) {
+  .warning-modal-card {
+    padding: var(--space-6) var(--space-5);
+    border-radius: 24px;
+  }
+}
+
+/* Botón de Cierre Superior (Opcional) */
+.warning-modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--rounded-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  color: var(--apple-glass-text-muted);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease, transform var(--duration-fast) ease;
+}
+
+[data-bs-theme="dark"] .warning-modal-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #d1d5db;
+}
+
+.warning-modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: var(--apple-glass-text);
+  transform: scale(1.06);
+}
+
+[data-bs-theme="dark"] .warning-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+/* Escudo / Badge de Edad +18 */
+.warning-modal-badge {
+  width: 76px;
+  height: 76px;
+  border-radius: var(--rounded-full);
+  margin: 0 auto var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(245, 158, 11, 0.22) 100%);
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.22);
+}
+
+.warning-modal-badge-number {
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  background: linear-gradient(135deg, #ef4444 0%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.warning-modal-badge-icon {
+  font-size: 1.85rem;
+  color: #ef4444;
+}
+
+/* Tipografía Editorial */
+.warning-modal-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: #dc2626;
+  margin-bottom: var(--space-2);
+}
+
+[data-bs-theme="dark"] .warning-modal-kicker {
+  color: #f87171;
+}
+
+.warning-modal-title {
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-tight);
+  color: #111827;
+  margin-bottom: var(--space-3);
+}
+
+[data-bs-theme="dark"] .warning-modal-title {
+  color: #f9fafb;
+}
+
+.warning-modal-content {
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  color: #374151;
+  margin-bottom: var(--space-5);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+[data-bs-theme="dark"] .warning-modal-content {
+  color: #d1d5db;
+}
+
+/* Disclaimer / Leyenda Legal */
+.warning-modal-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: left;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: var(--rounded-lg);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-6);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+  color: var(--apple-glass-text-muted);
+}
+
+[data-bs-theme="dark"] .warning-modal-disclaimer {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+}
+
+.warning-modal-disclaimer-icon {
+  font-size: 1.1rem;
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+/* Botones de Acción (100% Sólidos) */
+.warning-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.warning-modal-accept-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 50px;
+  padding: 0 var(--space-6);
+  border-radius: var(--rounded-full);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff !important;
+  border: none;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease, background-color var(--duration-fast) ease;
+}
+
+.warning-modal-accept-btn:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.45);
+  transform: translateY(-2px);
+  color: #ffffff !important;
+}
+
+.warning-modal-accept-btn:active {
+  transform: translateY(0);
+}
+
+.warning-modal-cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-6);
+  border-radius: var(--rounded-full);
+  background: rgba(0, 0, 0, 0.07);
+  color: #374151 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  box-shadow: var(--shadow-2xs);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease, background-color var(--duration-fast) ease;
+}
+
+[data-bs-theme="dark"] .warning-modal-cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #e5e7eb !important;
+}
+
+.warning-modal-cancel-btn:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: #111827 !important;
+  transform: translateY(-2px);
+}
+
+[data-bs-theme="dark"] .warning-modal-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff !important;
+}
+
+.warning-modal-cancel-btn:active {
+  transform: translateY(0);
+}
+
+/* Indicador de Carga Inicial del Modal (si aún no se han recibido los settings) */
+.warning-modal-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  color: #ffffff;
+}
+
+.warning-modal-loading-spinner {
+  width: 42px;
+  height: 42px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #ffffff;
+  border-radius: var(--rounded-full);
+  animation: warning-modal-spin 0.8s linear infinite;
+}
+
+@keyframes warning-modal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

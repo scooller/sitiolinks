@@ -5,28 +5,38 @@ type SimpleVariants = {
   exit?: Record<string, any>;
 };
 
-// Reusable animation variants
+// Curvas de animación Apple Human Interface Guidelines
+export const appleEase = [0.16, 1, 0.3, 1] as const;
+
+export const appleSpring = {
+  type: 'spring',
+  stiffness: 380,
+  damping: 30,
+  mass: 0.8
+} as const;
+
+// Reusable animation variants con curvas Apple
 export const fadeIn: SimpleVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 }
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -6 }
 };
 
 export const slideLeft: SimpleVariants = {
-  initial: { x: 40, opacity: 0 },
+  initial: { x: 24, opacity: 0 },
   animate: { x: 0, opacity: 1 },
-  exit: { x: -40, opacity: 0 }
+  exit: { x: -24, opacity: 0 }
 };
 
 export const scaleIn: SimpleVariants = {
-  initial: { scale: 0.95, opacity: 0 },
+  initial: { scale: 0.96, opacity: 0 },
   animate: { scale: 1, opacity: 1 },
-  exit: { scale: 0.95, opacity: 0 }
+  exit: { scale: 0.96, opacity: 0 }
 };
 
 export const defaultTransition = {
-  duration: 0.25,
-  ease: 'easeOut'
+  duration: 0.24,
+  ease: appleEase
 };
 
 // Mapa de variantes disponibles por nombre

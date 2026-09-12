@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Badge, Card, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
+import { Alert, Col, Container, Form, Row, Spinner } from 'react-bootstrap';
+import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
+import { appleEase } from '../lib/animations';
 import type { Cafe } from '../types';
 
 interface CafesWithReviewsProps {
@@ -150,9 +152,52 @@ export default function CafesWithReviews({
 
   if (loading) {
     return (
-      <section className="py-5">
-        <Container className="text-center">
-          <Spinner animation="border" variant="warning" />
+      <section className="cafes-section" aria-busy="true" aria-live="polite">
+        <Container>
+          <div className="cafes-section-heading text-center">
+            <span className="cafes-section-kicker">
+              <i className="fas fa-mug-saucer me-1" aria-hidden="true" />
+              {t('cafes.kicker', 'Cafeterías de Especialidad')}
+            </span>
+            <h2 className="cafes-section-title">
+              {title || t('home.cafes_reviews_title')}
+            </h2>
+            <p className="cafes-section-subtitle mb-0">
+              {description || t('home.cafes_reviews_desc')}
+            </p>
+          </div>
+
+          <Row xs={1} md={2} lg={3} className="g-4">
+            {Array.from({ length: Math.min(limit || 6, 6) }).map((_, idx) => (
+              <Col key={idx}>
+                <article className="cafe-tile">
+                  <div className="cafe-tile-media">
+                    <div className="apple-skeleton" style={{ width: '100%', height: '100%' }} />
+                    <div
+                      className="apple-skeleton rounded-pill"
+                      style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        width: '54px',
+                        height: '24px',
+                        zIndex: 2,
+                      }}
+                    />
+                  </div>
+                  <div className="cafe-tile-content">
+                    <div className="apple-skeleton apple-skeleton-text w-75 mb-2" style={{ height: '18px' }} />
+                    <div className="apple-skeleton apple-skeleton-text w-100 mb-3" style={{ height: '13px' }} />
+                    <div className="cafe-tile-meta">
+                      <div className="apple-skeleton rounded-pill" style={{ width: '70px', height: '24px' }} />
+                      <div className="apple-skeleton rounded-pill" style={{ width: '80px', height: '24px' }} />
+                      <div className="apple-skeleton rounded-pill" style={{ width: '60px', height: '24px' }} />
+                    </div>
+                  </div>
+                </article>
+              </Col>
+            ))}
+          </Row>
         </Container>
       </section>
     );
@@ -176,164 +221,174 @@ export default function CafesWithReviews({
   }
 
   return (
-    <section className="py-5" style={{ backgroundColor: '#fff8f1' }}>
+    <section className="cafes-section">
       <Container>
-        <div className="text-center mb-4">
-          <h2 className="mb-2 cafes-section-title">
-            <i className="fas fa-mug-hot text-warning me-2"></i>
+        <div className="cafes-section-heading text-center">
+          <span className="cafes-section-kicker">
+            <i className="fas fa-mug-saucer me-1" aria-hidden="true"></i>
+            {t('cafes.kicker', 'Cafeterías de Especialidad')}
+          </span>
+          <h2 className="cafes-section-title">
             {title || t('home.cafes_reviews_title')}
           </h2>
-          <p className="text-muted mb-0">{description || t('home.cafes_reviews_desc')}</p>
+          <p className="cafes-section-subtitle mb-0">
+            {description || t('home.cafes_reviews_desc')}
+          </p>
         </div>
 
         {showFilters && (
-          <Row className="g-2 mb-4" xs={1} md={5}>
-            <Col>
-              <Form.Group controlId="cafes-filter-search">
-                <Form.Label className="small text-muted mb-1">{t('home.filter_search')}</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={searchText}
-                  onChange={(event) => setSearchText(event.target.value)}
-                  placeholder={t('home.search_cafes_placeholder')}
-                />
-              </Form.Group>
-            </Col>
-            <Col>
-              <Form.Group controlId="cafes-filter-city">
-                <Form.Label className="small text-muted mb-1">{t('home.filter_city')}</Form.Label>
-                <Form.Select
-                  value={selectedCity}
-                  onChange={(event) => setSelectedCity(event.target.value)}
+          <div className="cafes-filter-bar">
+            <Row className="g-3 align-items-end" xs={1} sm={2} md={5}>
+              <Col>
+                <Form.Group controlId="cafes-filter-search">
+                  <Form.Label className="small text-muted mb-1 fw-semibold">
+                    <i className="fas fa-magnifying-glass me-1" aria-hidden="true"></i>
+                    {t('home.filter_search')}
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    className="cafes-filter-input"
+                    value={searchText}
+                    onChange={(event) => setSearchText(event.target.value)}
+                    placeholder={t('home.search_cafes_placeholder')}
+                  />
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group controlId="cafes-filter-city">
+                  <Form.Label className="small text-muted mb-1 fw-semibold">
+                    <i className="fas fa-location-dot me-1" aria-hidden="true"></i>
+                    {t('home.filter_city')}
+                  </Form.Label>
+                  <Form.Select
+                    className="cafes-filter-select"
+                    value={selectedCity}
+                    onChange={(event) => setSelectedCity(event.target.value)}
+                  >
+                    <option value="">{t('home.all_cities')}</option>
+                    {cityOptions.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group controlId="cafes-filter-rating">
+                  <Form.Label className="small text-muted mb-1 fw-semibold">
+                    <i className="fas fa-star me-1" aria-hidden="true"></i>
+                    {t('home.filter_min_rating')}
+                  </Form.Label>
+                  <Form.Select
+                    className="cafes-filter-select"
+                    value={selectedMinRating}
+                    onChange={(event) => setSelectedMinRating(event.target.value)}
+                  >
+                    <option value="">{t('home.any_rating')}</option>
+                    <option value="1">1+ ★</option>
+                    <option value="2">2+ ★</option>
+                    <option value="3">3+ ★</option>
+                    <option value="4">4+ ★</option>
+                    <option value="5">5 ★</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group controlId="cafes-filter-tag">
+                  <Form.Label className="small text-muted mb-1 fw-semibold">
+                    <i className="fas fa-tag me-1" aria-hidden="true"></i>
+                    {t('home.filter_branch_tag')}
+                  </Form.Label>
+                  <Form.Select
+                    className="cafes-filter-select"
+                    value={selectedTagId}
+                    onChange={(event) => setSelectedTagId(event.target.value)}
+                  >
+                    <option value="">{t('home.all_tags')}</option>
+                    {tagOptions.map((tag) => (
+                      <option key={tag.id} value={tag.id}>{tag.name}</option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col>
+                <button
+                  type="button"
+                  className="btn btn-secondary w-100 cafes-filter-reset-btn"
+                  onClick={() => {
+                    setSearchText('');
+                    setSelectedCity('');
+                    setSelectedMinRating('');
+                    setSelectedTagId('');
+                  }}
+                  disabled={!hasActiveFilters}
                 >
-                  <option value="">{t('home.all_cities')}</option>
-                  {cityOptions.map((city) => (
-                    <option key={city} value={city}>{city}</option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            <Col>
-              <Form.Group controlId="cafes-filter-rating">
-                <Form.Label className="small text-muted mb-1">{t('home.filter_min_rating')}</Form.Label>
-                <Form.Select
-                  value={selectedMinRating}
-                  onChange={(event) => setSelectedMinRating(event.target.value)}
-                >
-                  <option value="">{t('home.any_rating')}</option>
-                  <option value="1">1+</option>
-                  <option value="2">2+</option>
-                  <option value="3">3+</option>
-                  <option value="4">4+</option>
-                  <option value="5">5</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            <Col>
-              <Form.Group controlId="cafes-filter-tag">
-                <Form.Label className="small text-muted mb-1">{t('home.filter_branch_tag')}</Form.Label>
-                <Form.Select
-                  value={selectedTagId}
-                  onChange={(event) => setSelectedTagId(event.target.value)}
-                >
-                  <option value="">{t('home.all_tags')}</option>
-                  {tagOptions.map((tag) => (
-                    <option key={tag.id} value={tag.id}>{tag.name}</option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            <Col className="d-flex align-items-end">
-              <button
-                type="button"
-                className="btn btn-outline-secondary w-100"
-                onClick={() => {
-                  setSearchText('');
-                  setSelectedCity('');
-                  setSelectedMinRating('');
-                  setSelectedTagId('');
-                }}
-                disabled={!hasActiveFilters}
-              >
-                <i className="fas fa-rotate-left me-2"></i>
-                {t('home.clear_cafes_filters')}
-              </button>
-            </Col>
-          </Row>
+                  <i className="fas fa-rotate-left me-2"></i>
+                  {t('home.clear_cafes_filters')}
+                </button>
+              </Col>
+            </Row>
+          </div>
         )}
 
         {cafes.length === 0 ? (
-          <Alert variant="light" className="text-center border mb-0">
+          <Alert variant="light" className="text-center border rounded-4 py-4 mb-0">
+            <i className="fas fa-mug-hot text-muted mb-2 d-block" style={{ fontSize: '2rem' }}></i>
             {t('home.no_cafes_for_filters')}
           </Alert>
         ) : (
           <Row xs={1} md={2} lg={3} className="g-4">
-            {cafes.map((cafe) => (
+            {cafes.map((cafe, index) => (
               <Col key={cafe.id}>
-                <Card className="h-100 border-0 shadow-sm">
-                  {cafe.image_url && (
-                    <Card.Img variant="top" src={cafe.image_url} alt={cafe.name} style={{ height: '200px', objectFit: 'cover' }} />
-                  )}
-                  <Card.Body className="d-flex flex-column gap-3">
-                    <div className="d-flex justify-content-between align-items-start gap-2">
-                      <div>
-                        <Card.Title className="mb-1">
-                          <Link to={`/cafes/${cafe.slug || cafe.id}`} className="text-decoration-none text-dark">
-                            {cafe.name}
-                          </Link>
-                        </Card.Title>
-                        {cafe.description && (
-                          <Card.Text className="text-muted small mb-0">
-                            {cafe.description}
-                          </Card.Text>
-                        )}
-                      </div>
-                      {typeof cafe.average_rating === 'number' && (
-                        <Badge bg="warning" text="dark" pill>
-                          {cafe.average_rating.toFixed(1)}
-                        </Badge>
+                <motion.article
+                  className="cafe-tile"
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28, delay: Math.min(index * 0.03, 0.18), ease: appleEase }}
+                >
+                  <Link to={`/cafes/${cafe.slug || cafe.id}`} className="cafe-tile-link">
+                    <div className="cafe-tile-media">
+                      {cafe.image_url ? (
+                        <img src={cafe.image_url} alt={cafe.name} width="600" height="360" loading="lazy" />
+                      ) : (
+                        <div className="cafe-tile-placeholder" aria-hidden="true">
+                          <i className="fas fa-mug-hot"></i>
+                        </div>
                       )}
+                      {typeof cafe.average_rating === 'number' && (
+                        <span className="cafe-tile-rating">
+                          <i className="fas fa-star" aria-hidden="true"></i> {cafe.average_rating.toFixed(1)}
+                        </span>
+                      )}
+                      <span className="cafe-tile-arrow" aria-hidden="true">
+                        <i className="fas fa-arrow-up-right-from-square"></i>
+                      </span>
                     </div>
 
-                    <div className="d-flex gap-2 flex-wrap">
-                      <Badge bg="light" text="dark">
-                        {t('home.reviews_count_label', { count: cafe.reviews_count ?? 0 })}
-                      </Badge>
-                      <Badge bg="light" text="dark">
-                        {t('home.branches_count_label', { count: cafe.branches_count ?? 0 })}
-                      </Badge>
+                    <div className="cafe-tile-content">
+                      <h3 className="cafe-tile-title mb-0">{cafe.name}</h3>
+                      {cafe.description && <p className="cafe-tile-description">{cafe.description}</p>}
+                      <div className="cafe-tile-meta">
+                        <span className="cafe-tile-badge">
+                          <i className="fas fa-message me-1" aria-hidden="true"></i>
+                          {t('home.reviews_count_label', { count: cafe.reviews_count ?? 0 })}
+                        </span>
+                        <span className="cafe-tile-badge">
+                          <i className="fas fa-store me-1" aria-hidden="true"></i>
+                          {t('home.branches_count_label', { count: cafe.branches_count ?? 0 })}
+                        </span>
+                        {(cafe.branches ?? []).slice(0, 1).map((branch) => {
+                          const location = (branch.city ?? branch.state ?? '').trim();
+                          return location ? (
+                            <span key={branch.id} className="cafe-tile-badge">
+                              <i className="fas fa-location-dot me-1" aria-hidden="true"></i>
+                              {location}
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
                     </div>
-
-                    <div className="d-flex flex-wrap gap-2">
-                      {(cafe.branches ?? []).map((branch) => {
-                        const comuna = (branch.city ?? branch.state ?? '').trim();
-
-                        return (
-                          <Badge key={branch.id} bg="secondary">
-                            {comuna !== '' ? `${branch.name}/${comuna}` : branch.name}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-
-                    {cafe.website && (
-                      <a
-                        href={cafe.website}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-outline-dark btn-sm mt-auto"
-                      >
-                        <i className="fas fa-link me-2"></i>
-                        {t('home.view_cafe_site')}
-                      </a>
-                    )}
-
-                    <Link to={`/cafes/${cafe.slug || cafe.id}`} className="btn btn-dark btn-sm">
-                      <i className="fas fa-mug-hot me-2"></i>
-                      {t('cafes.detail.view')}
-                    </Link>
-                  </Card.Body>
-                </Card>
+                  </Link>
+                </motion.article>
               </Col>
             ))}
           </Row>

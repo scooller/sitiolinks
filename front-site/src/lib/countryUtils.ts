@@ -1,6 +1,10 @@
 /** Utilidades de país (ISO 3166-1 alpha-2) en TypeScript */
 
-/** Mapa de códigos a nombres en español */
+const displayNames = typeof Intl !== 'undefined' && Intl.DisplayNames
+  ? new Intl.DisplayNames(['es'], { type: 'region' })
+  : null;
+
+/** Mapa de países frecuentes para selectores de filtro */
 export const COUNTRY_NAMES: Record<string, string> = {
   AR: 'Argentina', BO: 'Bolivia', BR: 'Brasil', CL: 'Chile', CO: 'Colombia',
   CR: 'Costa Rica', CU: 'Cuba', DO: 'República Dominicana', EC: 'Ecuador', SV: 'El Salvador',
@@ -18,10 +22,15 @@ export function getCountryFlag(countryCode: string | null | undefined): string {
   return String.fromCodePoint(...code.split('').map(c => 127397 + c.charCodeAt(0)));
 }
 
-/** Obtiene nombre del país en español o código si no existe */
+/** Obtiene nombre del país en español con Intl.DisplayNames nativo de la plataforma */
 export function getCountryName(countryCode: string | null | undefined): string {
   if (!countryCode) return '';
-  return COUNTRY_NAMES[countryCode.toUpperCase()] || countryCode;
+  const clean = countryCode.trim().toUpperCase();
+  try {
+    return displayNames?.of(clean) || COUNTRY_NAMES[clean] || countryCode;
+  } catch {
+    return COUNTRY_NAMES[clean] || countryCode;
+  }
 }
 
 /** Retorna "🇨🇱 Chile" o solo nombre/código */

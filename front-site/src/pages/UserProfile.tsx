@@ -440,8 +440,56 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
 
   if (loading) {
     return (
-      <Container className="mt-4 text-center">
-        <Spinner animation="border" variant="primary" />
+      <Container className="profile-page-container py-4" aria-busy="true" aria-live="polite">
+        <Row className="justify-content-center">
+          <Col xs={12} md={10} lg={8} xl={7}>
+            {/* Segmented Control Skeleton */}
+            <div className="profile-segmented-control mb-4">
+              <div className="profile-segment-btn apple-skeleton" style={{ height: '44px' }} />
+              <div className="profile-segment-btn apple-skeleton" style={{ height: '44px' }} />
+            </div>
+
+            {/* Profile Inset Card Skeleton */}
+            <div className="apple-skeleton-card text-center p-4 p-md-5">
+              {/* Avatar 150px */}
+              <div
+                className="apple-skeleton rounded-circle mx-auto mb-3"
+                style={{ width: '150px', height: '150px', border: '3px solid rgba(255,255,255,0.2)' }}
+              />
+
+              {/* Name & Handle */}
+              <div className="apple-skeleton apple-skeleton-text mx-auto mb-2" style={{ width: '180px', height: '26px' }} />
+              <div className="apple-skeleton apple-skeleton-text mx-auto mb-3" style={{ width: '100px', height: '16px' }} />
+
+              {/* Bio */}
+              <div className="d-flex flex-column align-items-center gap-1 mb-4">
+                <div className="apple-skeleton apple-skeleton-text w-75" style={{ height: '14px' }} />
+                <div className="apple-skeleton apple-skeleton-text w-50" style={{ height: '14px' }} />
+              </div>
+
+              {/* Actions row */}
+              <div className="d-flex justify-content-center gap-2 mb-4">
+                <div className="apple-skeleton rounded-pill" style={{ width: '120px', height: '44px' }} />
+                <div className="apple-skeleton rounded-pill" style={{ width: '44px', height: '44px' }} />
+                <div className="apple-skeleton rounded-pill" style={{ width: '44px', height: '44px' }} />
+              </div>
+
+              {/* Counters row */}
+              <div className="d-flex justify-content-center gap-4 py-3 mb-4 border-top border-bottom">
+                <div className="apple-skeleton rounded-pill" style={{ width: '90px', height: '24px' }} />
+                <div className="apple-skeleton rounded-pill" style={{ width: '90px', height: '24px' }} />
+                <div className="apple-skeleton rounded-pill" style={{ width: '90px', height: '24px' }} />
+              </div>
+
+              {/* Links list skeletons */}
+              <div className="d-flex flex-column gap-2">
+                <div className="apple-skeleton rounded-xl" style={{ width: '100%', height: '52px' }} />
+                <div className="apple-skeleton rounded-xl" style={{ width: '100%', height: '52px' }} />
+                <div className="apple-skeleton rounded-xl" style={{ width: '100%', height: '52px' }} />
+              </div>
+            </div>
+          </Col>
+        </Row>
       </Container>
     );
   }
@@ -570,7 +618,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                   </Button>
                   {followingSearch && (
                     <Button
-                      variant="outline-secondary"
+                      variant="secondary"
                       onClick={() => {
                         setFollowingSearchInput('');
                         setFollowingSearch('');
@@ -758,10 +806,10 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
               />
             </Form.Group>
             <div className="d-flex justify-content-end gap-2">
-              <Button variant="outline-secondary" onClick={() => setShowVipMessageModal(false)} disabled={vipMessageSending}>
+              <Button variant="secondary" className="rounded-pill px-3" onClick={() => setShowVipMessageModal(false)} disabled={vipMessageSending}>
                 Cerrar
               </Button>
-              <Button type="submit" variant="warning" disabled={vipMessageSending}>
+              <Button type="submit" variant="warning" className="rounded-pill px-4 fw-semibold" disabled={vipMessageSending}>
                 {vipMessageSending ? 'Enviando...' : 'Enviar mensaje VIP'}
               </Button>
             </div>
@@ -782,116 +830,120 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
             initial={itemVariants.hidden}
             animate={itemVariants.visible}
           >
-            <Card
-              className="perfil"
+            <div
+              className="profile-apple-card text-center"
               style={cardBg && cardRgbArr ? { backgroundColor: `rgba(${cardRgbArr[0]},${cardRgbArr[1]},${cardRgbArr[2]},${cardOpacity})`, color: cardTextColor } : undefined}
             >
+              {user.roles?.some((role: any) => role.name === 'vip') && (
+                <span className="profile-vip-pill">
+                  <i className={`${normalizeFA(vipBadgeIcon) || 'fas fa-crown'} text-white`} aria-hidden="true"></i>
+                  <span>{(vipBadgeLabel && vipBadgeLabel.trim()) || 'VIP'}</span>
+                </span>
+              )}
+
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.25, ease: 'easeOut', delay: 0.2 }}
+                className="profile-avatar-container"
               >
-                <div className="p-3">
-                  <OptimizedImage
-                    webpUrl={avatarWebp}
-                    smallWebpUrl={smallWebp}
-                    mediumWebpUrl={mediumWebp}
-                    fallbackUrl={avatarFallback}
-                    alt={user.username}
-                    className="rounded w-100"
-                    style={{ objectFit: 'contain' }}
-                    size={300}
-                    priority={true}
-                    placeholderFallback={true}
-                  />
-                </div>
+                <OptimizedImage
+                  webpUrl={avatarWebp}
+                  smallWebpUrl={smallWebp}
+                  mediumWebpUrl={mediumWebp}
+                  fallbackUrl={avatarFallback}
+                  alt={user.username}
+                  className="profile-avatar-img w-100"
+                  style={{ objectFit: 'contain', maxHeight: '320px' }}
+                  size={300}
+                  priority={true}
+                  placeholderFallback={true}
+                />
               </motion.div>
-              <Card.Body className="text-center">
+
+              <div>
                 {followNotice && (
-                  <Alert variant={followNotice.variant} dismissible onClose={() => setFollowNotice(null)} className="py-2">
+                  <Alert variant={followNotice.variant} dismissible onClose={() => setFollowNotice(null)} className="py-2 rounded-3 mb-3">
                     {followNotice.text}
                   </Alert>
                 )}
+
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <div className="d-flex align-items-center justify-content-center gap-2 mb-2">
-                    <Card.Title className="mb-0 d-flex align-items-center">
+                  <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
+                    <h2 className="profile-username-title mb-0">
                       @{user.username}
                       {user.is_verified && <VerifiedBadge />}
-                    </Card.Title>
-                    {user.roles?.some((role: any) => role.name === 'vip') && (
-                      <Badge
-                        bg="warning"
-                        text="dark"
-                        className="px-2 py-1 fw-bold"
-                        style={{
-                          fontSize: '0.75rem',
-                          letterSpacing: '0.5px',
-                          border: '2px solid #ffc107',
-                          borderRadius: '15px'
-                        }}
-                      >
-                        <i className={`${normalizeFA(vipBadgeIcon) || 'fas fa-crown'} me-1`} style={{ color: '#f59e0b' }}></i>
-                        {(vipBadgeLabel && vipBadgeLabel.trim()) || 'VIP'}
-                      </Badge>
-                    )}
+                    </h2>
                   </div>
-                  <Card.Subtitle className="mb-2 badge text-bg-secondary">
-                    {genderIcon && <i className={`${genderIcon} me-1`}></i>}
-                    {genderFull || ''}
-                  </Card.Subtitle>
+                  {genderFull && (
+                    <div>
+                      <span className="profile-gender-pill">
+                        {genderIcon && <i className={`${genderIcon} me-1`} aria-hidden="true"></i>}
+                        {genderFull}
+                      </span>
+                    </div>
+                  )}
                 </motion.div>
 
+                {/* Barra de Estadísticas Tipo Métrica Apple */}
                 <motion.div
-                  className="d-flex justify-content-center gap-3 mb-3 text-muted small"
+                  className="profile-stats-bar"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
                   {isProfileCreatorOrAdmin ? (
                     <>
-                      <span>
-                        <strong>{(user as any).followers_count || 0}</strong> {t('profile.followers')}
-                      </span>
+                      <div className="profile-stat-item">
+                        <strong>{(user as any).followers_count || 0}</strong>
+                        <span>{t('profile.followers')}</span>
+                      </div>
+                      <div className="profile-stat-divider"></div>
                       {currentUser?.username === user.username ? (
-                        <span
+                        <div
                           onClick={handleShowFollowing}
-                          style={{ cursor: 'pointer' }}
-                          className="text-primary"
+                          className="profile-stat-item interactive"
                         >
-                          <strong>{(user as any).following_count || 0}</strong> {t('profile.following')}
-                        </span>
+                          <strong>{(user as any).following_count || 0}</strong>
+                          <span>{t('profile.following')}</span>
+                        </div>
                       ) : (
-                        <span>
-                          <strong>{(user as any).following_count || 0}</strong> {t('profile.following')}
-                        </span>
+                        <div className="profile-stat-item">
+                          <strong>{(user as any).following_count || 0}</strong>
+                          <span>{t('profile.following')}</span>
+                        </div>
                       )}
-                      <span>
-                        <strong>{(user as any).views || 0}</strong> {t('profile.views')}
-                      </span>
+                      <div className="profile-stat-divider"></div>
+                      <div className="profile-stat-item">
+                        <strong>{(user as any).views || 0}</strong>
+                        <span>{t('profile.views')}</span>
+                      </div>
                     </>
                   ) : (
                     currentUser?.username === user.username ? (
-                      <span
+                      <div
                         onClick={handleShowFollowing}
-                        style={{ cursor: 'pointer' }}
-                        className="text-primary"
+                        className="profile-stat-item interactive"
                       >
-                        <strong>{(user as any).following_count || 0}</strong> {t('profile.following')}
-                      </span>
+                        <strong>{(user as any).following_count || 0}</strong>
+                        <span>{t('profile.following')}</span>
+                      </div>
                     ) : (
-                      <span>
-                        <strong>{(user as any).following_count || 0}</strong> {t('profile.following')}
-                      </span>
+                      <div className="profile-stat-item">
+                        <strong>{(user as any).following_count || 0}</strong>
+                        <span>{t('profile.following')}</span>
+                      </div>
                     )
                   )}
                 </motion.div>
 
+                {/* Acciones de Perfil 100% Sólidas */}
                 <motion.div
-                  className="d-flex justify-content-center gap-2 mb-3"
+                  className="profile-actions-row"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.45 }}
@@ -900,16 +952,15 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                     profileUserId={Number((user as any).id)}
                     initialLikesCount={Number((user as any).likes_count || 0)}
                     initialLiked={Boolean((user as any).liked_by_user)}
-                    className="mb-3"
+                    className="mb-0"
                   />
 
                   {currentUser?.username !== user.username && isProfileCreator && (
                     !isAuthenticated ? (
                       <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-follow-login">{t('profile.login_to_follow')}</Tooltip>}>
                         <Button
-                          variant={following ? 'outline-secondary' : 'primary'}
-                          size="sm"
-                          className="mb-3"
+                          variant={following ? 'secondary' : 'primary'}
+                          className={`profile-btn-solid ${following ? 'profile-btn-secondary' : 'profile-btn-primary'}`}
                           onClick={() => navigate('/login')}
                           disabled={followLoading}
                         >
@@ -917,7 +968,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                             <Spinner animation="border" size="sm" />
                           ) : (
                             <>
-                              <i className="fas fa-user-plus me-2"></i>
+                              <i className="fas fa-user-plus me-1" aria-hidden="true"></i>
                               {t('profile.follow')}
                             </>
                           )}
@@ -925,9 +976,8 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                       </OverlayTrigger>
                     ) : (
                       <Button
-                        variant={following ? 'outline-secondary' : 'primary'}
-                        size="sm"
-                        className="mb-3"
+                        variant={following ? 'secondary' : 'primary'}
+                        className={`profile-btn-solid ${following ? 'profile-btn-secondary' : 'profile-btn-primary'}`}
                         onClick={handleFollow}
                         disabled={followLoading}
                       >
@@ -935,12 +985,12 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                           <Spinner animation="border" size="sm" />
                         ) : following ? (
                           <>
-                            <i className="fas fa-user-check me-2"></i>
+                            <i className="fas fa-user-check me-1" aria-hidden="true"></i>
                             {t('profile.following_btn')}
                           </>
                         ) : (
                           <>
-                            <i className="fas fa-user-plus me-2"></i>
+                            <i className="fas fa-user-plus me-1" aria-hidden="true"></i>
                             {t('profile.follow')}
                           </>
                         )}
@@ -951,96 +1001,102 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                   {currentUser?.username !== user.username && isAuthenticated && user.roles?.some((role: any) => role.name === 'vip') && (
                     <Button
                       variant="warning"
-                      size="sm"
-                      className="mb-3"
+                      className="profile-btn-solid profile-btn-warning"
                       onClick={() => {
                         setVipMessageStatus(null);
                         setShowVipMessageModal(true);
                       }}
                     >
-                      <i className="fas fa-paper-plane me-2"></i>
-                      Enviar mensaje VIP
+                      <i className="fas fa-paper-plane me-1" aria-hidden="true"></i>
+                      <span>Enviar mensaje VIP</span>
                     </Button>
                   )}
                 </motion.div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  {isAuthenticated && currentUser?.username === user.username && (
-                    <Button variant="btn-outline-dark" size="sm" className="mb-3 w-100" onClick={() => navigate('/perfil/editar')}>
-                      <i className="fas fa-edit me-2"></i>
+                {/* Editar perfil (Sólido oscuro) */}
+                {isAuthenticated && currentUser?.username === user.username && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="mb-3"
+                  >
+                    <Button
+                      variant="dark"
+                      className="profile-btn-solid profile-btn-dark w-100"
+                      onClick={() => navigate('/perfil/editar')}
+                    >
+                      <i className="fas fa-edit me-2" aria-hidden="true"></i>
                       {t('profile.edit_profile')}
                     </Button>
-                  )}
-                </motion.div>
+                  </motion.div>
+                )}
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                >
-                  {(user as any).tags?.length > 0 && (
-                    <div className="mb-2">
-                      {(user as any).tags
+                {/* Tags de perfil */}
+                {(user as any).tags?.length > 0 && (
+                  <motion.div
+                    className="profile-tags-container"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    {(user as any).tags
+                      .slice()
+                      .sort((a: Tag, b: Tag) => (Number(b.weight) || 0) - (Number(a.weight) || 0))
+                      .map((t: Tag) => {
+                        const iconClass = t.icon ? t.icon.replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-') : null;
+                        const slug = String(t.name).trim().toLowerCase().replace(/\s+/g, '-');
+                        const label = i18n.language === 'en' && t.name_en ? t.name_en : t.name;
+                        return (
+                          <Link key={String(t.id)} to={`/t/${slug}`} className="profile-tag-pill">
+                            {iconClass && <i className={`${iconClass}`} aria-hidden="true"></i>}
+                            <span>{label}</span>
+                          </Link>
+                        );
+                      })}
+                  </motion.div>
+                )}
+
+                {/* Enlaces Sociales / Externos */}
+                {(user as any).links?.length > 0 && (
+                  <motion.div
+                    className="profile-links-container"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 }}
+                  >
+                    <div className="profile-links-title">{t('profile.links')}</div>
+                    <div>
+                      {(user as any).links
                         .slice()
-                        .sort((a: Tag, b: Tag) => (Number(b.weight) || 0) - (Number(a.weight) || 0))
-                        .map((t: Tag) => {
-                          const iconClass = t.icon ? t.icon.replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-') : null;
-                          const slug = String(t.name).trim().toLowerCase().replace(/\s+/g, '-');
-                          const label = i18n.language === 'en' && t.name_en ? t.name_en : t.name;
+                        .sort((a: UserLink, b: UserLink) => (a.order ?? 0) - (b.order ?? 0))
+                        .map((l: UserLink) => {
+                          const iconClass = l.icon ? l.icon.replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-') : null;
+                          const isAdult = !!l.is_adult;
                           return (
-                            <Badge key={String(t.id)} bg={t.color || ('secondary' as any)} className="me-1">
-                              <Link to={`/t/${slug}`} className="text-white text-decoration-none">
-                                {iconClass && <i className={`${iconClass} me-1`}></i>}
-                                {label}
-                              </Link>
-                            </Badge>
+                            <a
+                              href={isAdult ? `/go/${l.id}` : l.url}
+                              {...(isAdult ? {} : { target: '_blank' })}
+                              rel={isAdult ? 'nofollow noopener noreferrer' : 'noreferrer'}
+                              key={`${l.name}-${l.url}`}
+                              className="profile-link-item"
+                            >
+                              {iconClass ? (
+                                <i className={`${iconClass} me-2`} aria-hidden="true"></i>
+                              ) : (
+                                <i className="fas fa-link me-2 text-muted" aria-hidden="true"></i>
+                              )}
+                              <span className="flex-grow-1">{l.name || l.url}</span>
+                              {isAdult && <span className="profile-link-badge-18">+18</span>}
+                              <i className="fas fa-arrow-up-right-from-square text-muted ms-2" aria-hidden="true" style={{ fontSize: '0.75rem' }}></i>
+                            </a>
                           );
                         })}
                     </div>
-                  )}
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 }}
-                >
-                  {(user as any).links?.length > 0 && (
-                    <div className="mt-3 text-start profile-links">
-                      <div className="fw-bold mb-2">{t('profile.links')}</div>
-                      <ListGroup variant="flush" className="mb-2">
-                        {(user as any).links
-                          .slice()
-                          .sort((a: UserLink, b: UserLink) => (a.order ?? 0) - (b.order ?? 0))
-                          .map((l: UserLink) => {
-                            const iconClass = l.icon ? l.icon.replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-') : null;
-                            const isAdult = !!l.is_adult;
-                            return (
-                              <ListGroup.Item
-                                as="a"
-                                href={isAdult ? `/go/${l.id}` : l.url}
-                                {...(isAdult ? {} : { target: '_blank' })}
-                                rel={isAdult ? 'nofollow noopener noreferrer' : 'noreferrer'}
-                                key={`${l.name}-${l.url}`}
-                                className="d-flex align-items-center profile-link"
-                              >
-                                {iconClass && <i className={`${iconClass} me-2`}></i>}
-                                <span className="flex-grow-1">{l.name || l.url}</span>
-                                {isAdult && <span className="badge bg-danger me-2">+18</span>}
-                                <i className="fas fa-external-link-alt text-muted ms-2" aria-hidden="true"></i>
-                              </ListGroup.Item>
-                            );
-                          })}
-                      </ListGroup>
-                    </div>
-                  )}
-                </motion.div>
-              </Card.Body>
-            </Card>
+                  </motion.div>
+                )}
+              </div>
+            </div>
           </Col>
 
           <Col
@@ -1054,21 +1110,26 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <Nav variant="tabs" className="mb-3">
-                <Nav.Item>
-                  <Nav.Link active={activeTab === 'profile'} onClick={() => handleTabChange('profile')}>
-                    {t('profile.tab_profile')}
-                  </Nav.Link>
-                </Nav.Item>
+              <div className="profile-segmented-control">
+                <button
+                  type="button"
+                  className={`profile-segment-btn ${activeTab === 'profile' ? 'active' : ''}`}
+                  onClick={() => handleTabChange('profile')}
+                >
+                  <i className="fas fa-id-card me-1" aria-hidden="true"></i>
+                  <span>{t('profile.tab_profile')}</span>
+                </button>
                 {(user as any)?.galleries_count > 0 && (
-                  <Nav.Item>
-                    <Nav.Link active={activeTab === 'galleries'} onClick={() => handleTabChange('galleries')}>
-                      <i className="fas fa-images me-1"></i>
-                      {t('profile.tab_galleries')} ({(user as any).galleries_count})
-                    </Nav.Link>
-                  </Nav.Item>
+                  <button
+                    type="button"
+                    className={`profile-segment-btn ${activeTab === 'galleries' ? 'active' : ''}`}
+                    onClick={() => handleTabChange('galleries')}
+                  >
+                    <i className="fas fa-images me-1" aria-hidden="true"></i>
+                    <span>{t('profile.tab_galleries')} ({(user as any).galleries_count})</span>
+                  </button>
                 )}
-              </Nav>
+              </div>
             </motion.div>
 
             <motion.div
@@ -1076,102 +1137,127 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
               animate={cardVariants.visible}
               transition={{ delay: 0.4 }}
             >
-              <Card
-                className="perfil-info"
+              <div
+                className="profile-info-card"
                 style={cardBg && cardRgbArr ? { backgroundColor: `rgba(${cardRgbArr[0]},${cardRgbArr[1]},${cardRgbArr[2]},${cardOpacity})`, color: cardTextColor } : undefined}
               >
-                <Card.Body>
-                  {activeTab === 'profile' && (
-                    <>
-                      <div className="text-start mb-4">
-                        <h5 className="mb-3">
-                          {t('profile.info_of')} <b>{username}</b>
-                        </h5>
-                        {user.description && <p className="mb-3">{user.description}</p>}
-                        <ul className="list-group">
-                          {genderFull && (
-                            <li className="list-group-item d-flex justify-content-between align-items-center">
-                              <span className="text-muted">{t('profile.gender')}</span>
-                              <span>
-                                {genderIcon && <i className={`${genderIcon} me-2`}></i>}
-                                {genderFull}
-                              </span>
-                            </li>
-                          )}
-                          {user.nationality && (
-                            <li className="list-group-item d-flex justify-content-between align-items-center">
-                              <span className="text-muted">{t('profile.nationality')}</span>
-                              <span>{getCountryDisplay(user.nationality)}</span>
-                            </li>
-                          )}
-                          {ageYears != null && (
-                            <li className="list-group-item d-flex justify-content-between align-items-center">
-                              <span className="text-muted">{t('profile.age')}</span>
-                              <span>{ageYears} {t('profile.years')}</span>
-                            </li>
-                          )}
-                          {user.country && (isOwnProfile || isAdminOrModeratorViewer) && (
-                            <li className="list-group-item d-flex justify-content-between align-items-center">
-                              <span className="text-muted">{t('profile.country')}</span>
-                              <span>{getCountryDisplay(user.country)}</span>
-                            </li>
-                          )}
-                          {user.city && (isOwnProfile || isAdminOrModeratorViewer) && (
-                            <li className="list-group-item d-flex justify-content-between align-items-center">
-                              <span className="text-muted">{t('profile.city')}</span>
-                              <span>{user.city}</span>
-                            </li>
-                          )}
-                          {birthDateStr && (isOwnProfile || isAdminOrModeratorViewer) && (
-                            <li className="list-group-item d-flex justify-content-between align-items-center">
-                              <span className="text-muted">{t('profile.birth_date')}</span>
-                              <span>{birthDateStr}</span>
-                            </li>
-                          )}
-                          {priceStr && (
-                            <li className="list-group-item d-flex justify-content-between align-items-center">
-                              <span className="text-muted">{t('profile.price_from_label')}</span>
-                              <span className="fw-semibold">{priceStr}</span>
-                            </li>
-                          )}
-                        </ul>
-                        {(user as any).country_block && (isOwnProfile || isAdminOrModeratorViewer) && (
-                          <div className="mt-2">
-                            <Badge bg="dark">{t('profile.country_block_active')}</Badge>
+                {activeTab === 'profile' && (
+                  <>
+                    <div className="text-start mb-4">
+                      <h3 className="profile-info-heading">
+                        {t('profile.info_of')} <b>{username}</b>
+                      </h3>
+                      {user.description && <p className="profile-bio-text">{user.description}</p>}
+
+                      {/* Lista Inset Apple con Líneas Hairline */}
+                      <div className="profile-details-list">
+                        {genderFull && (
+                          <div className="profile-detail-row">
+                            <span className="profile-detail-label">
+                              {genderIcon && <i className={`${genderIcon} me-1`} aria-hidden="true"></i>}
+                              {t('profile.gender')}
+                            </span>
+                            <span className="profile-detail-value">{genderFull}</span>
+                          </div>
+                        )}
+                        {user.nationality && (
+                          <div className="profile-detail-row">
+                            <span className="profile-detail-label">
+                              <i className="fas fa-globe me-1 text-primary" aria-hidden="true"></i>
+                              {t('profile.nationality')}
+                            </span>
+                            <span className="profile-detail-value">{getCountryDisplay(user.nationality)}</span>
+                          </div>
+                        )}
+                        {ageYears != null && (
+                          <div className="profile-detail-row">
+                            <span className="profile-detail-label">
+                              <i className="fas fa-cake-candles me-1 text-primary" aria-hidden="true"></i>
+                              {t('profile.age')}
+                            </span>
+                            <span className="profile-detail-value">{ageYears} {t('profile.years')}</span>
+                          </div>
+                        )}
+                        {user.country && (isOwnProfile || isAdminOrModeratorViewer) && (
+                          <div className="profile-detail-row">
+                            <span className="profile-detail-label">
+                              <i className="fas fa-map-pin me-1 text-primary" aria-hidden="true"></i>
+                              {t('profile.country')}
+                            </span>
+                            <span className="profile-detail-value">{getCountryDisplay(user.country)}</span>
+                          </div>
+                        )}
+                        {user.city && (isOwnProfile || isAdminOrModeratorViewer) && (
+                          <div className="profile-detail-row">
+                            <span className="profile-detail-label">
+                              <i className="fas fa-city me-1 text-primary" aria-hidden="true"></i>
+                              {t('profile.city')}
+                            </span>
+                            <span className="profile-detail-value">{user.city}</span>
+                          </div>
+                        )}
+                        {birthDateStr && (isOwnProfile || isAdminOrModeratorViewer) && (
+                          <div className="profile-detail-row">
+                            <span className="profile-detail-label">
+                              <i className="fas fa-calendar-day me-1 text-primary" aria-hidden="true"></i>
+                              {t('profile.birth_date')}
+                            </span>
+                            <span className="profile-detail-value">{birthDateStr}</span>
+                          </div>
+                        )}
+                        {priceStr && (
+                          <div className="profile-detail-row">
+                            <span className="profile-detail-label">
+                              <i className="fas fa-tag me-1 text-success" aria-hidden="true"></i>
+                              {t('profile.price_from_label')}
+                            </span>
+                            <span className="profile-detail-value text-success fw-bold">{priceStr}</span>
                           </div>
                         )}
                       </div>
 
-                      {(user as any).has_public_profile && (
-                        <div className="text-center">
-                          <h5 className="mb-4">{t('profile.qr_code_title')}</h5>
-                          <div className="d-flex flex-column align-items-center mb-3">
-                            <QRCodeCanvas
-                              ref={qrCanvasRef}
-                              value={profileUrl}
-                              size={QR_DISPLAY_SIZE}
-                              level="H"
-                              includeMargin={false}
-                              imageSettings={siteLogo ? { src: siteLogo, width: qrLogoSize, height: qrLogoSize, excavate: true } : undefined}
-                            />
-                            <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-qr">{t('profile.download_qr_tooltip')}</Tooltip>}>
-                              <Button variant="outline-secondary" size="sm" className="mt-2" onClick={handleDownloadQr}>
-                                <i className="fas fa-download me-2"></i>
-                                {t('profile.download_qr')}
-                              </Button>
-                            </OverlayTrigger>
-                          </div>
-                          <p className="small">
-                            <a href={profileUrl} className="link" target="_blank" rel="noreferrer">
-                              {profileUrl}
-                            </a>
-                          </p>
+                      {(user as any).country_block && (isOwnProfile || isAdminOrModeratorViewer) && (
+                        <div className="mt-3">
+                          <Badge bg="dark" className="rounded-pill px-3 py-2">{t('profile.country_block_active')}</Badge>
                         </div>
                       )}
-                    </>
-                  )}
-                </Card.Body>
-              </Card>
+                    </div>
+
+                    {(user as any).has_public_profile && (
+                      <div className="profile-qr-wrapper">
+                        <h4 className="profile-info-heading">{t('profile.qr_code_title')}</h4>
+                        <div className="profile-qr-canvas-container">
+                          <QRCodeCanvas
+                            ref={qrCanvasRef}
+                            value={profileUrl}
+                            size={QR_DISPLAY_SIZE}
+                            level="H"
+                            includeMargin={false}
+                            imageSettings={siteLogo ? { src: siteLogo, width: qrLogoSize, height: qrLogoSize, excavate: true } : undefined}
+                          />
+                        </div>
+                        <div className="mb-3">
+                          <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-qr">{t('profile.download_qr_tooltip')}</Tooltip>}>
+                            <Button
+                              variant="secondary"
+                              className="profile-btn-solid profile-btn-secondary"
+                              onClick={handleDownloadQr}
+                            >
+                              <i className="fas fa-download me-2" aria-hidden="true"></i>
+                              {t('profile.download_qr')}
+                            </Button>
+                          </OverlayTrigger>
+                        </div>
+                        <p className="small mb-0">
+                          <a href={profileUrl} className="profile-qr-link" target="_blank" rel="noreferrer">
+                            {profileUrl}
+                          </a>
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </motion.div>
           </Col>
         </Row>

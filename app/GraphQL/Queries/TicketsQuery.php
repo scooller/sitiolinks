@@ -34,11 +34,21 @@ class TicketsQuery extends Query
 
     public function resolve($root, $args)
     {
+        $viewer = auth('web')->user() ?? auth('sanctum')->user();
+        if (! $viewer) {
+            return collect();
+        }
+
         $query = Ticket::query()->withCount('comments')->with(['user', 'assignedTo']);
 
-        if (! empty($args['user_id'])) {
+        $isAdmin = $viewer->hasAnyRole(['super_admin', 'admin', 'moderator']);
+
+        if (! $isAdmin) {
+            $query->where('user_id', $viewer->id);
+        } elseif (! empty($args['user_id'])) {
             $query->where('user_id', $args['user_id']);
         }
+
         if (! empty($args['status'])) {
             $query->where('status', $args['status']);
         }

@@ -1,19 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Accordion,
   Alert,
   Badge,
   Button,
-  Card,
   Col,
   Container,
   Form,
-  ListGroup,
   Modal,
   Row,
   Spinner,
-  Tab,
-  Tabs,
 } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
@@ -21,6 +16,31 @@ import { useAuth } from '../contexts/AuthContext';
 import { APP_CURRENCY, APP_CURRENCY_FRACTION_DIGITS } from '../config/constants';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import type { Cafe, CafeBranch } from '../types';
+import 'lightgallery/css/lightgallery.css';
+import 'lightgallery/css/lg-zoom.css';
+import 'lightgallery/css/lg-fullscreen.css';
+
+interface LightGalleryInstance {
+  destroy: () => void;
+}
+
+const loadLightGallery = async (): Promise<{
+  lightGallery: any;
+  lgZoom: any;
+  lgFullscreen: any;
+}> => {
+  const [lightGallery, zoom, fullscreen] = await Promise.all([
+    import('lightgallery'),
+    import('lightgallery/plugins/zoom'),
+    import('lightgallery/plugins/fullscreen'),
+  ]);
+
+  return {
+    lightGallery: lightGallery.default,
+    lgZoom: zoom.default,
+    lgFullscreen: fullscreen.default,
+  };
+};
 
 interface CafeDetailResponse {
   cafeDetail: Cafe;
@@ -36,6 +56,8 @@ export default function CafeDetail(): React.ReactElement {
   const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const { isAuthenticated } = useAuth();
+  const cafeImageRef = useRef<HTMLDivElement | null>(null);
+  const lightGalleryInstance = useRef<LightGalleryInstance | null>(null);
 
   const [cafe, setCafe] = useState<Cafe | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -48,10 +70,22 @@ export default function CafeDetail(): React.ReactElement {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
+  const [showMapDialog, setShowMapDialog] = useState<boolean>(false);
 
   const activeBranch = useMemo(() => {
     return (cafe?.branches ?? []).find((branch) => String(branch.id) === activeBranchKey) ?? null;
   }, [activeBranchKey, cafe?.branches]);
+
+  const activeBranchTags = useMemo(() => {
+    if (!activeBranch) return [];
+    return Array.from(
+      new Map(
+        (activeBranch.creators ?? [])
+          .flatMap((creator) => creator.tags ?? [])
+          .map((tag) => [String(tag.id), tag])
+      ).values()
+    );
+  }, [activeBranch]);
 
   const loadCafeDetail = async (): Promise<void> => {
     if (!slug) {
@@ -116,12 +150,6 @@ export default function CafeDetail(): React.ReactElement {
                 rating
                 comment
                 created_at
-                user {
-                  id
-                  name
-                  username
-                  avatar_thumb
-                }
               }
             }
           }
@@ -156,6 +184,30 @@ export default function CafeDetail(): React.ReactElement {
     loadCafeDetail();
   }, [slug]);
 
+  useEffect(() => {
+    if (!cafe?.image_url || !cafeImageRef.current || lightGalleryInstance.current) {
+      return;
+    }
+
+    loadLightGallery().then(({ lightGallery, lgZoom, lgFullscreen }) => {
+      if (cafeImageRef.current && !lightGalleryInstance.current) {
+        lightGalleryInstance.current = lightGallery(cafeImageRef.current, {
+          plugins: [lgZoom, lgFullscreen],
+          speed: 350,
+          zoom: true,
+          zoomFromOrigin: true,
+          download: false,
+          counter: false,
+        });
+      }
+    });
+
+    return () => {
+      lightGalleryInstance.current?.destroy();
+      lightGalleryInstance.current = null;
+    };
+  }, [cafe?.image_url]);
+
   const renderStars = (value: number): string => {
     const fullStars = Math.max(0, Math.min(5, Math.round(value)));
     return `${'★'.repeat(fullStars)}${'☆'.repeat(5 - fullStars)}`;
@@ -163,7 +215,7 @@ export default function CafeDetail(): React.ReactElement {
 
   const branchLocationLabel = (branch: CafeBranch): string => {
     const comuna = (branch.city ?? branch.state ?? '').trim();
-    return comuna !== '' ? `${branch.name}/${comuna}` : branch.name;
+    return comuna !== '' ? `${branch.name} · ${comuna}` : branch.name;
   };
 
   const formatCurrency = (value: number): string => {
@@ -278,8 +330,42 @@ export default function CafeDetail(): React.ReactElement {
 
   if (loading) {
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" variant="warning" />
+      <Container className="cafe-detail-page py-4" aria-busy="true" aria-live="polite">
+        <div className="cafe-detail-header-bar mb-3">
+          <div className="apple-skeleton rounded-xl" style={{ width: '110px', height: '44px' }} />
+          <div className="apple-skeleton rounded-xl" style={{ width: '90px', height: '44px' }} />
+        </div>
+
+        <div className="cafe-detail-hero-card mb-4 overflow-hidden position-relative" style={{ height: '360px', borderRadius: 'var(--rounded-2xl)' }}>
+          <div className="apple-skeleton w-100 h-100" />
+          <div style={{ position: 'absolute', bottom: '24px', left: '24px', right: '24px', zIndex: 2 }}>
+            <div className="apple-skeleton apple-skeleton-text mb-2" style={{ width: '120px', height: '14px' }} />
+            <div className="apple-skeleton apple-skeleton-text mb-3" style={{ width: '45%', height: '32px' }} />
+            <div className="d-flex gap-2">
+              <div className="apple-skeleton rounded-pill" style={{ width: '70px', height: '28px' }} />
+              <div className="apple-skeleton rounded-pill" style={{ width: '110px', height: '28px' }} />
+              <div className="apple-skeleton rounded-pill" style={{ width: '90px', height: '28px' }} />
+            </div>
+          </div>
+        </div>
+
+        <Row className="g-4">
+          <Col lg={8}>
+            <div className="apple-skeleton-card p-4 text-start">
+              <div className="apple-skeleton apple-skeleton-text w-50 mb-3" style={{ height: '22px' }} />
+              <div className="apple-skeleton apple-skeleton-text w-100 mb-2" style={{ height: '14px' }} />
+              <div className="apple-skeleton apple-skeleton-text w-85 mb-4" style={{ height: '14px' }} />
+              <div className="apple-skeleton rounded-2xl w-100" style={{ height: '180px' }} />
+            </div>
+          </Col>
+          <Col lg={4}>
+            <div className="apple-skeleton-card p-4 text-start">
+              <div className="apple-skeleton apple-skeleton-text w-60 mb-3" style={{ height: '20px' }} />
+              <div className="apple-skeleton rounded-xl w-100 mb-3" style={{ height: '60px' }} />
+              <div className="apple-skeleton rounded-xl w-100" style={{ height: '60px' }} />
+            </div>
+          </Col>
+        </Row>
       </Container>
     );
   }
@@ -288,8 +374,8 @@ export default function CafeDetail(): React.ReactElement {
     return (
       <Container className="py-5">
         <Alert variant="danger" className="mb-3">{error || t('cafes.detail.not_found')}</Alert>
-        <Link to="/cafes" className="btn btn-outline-secondary btn-sm">
-          <i className="fas fa-arrow-left me-2"></i>
+        <Link to="/cafes" className="cafe-detail-back-btn btn btn-secondary">
+          <i className="fas fa-chevron-left me-2" aria-hidden="true"></i>
           {t('common.back')}
         </Link>
       </Container>
@@ -297,331 +383,569 @@ export default function CafeDetail(): React.ReactElement {
   }
 
   return (
-    <Container className="py-5">
-      <Row className="mb-4 g-4 align-items-center">
-        <Col md={8}>
-          <h1 className="mb-2">{cafe.name}</h1>
+    <Container className="cafe-detail-page">
+      {/* Barra Superior: Retroceso y Acciones */}
+      <div className="cafe-detail-header-bar">
+        <Link to="/cafes" className="cafe-detail-back-btn btn btn-secondary">
+          <i className="fas fa-chevron-left me-2" aria-hidden="true"></i>
+          {t('common.back')}
+        </Link>
+
+        <div className="d-flex gap-2 align-items-center">
+          {cafe.website && (
+            <a
+              href={cafe.website}
+              target="_blank"
+              rel="noreferrer"
+              className="cafe-detail-action-btn btn btn-secondary d-none d-sm-inline-flex"
+            >
+              <i className="fas fa-globe me-2" aria-hidden="true"></i>
+              {t('home.view_cafe_site')}
+            </a>
+          )}
+          <Button variant="secondary" className="cafe-detail-action-btn" onClick={openShareDialog}>
+            <i className="fas fa-arrow-up-from-bracket me-2" aria-hidden="true"></i>
+            {t('cafes.detail.share')}
+          </Button>
+        </div>
+      </div>
+
+      {/* Hero Card Visual */}
+      <div className="cafe-detail-hero-card">
+        {cafe.image_url ? (
+          <div ref={cafeImageRef} className="cafe-detail-cover-wrapper">
+            <a href={cafe.image_url} data-src={cafe.image_url} aria-label={t('cafes.detail.open_image')}>
+              <img
+                src={cafe.image_url}
+                alt={cafe.name}
+                width="1200"
+                height="420"
+                className="cafe-detail-cover"
+                loading="eager"
+              />
+            </a>
+            <div className="cafe-detail-cover-overlay">
+              <div className="cafe-detail-hero-content">
+                <span className="cafe-detail-hero-kicker">{t('cafes.detail.eyebrow')}</span>
+                <h1 className="cafe-detail-hero-title">{cafe.name}</h1>
+                <div className="cafe-detail-hero-badges">
+                  {typeof cafe.average_rating === 'number' && (
+                    <span className="cafe-pill-rating">
+                      <i className="fas fa-star" aria-hidden="true"></i>
+                      {cafe.average_rating.toFixed(1)}
+                    </span>
+                  )}
+                  <span className="cafe-pill-meta">
+                    <i className="fas fa-store me-1" aria-hidden="true"></i>
+                    {t('home.branches_count_label', { count: cafe.branches_count ?? 0 })}
+                  </span>
+                  <span className="cafe-pill-meta">
+                    <i className="fas fa-message me-1" aria-hidden="true"></i>
+                    {t('home.reviews_count_label', { count: cafe.reviews_count ?? 0 })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 p-md-5">
+            <span className="cafes-section-kicker">{t('cafes.detail.eyebrow')}</span>
+            <h1 className="cafe-detail-hero-title text-dark">{cafe.name}</h1>
+            <div className="cafe-detail-hero-badges mt-3">
+              {typeof cafe.average_rating === 'number' && (
+                <span className="cafe-pill-rating text-dark border">
+                  <i className="fas fa-star" aria-hidden="true"></i> {cafe.average_rating.toFixed(1)}
+                </span>
+              )}
+              <span className="cafe-pill-meta text-dark border">
+                <i className="fas fa-store me-1" aria-hidden="true"></i>
+                {t('home.branches_count_label', { count: cafe.branches_count ?? 0 })}
+              </span>
+              <span className="cafe-pill-meta text-dark border">
+                <i className="fas fa-message me-1" aria-hidden="true"></i>
+                {t('home.reviews_count_label', { count: cafe.reviews_count ?? 0 })}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Contenido Principal en 2 Columnas (Editorial Layout) */}
+      <Row className="g-4">
+        {/* Columna Principal (Detalles, Sucursales, Creadores, Reseñas) */}
+        <Col lg={8}>
+          {/* Historia / Descripción del Café */}
+          {cafe.description && (
+            <div className="cafe-apple-card">
+              <div className="cafe-card-heading">
+                <h2 className="cafe-card-title">
+                  <i className="fas fa-circle-info text-primary" aria-hidden="true"></i>
+                  {t('cafes.detail.sections.details')}
+                </h2>
+              </div>
+              <p className="fs-5 text-muted mb-0" style={{ lineHeight: 'var(--lh-normal)' }}>
+                {cafe.description}
+              </p>
+            </div>
+          )}
+
+          {/* Sección de Sucursales */}
+          <div className="cafe-apple-card">
+            <div className="cafe-card-heading">
+              <h2 className="cafe-card-title">
+                <i className="fas fa-location-dot text-primary" aria-hidden="true"></i>
+                {t('cafes.detail.sections.branches')}
+              </h2>
+              <Badge bg="secondary" className="rounded-pill">
+                {(cafe.branches ?? []).length}
+              </Badge>
+            </div>
+
+            {(cafe.branches ?? []).length === 0 ? (
+              <Alert variant="light" className="mb-0 rounded-3 border">
+                {t('cafes.detail.no_branches')}
+              </Alert>
+            ) : (
+              <>
+                {/* Selector Segmentado de Sucursales */}
+                {(cafe.branches ?? []).length > 1 && (
+                  <div className="apple-segmented-control" role="tablist">
+                    {(cafe.branches ?? []).map((branch) => (
+                      <button
+                        key={branch.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={activeBranchKey === String(branch.id)}
+                        className={`apple-segment-btn ${activeBranchKey === String(branch.id) ? 'active' : ''}`}
+                        onClick={() => setActiveBranchKey(String(branch.id))}
+                      >
+                        <i className="fas fa-store" aria-hidden="true"></i>
+                        {branchLocationLabel(branch)}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Ficha de Información de la Sucursal Activa */}
+                {activeBranch && (
+                  <div className="apple-list-rows mt-3">
+                    <div className="apple-list-row">
+                      <span className="apple-list-row-label">
+                        <i className="fas fa-signature text-muted" aria-hidden="true"></i>
+                        {t('cafes.detail.fields.name')}
+                      </span>
+                      <span className="apple-list-row-value">{activeBranch.name}</span>
+                    </div>
+
+                    {activeBranch.address && (
+                      <div className="apple-list-row">
+                        <span className="apple-list-row-label">
+                          <i className="fas fa-map-pin text-muted" aria-hidden="true"></i>
+                          {t('cafes.detail.fields.address')}
+                        </span>
+                        <span className="apple-list-row-value">
+                          <span className="badge text-bg-success rounded-pill px-3 py-2">
+                            {activeBranch.address}
+                          </span>
+                        </span>
+                      </div>
+                    )}
+
+                    {(activeBranch.city || activeBranch.state) && (
+                      <div className="apple-list-row">
+                        <span className="apple-list-row-label">
+                          <i className="fas fa-city text-muted" aria-hidden="true"></i>
+                          {t('cafes.detail.fields.comuna')}
+                        </span>
+                        <span className="apple-list-row-value">
+                          {(activeBranch.city ?? activeBranch.state) || '-'}
+                        </span>
+                      </div>
+                    )}
+
+                    {activeBranch.phone && (
+                      <div className="apple-list-row">
+                        <span className="apple-list-row-label">
+                          <i className="fas fa-phone text-muted" aria-hidden="true"></i>
+                          {t('cafes.detail.fields.phone')}
+                        </span>
+                        <span className="apple-list-row-value">
+                          <a href={`tel:${activeBranch.phone}`} className="text-decoration-none">
+                            {activeBranch.phone}
+                          </a>
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="apple-list-row">
+                      <span className="apple-list-row-label">
+                        <i className="fas fa-ticket text-muted" aria-hidden="true"></i>
+                        {t('cafes.detail.fields.entry_price')}
+                      </span>
+                      <span className="apple-list-row-value">
+                        {typeof activeBranch.entry_price === 'number' && activeBranch.entry_price > 0
+                          ? formatCurrency(activeBranch.entry_price)
+                          : t('cafes.detail.free_entry')}
+                      </span>
+                    </div>
+
+                    <div className="apple-list-row">
+                      <span className="apple-list-row-label">
+                        <i className="fas fa-mug-hot text-muted" aria-hidden="true"></i>
+                        {t('cafes.detail.fields.individual_consumption')}
+                      </span>
+                      <span className="apple-list-row-value">
+                        {typeof activeBranch.consumo_individual === 'number' && activeBranch.consumo_individual > 0 ? (
+                          <span className="badge text-bg-info rounded-pill px-3 py-1">
+                            {formatCurrency(activeBranch.consumo_individual)}
+                          </span>
+                        ) : (
+                          '-'
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="apple-list-row">
+                      <span className="apple-list-row-label">
+                        <i className="fas fa-cookie-bite text-muted" aria-hidden="true"></i>
+                        {t('cafes.detail.fields.small_consumption')}
+                      </span>
+                      <span className="apple-list-row-value">
+                        {typeof activeBranch.consumo_chica === 'number' && activeBranch.consumo_chica > 0 ? (
+                          <span className="badge text-bg-info rounded-pill px-3 py-1">
+                            {formatCurrency(activeBranch.consumo_chica)}
+                          </span>
+                        ) : (
+                          '-'
+                        )}
+                      </span>
+                    </div>
+
+                    {activeBranch.description && (
+                      <div className="apple-list-row">
+                        <span className="apple-list-row-label">
+                          <i className="fas fa-align-left text-muted" aria-hidden="true"></i>
+                          {t('cafes.detail.fields.description')}
+                        </span>
+                        <span className="apple-list-row-value text-muted fw-normal text-start">
+                          {activeBranch.description}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Creadores de la Sucursal */}
+          {activeBranch && (
+            <div className="cafe-apple-card">
+              <div className="cafe-card-heading">
+                <h2 className="cafe-card-title">
+                  <i className="fas fa-users text-primary" aria-hidden="true"></i>
+                  {t('cafes.detail.branch_creators')}
+                </h2>
+                <span className="small text-muted">
+                  {(activeBranch.creators ?? []).length}
+                </span>
+              </div>
+
+              {(activeBranch.creators ?? []).length === 0 ? (
+                <p className="text-muted mb-0">{t('cafes.detail.no_creators')}</p>
+              ) : (
+                <>
+                  <div className="cafe-creators-list">
+                    {(activeBranch.creators ?? []).map((creator) => (
+                      <Link
+                        key={creator.id}
+                        to={`/u/${creator.username}`}
+                        className="cafe-creator-pill"
+                      >
+                        {creator.avatar_thumb || creator.avatar_url ? (
+                          <img
+                            src={creator.avatar_thumb || creator.avatar_url}
+                            alt={creator.name || creator.username}
+                            width={72}
+                            height={72}
+                            className="cafe-creator-avatar"
+                          />
+                        ) : (
+                          <div className="cafe-creator-avatar-placeholder">
+                            {(creator.name || creator.username || '?').charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <span className="cafe-creator-name">
+                          {creator.name || `@${creator.username}`}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {activeBranchTags.length > 0 && (
+                    <div className="mt-4 pt-3 border-top">
+                      <p className="text-muted small mb-2">{t('cafes.detail.creators_tags')}</p>
+                      <div className="d-flex flex-wrap gap-2">
+                        {activeBranchTags.map((tag) => {
+                          const tagSlug = String(tag.name).trim().toLowerCase().replace(/\s+/g, '-');
+                          return (
+                            <Badge key={tag.id} bg={(tag.color as any) || 'secondary'} className="rounded-pill px-3 py-2">
+                              <Link to={`/t/${tagSlug}`} className="text-white text-decoration-none">
+                                #{tag.name}
+                              </Link>
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Reseñas de la Sucursal */}
+          {activeBranch && (
+            <div className="cafe-apple-card">
+              <div className="cafe-card-heading">
+                <h2 className="cafe-card-title">
+                  <i className="fas fa-star text-warning" aria-hidden="true"></i>
+                  {t('cafes.detail.branch_reviews')}
+                </h2>
+                <Badge bg="warning" text="dark" className="rounded-pill px-3 py-2">
+                  {typeof activeBranch.average_rating === 'number'
+                    ? `${activeBranch.average_rating.toFixed(1)} ★ (${activeBranch.reviews_count ?? 0})`
+                    : t('cafes.detail.no_reviews_short')}
+                </Badge>
+              </div>
+
+              {(activeBranch.reviews ?? []).length === 0 ? (
+                <p className="text-muted mb-4">{t('cafes.detail.no_reviews')}</p>
+              ) : (
+                <div className="d-flex flex-column gap-3 mb-4">
+                  {(activeBranch.reviews ?? []).map((review) => (
+                    <div key={review.id} className="cafe-review-item">
+                      <div className="cafe-review-header">
+                        <span className="fw-bold">{t('home.anonymous_reviewer')}</span>
+                        <span className="badge bg-warning text-dark rounded-pill">
+                          {renderStars(review.rating)} ({review.rating}/5)
+                        </span>
+                      </div>
+                      {review.comment && (
+                        <p className="cafe-review-comment">{review.comment}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Formulario de Reseña */}
+              {isAuthenticated ? (
+                <Form onSubmit={handleSubmitReview} className="border-top pt-4">
+                  <h3 className="h6 fw-bold mb-3">
+                    <i className="fas fa-pen-to-square me-2 text-primary" aria-hidden="true"></i>
+                    {t('cafes.detail.write_review', 'Escribir una reseña')}
+                  </h3>
+                  {submitMessage && <Alert variant="success" className="py-2 rounded-3">{submitMessage}</Alert>}
+                  {submitError && <Alert variant="danger" className="py-2 rounded-3">{submitError}</Alert>}
+
+                  <Row className="g-3">
+                    <Col md={3}>
+                      <Form.Group controlId="review-rating">
+                        <Form.Label className="small fw-semibold text-muted">{t('cafes.detail.form.rating')}</Form.Label>
+                        <Form.Select
+                          value={rating}
+                          onChange={(event) => setRating(Number(event.target.value))}
+                          disabled={submittingReview}
+                          className="rounded-pill"
+                        >
+                          <option value={5}>5 ★★★★★</option>
+                          <option value={4}>4 ★★★★☆</option>
+                          <option value={3}>3 ★★★☆☆</option>
+                          <option value={2}>2 ★★☆☆☆</option>
+                          <option value={1}>1 ★☆☆☆☆</option>
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+                    <Col md={9}>
+                      <Form.Group controlId="review-comment">
+                        <Form.Label className="small fw-semibold text-muted">{t('cafes.detail.form.comment')}</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={2}
+                          maxLength={1000}
+                          placeholder={t('cafes.detail.form.comment_placeholder')}
+                          value={comment}
+                          onChange={(event) => setComment(event.target.value)}
+                          disabled={submittingReview}
+                          className="rounded-3"
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <div className="mt-3 d-flex justify-content-end">
+                    <Button type="submit" variant="primary" className="rounded-pill px-4" disabled={submittingReview}>
+                      {submittingReview ? t('cafes.detail.form.sending') : t('cafes.detail.form.submit')}
+                    </Button>
+                  </div>
+                </Form>
+              ) : (
+                <Alert variant="info" className="mb-0 rounded-4">
+                  <i className="fas fa-circle-info me-2" aria-hidden="true"></i>
+                  {t('cafes.detail.login_to_review')} <Link to="/login" className="fw-bold">{t('nav.login')}</Link>
+                </Alert>
+              )}
+            </div>
+          )}
         </Col>
-        <Col md={4} className="text-center text-md-end">
-          <div className="d-flex gap-2 justify-content-center justify-content-md-end">
-            <Button variant="outline-dark" size="sm" onClick={openShareDialog}>
-              <i className="fas fa-share-alt me-2"></i>
-              {t('cafes.detail.share')}
-            </Button>
-            <Link to="/cafes" className="btn btn-outline-secondary btn-sm">
-              <i className="fas fa-arrow-left me-2"></i>
-              {t('common.back')}
-            </Link>
+
+        {/* Columna Lateral (Acciones Rápidas / Resumen) */}
+        <Col lg={4}>
+          <div className="cafe-action-card">
+            {/* Tarjeta de Acciones Rápidas */}
+            <div className="cafe-apple-card">
+              <h3 className="cafe-card-title mb-3">
+                <i className="fas fa-bolt text-warning" aria-hidden="true"></i>
+                {t('cafes.detail.quick_actions', 'Acciones Rápidas')}
+              </h3>
+
+              {activeBranch?.google_maps_url && (
+                <button
+                  type="button"
+                  className="cafe-primary-action-btn"
+                  onClick={() => setShowMapDialog(true)}
+                >
+                  <i className="fas fa-map-location-dot" aria-hidden="true"></i>
+                  {t('cafes.detail.fields.maps')}
+                </button>
+              )}
+
+              {(activeBranch?.website || cafe.website) && (
+                <a
+                  href={activeBranch?.website || cafe.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="cafe-secondary-action-btn btn btn-secondary"
+                >
+                  <i className="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                  {t('home.view_cafe_site')}
+                </a>
+              )}
+
+              {activeBranch?.menu_qr_url && (
+                <a
+                  href={activeBranch.menu_qr_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="cafe-secondary-action-btn btn btn-secondary"
+                >
+                  <i className="fas fa-qrcode" aria-hidden="true"></i>
+                  {t('cafes.detail.view_menu')}
+                </a>
+              )}
+
+              <Button
+                variant="secondary"
+                className="cafe-secondary-action-btn"
+                onClick={openShareDialog}
+              >
+                <i className="fas fa-share-nodes" aria-hidden="true"></i>
+                {t('cafes.detail.share')}
+              </Button>
+            </div>
+
+            {/* Ficha Resumen */}
+            {activeBranch && (
+              <div className="cafe-apple-card">
+                <h4 className="fs-6 fw-bold mb-3 text-muted">
+                  <i className="fas fa-circle-check me-2 text-success" aria-hidden="true"></i>
+                  {t('cafes.detail.summary_title', 'Información Clave')}
+                </h4>
+                <div className="d-flex flex-column gap-2 small">
+                  <div className="d-flex justify-content-between">
+                    <span className="text-muted">{t('cafes.detail.fields.entry_price')}:</span>
+                    <span className="fw-semibold">
+                      {typeof activeBranch.entry_price === 'number' && activeBranch.entry_price > 0
+                        ? formatCurrency(activeBranch.entry_price)
+                        : t('cafes.detail.free_entry')}
+                    </span>
+                  </div>
+                  {activeBranch.city && (
+                    <div className="d-flex justify-content-between">
+                      <span className="text-muted">{t('cafes.detail.fields.comuna')}:</span>
+                      <span className="fw-semibold">{activeBranch.city}</span>
+                    </div>
+                  )}
+                  {activeBranch.postal_code && (
+                    <div className="d-flex justify-content-between">
+                      <span className="text-muted">{t('cafes.detail.fields.postal_code')}:</span>
+                      <span className="fw-semibold">{activeBranch.postal_code}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </Col>
       </Row>
 
-      <Accordion alwaysOpen defaultActiveKey={['0', '1']}>
-        <Accordion.Item eventKey="0">
-          <Accordion.Header>{t('cafes.detail.sections.details')}</Accordion.Header>
-          <Accordion.Body>
-            <Row className="g-4">
-              <Col lg={4}>
-                {cafe.image_url ? (
-                  <img
-                    src={cafe.image_url}
-                    alt={cafe.name}
-                    className="img-fluid rounded shadow-sm"
-                    style={{ width: '100%', maxHeight: '320px', objectFit: 'cover' }}
-                  />
-                ) : (
-                  <Card className="h-100 border-dashed">
-                    <Card.Body className="d-flex align-items-center justify-content-center text-muted">
-                      {t('cafes.detail.no_image')}
-                    </Card.Body>
-                  </Card>
-                )}
-              </Col>
-              <Col lg={8}>
-                <div className="d-flex flex-wrap gap-2 mb-3">
-                  <Badge bg="light" text="dark">{t('home.branches_count_label', { count: cafe.branches_count ?? 0 })}</Badge>
-                  <Badge bg="light" text="dark">{t('home.reviews_count_label', { count: cafe.reviews_count ?? 0 })}</Badge>
-                  {typeof cafe.average_rating === 'number' && (
-                    <Badge bg="warning" text="dark">{renderStars(cafe.average_rating)} {cafe.average_rating.toFixed(1)}</Badge>
-                  )}
-                </div>
-                <hr />
-                {cafe.description && <p className="text-muted mb-3">{cafe.description}</p>}
-
-                {cafe.website && (
-                  <p className="mb-0">
-                    <a href={cafe.website} target="_blank" rel="noreferrer">
-                      <i className="fas fa-link me-2"></i>
-                      {t('home.view_cafe_site')}
-                    </a>
-                  </p>
-                )}
-              </Col>
-            </Row>
-          </Accordion.Body>
-        </Accordion.Item>
-
-        <Accordion.Item eventKey="1">
-          <Accordion.Header>{t('cafes.detail.sections.branches')}</Accordion.Header>
-          <Accordion.Body>
-            {(cafe.branches ?? []).length === 0 ? (
-              <Alert variant="light" className="mb-0">{t('cafes.detail.no_branches')}</Alert>
-            ) : (
-              <Tabs
-                id="cafe-branches-tabs"
-                activeKey={activeBranchKey}
-                onSelect={(key) => setActiveBranchKey(key ?? '')}
-                className="mb-3"
-              >
-                {(cafe.branches ?? []).map((branch) => {
-                  const creatorTags = Array.from(
-                    new Map(
-                      (branch.creators ?? [])
-                        .flatMap((creator) => creator.tags ?? [])
-                        .map((tag) => [String(tag.id), tag])
-                    ).values()
-                  );
-
-                  return (
-                  <Tab key={branch.id} eventKey={String(branch.id)} title={branchLocationLabel(branch)}>
-                    <Row className="g-4 mt-1">
-                      <Col lg={6}>
-                        <Card className="h-100" style={{ paddingTop: 0 }}>
-                          <Card.Header>{t('cafes.detail.branch_data')}</Card.Header>
-                          <ListGroup variant="flush">
-                            <ListGroup.Item><strong>{t('cafes.detail.fields.name')}:</strong> {branch.name}</ListGroup.Item>
-                                {branch.description && <ListGroup.Item><strong>{t('cafes.detail.fields.description')}:</strong> {branch.description}</ListGroup.Item>}
-                                {branch.address && <ListGroup.Item><strong>{t('cafes.detail.fields.address')}:</strong> <span className="badge text-bg-success">{branch.address}</span></ListGroup.Item>}
-                            {(branch.city || branch.state) && <ListGroup.Item><strong>{t('cafes.detail.fields.comuna')}:</strong> {(branch.city ?? branch.state) || '-'}</ListGroup.Item>}
-                            {branch.postal_code && <ListGroup.Item><strong>{t('cafes.detail.fields.postal_code')}:</strong> {branch.postal_code}</ListGroup.Item>}
-                            {branch.phone && <ListGroup.Item><strong>{t('cafes.detail.fields.phone')}:</strong> {branch.phone}</ListGroup.Item>}
-                            <ListGroup.Item>
-                              <strong>{t('cafes.detail.fields.entry_price')}:</strong>{' '}
-                              {typeof branch.entry_price === 'number' && branch.entry_price > 0
-                                ? formatCurrency(branch.entry_price)
-                                : t('cafes.detail.free_entry')}
-                            </ListGroup.Item>
-                            <ListGroup.Item>
-                                <strong>{t('cafes.detail.fields.individual_consumption')}:</strong>{' '}
-                                <span className="badge text-bg-info">
-                              {typeof branch.consumo_individual === 'number' && branch.consumo_individual > 0
-                                ? formatCurrency(branch.consumo_individual)
-                                : '-'}</span>
-                            </ListGroup.Item>
-                            <ListGroup.Item>
-                                <strong>{t('cafes.detail.fields.small_consumption')}:</strong>{' '}
-                                <span className="badge text-bg-info">
-                              {typeof branch.consumo_chica === 'number' && branch.consumo_chica > 0
-                                ? formatCurrency(branch.consumo_chica)
-                                : '-'}</span>
-                            </ListGroup.Item>
-                            {branch.website && (
-                              <ListGroup.Item>
-                                <strong>{t('cafes.detail.fields.website')}:</strong>{' '}
-                                <a href={branch.website} target="_blank" rel="noreferrer">{branch.website}</a>
-                              </ListGroup.Item>
-                            )}
-                            {branch.google_maps_url && (
-                              <ListGroup.Item>
-                                <strong>{t('cafes.detail.fields.maps')}</strong>
-                                <div className="mt-2">
-                                  <iframe
-                                    src={branch.google_maps_url}
-                                    width="100%"
-                                    height="300"
-                                    style={{ border: 0 }}
-                                    allowFullScreen
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                    title={t('cafes.detail.fields.maps_iframe_title')}
-                                  />
-                                </div>
-                              </ListGroup.Item>
-                            )}
-                            {branch.menu_qr_url && (
-                              <ListGroup.Item>
-                                <strong>{t('cafes.detail.fields.menu')}:</strong>{' '}
-                                <a href={branch.menu_qr_url} target="_blank" rel="noreferrer">{t('cafes.detail.view_menu')}</a>
-                              </ListGroup.Item>
-                            )}
-                          </ListGroup>
-                        </Card>
-                      </Col>
-
-                      <Col lg={6}>
-                        <Card className="mb-3" style={{ paddingTop: 0 }}>
-                          <Card.Header>{t('cafes.detail.branch_creators')}</Card.Header>
-                          <Card.Body>
-                            {(branch.creators ?? []).length === 0 ? (
-                              <p className="text-muted mb-0">{t('cafes.detail.no_creators')}</p>
-                            ) : (
-                              <>
-                              <div className="d-flex flex-wrap gap-3">
-                                {(branch.creators ?? []).map((creator) => (
-                                  <Link
-                                    key={creator.id}
-                                    to={`/u/${creator.username}`}
-                                    className="d-inline-flex flex-column align-items-center text-decoration-none text-dark"
-                                    style={{ width: '112px' }}
-                                  >
-                                    {creator.avatar_thumb || creator.avatar_url ? (
-                                      <img
-                                        src={creator.avatar_thumb || creator.avatar_url}
-                                        alt={creator.name || creator.username}
-                                        width={100}
-                                        height={100}
-                                        className="rounded-circle"
-                                        style={{ objectFit: 'cover' }}
-                                      />
-                                    ) : (
-                                      <span
-                                        className="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center"
-                                        style={{ width: '100px', height: '100px', fontSize: '32px' }}
-                                      >
-                                        {(creator.name || creator.username || '?').charAt(0).toUpperCase()}
-                                      </span>
-                                    )}
-                                    <span className="mt-2 text-center small fw-semibold lh-sm">{creator.name || `@${creator.username}`}</span>
-                                  </Link>
-                                ))}
-                              </div>
-                              <div className="mt-3 pt-3 border-top">
-                                <p className="text-muted small mb-2">{t('cafes.detail.creators_tags')}</p>
-                                {creatorTags.length > 0 ? (
-                                  <div className="d-flex flex-wrap gap-2">
-                                    {creatorTags.map((tag) => {
-                                      const slug = String(tag.name).trim().toLowerCase().replace(/\s+/g, '-');
-
-                                      return (
-                                        <Badge key={tag.id} bg={(tag.color as any) || 'secondary'}>
-                                          <Link to={`/t/${slug}`} className="text-white text-decoration-none">
-                                            {tag.name}
-                                          </Link>
-                                        </Badge>
-                                      );
-                                    })}
-                                  </div>
-                                ) : (
-                                  <p className="text-muted mb-0 small">{t('cafes.detail.no_creator_tags')}</p>
-                                )}
-                              </div>
-                              </>
-                            )}
-                          </Card.Body>
-                        </Card>
-
-                        <Card style={{ paddingTop: 0 }}>
-                          <Card.Header className="d-flex justify-content-between align-items-center">
-                            <span>{t('cafes.detail.branch_reviews')}</span>
-                            <Badge bg="warning" text="dark">
-                              {typeof branch.average_rating === 'number' ? `${branch.average_rating.toFixed(1)} (${branch.reviews_count ?? 0})` : t('cafes.detail.no_reviews_short')}
-                            </Badge>
-                          </Card.Header>
-                          <Card.Body>
-                            {(branch.reviews ?? []).length === 0 ? (
-                              <p className="text-muted mb-0">{t('cafes.detail.no_reviews')}</p>
-                            ) : (
-                              <div className="d-flex flex-column gap-2 mb-3">
-                                {(branch.reviews ?? []).map((review) => (
-                                  <div key={review.id} className="border rounded p-2">
-                                    <div className="d-flex justify-content-between align-items-center gap-2">
-                                      <strong>{review.user?.name || t('home.anonymous_reviewer')}</strong>
-                                      <Badge bg="light" text="dark">{renderStars(review.rating)} ({review.rating}/5)</Badge>
-                                    </div>
-                                    {review.comment && <p className="mb-0 mt-2 small">{review.comment}</p>}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {isAuthenticated ? (
-                              <Form onSubmit={handleSubmitReview}>
-                                {submitMessage && <Alert variant="success" className="py-2">{submitMessage}</Alert>}
-                                {submitError && <Alert variant="danger" className="py-2">{submitError}</Alert>}
-
-                                <Row className="g-2 align-items-end">
-                                  <Col md={3}>
-                                    <Form.Group controlId="review-rating">
-                                      <Form.Label>{t('cafes.detail.form.rating')}</Form.Label>
-                                      <Form.Select
-                                        value={rating}
-                                        onChange={(event) => setRating(Number(event.target.value))}
-                                        disabled={submittingReview}
-                                      >
-                                        <option value={5}>5</option>
-                                        <option value={4}>4</option>
-                                        <option value={3}>3</option>
-                                        <option value={2}>2</option>
-                                        <option value={1}>1</option>
-                                      </Form.Select>
-                                    </Form.Group>
-                                  </Col>
-                                  <Col md={9}>
-                                    <Form.Group controlId="review-comment">
-                                      <Form.Label>{t('cafes.detail.form.comment')}</Form.Label>
-                                      <Form.Control
-                                        as="textarea"
-                                        rows={2}
-                                        maxLength={1000}
-                                        placeholder={t('cafes.detail.form.comment_placeholder')}
-                                        value={comment}
-                                        onChange={(event) => setComment(event.target.value)}
-                                        disabled={submittingReview}
-                                      />
-                                    </Form.Group>
-                                  </Col>
-                                </Row>
-
-                                <div className="mt-3 d-flex justify-content-end">
-                                  <Button type="submit" variant="dark" disabled={submittingReview}>
-                                    {submittingReview ? t('cafes.detail.form.sending') : t('cafes.detail.form.submit')}
-                                  </Button>
-                                </div>
-                              </Form>
-                            ) : (
-                              <Alert variant="info" className="mb-0">
-                                {t('cafes.detail.login_to_review')} <Link to="/login">{t('nav.login')}</Link>
-                              </Alert>
-                            )}
-                          </Card.Body>
-                        </Card>
-                      </Col>
-                    </Row>
-                  </Tab>
-                  );
-                })}
-              </Tabs>
-            )}
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
-
-      <Modal show={showShareDialog} onHide={closeShareDialog} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{t('cafes.detail.share_title')}</Modal.Title>
+      {/* Modal de Mapa Google Maps */}
+      <Modal show={showMapDialog} onHide={() => setShowMapDialog(false)} size="lg" centered>
+        <Modal.Header closeButton className="border-bottom-0 pb-0">
+          <Modal.Title className="h5 fw-bold">{activeBranch?.name || t('cafes.detail.fields.maps')}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <p className="text-muted small mb-2">{t('cafes.detail.share_description')}</p>
-          <Form.Control type="text" readOnly value={getShareUrl()} onFocus={(event) => event.currentTarget.select()} />
+        <Modal.Body className="p-3">
+          {activeBranch?.google_maps_url && (
+            <div className="rounded-4 overflow-hidden border">
+              <iframe
+                src={activeBranch.google_maps_url}
+                width="100%"
+                height="420"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title={t('cafes.detail.fields.maps_iframe_title')}
+              />
+            </div>
+          )}
+        </Modal.Body>
+      </Modal>
+
+      {/* Modal de Compartir */}
+      <Modal show={showShareDialog} onHide={closeShareDialog} centered>
+        <Modal.Header closeButton className="border-bottom-0 pb-0">
+          <Modal.Title className="h5 fw-bold">{t('cafes.detail.share_title')}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <p className="text-muted small mb-3">{t('cafes.detail.share_description')}</p>
+          <Form.Control
+            type="text"
+            readOnly
+            value={getShareUrl()}
+            onFocus={(event) => event.currentTarget.select()}
+            className="rounded-3"
+          />
           {shareMessage && (
-            <Alert variant="info" className="mt-3 py-2 mb-0">
+            <Alert variant="info" className="mt-3 py-2 mb-0 rounded-3">
               {shareMessage}
             </Alert>
           )}
         </Modal.Body>
-        <Modal.Footer className="d-flex gap-2 justify-content-between">
+        <Modal.Footer className="border-top-0 pt-0 d-flex gap-2 justify-content-between">
           <div>
             {typeof navigator !== 'undefined' && 'share' in navigator && (
-              <Button variant="outline-dark" onClick={handleNativeShare}>
-                <i className="fas fa-share-nodes me-2"></i>
+              <Button variant="dark" className="rounded-pill" onClick={handleNativeShare}>
+                <i className="fas fa-share-nodes me-2" aria-hidden="true"></i>
                 {t('cafes.detail.share_native')}
               </Button>
             )}
           </div>
           <div className="d-flex gap-2 ms-auto">
-            <Button variant="secondary" onClick={closeShareDialog}>{t('common.close')}</Button>
-            <Button variant="dark" onClick={handleCopyShareUrl}>
-              <i className="fas fa-copy me-2"></i>
+            <Button variant="secondary" className="rounded-pill" onClick={closeShareDialog}>{t('common.close')}</Button>
+            <Button variant="dark" className="rounded-pill" onClick={handleCopyShareUrl}>
+              <i className="fas fa-copy me-2" aria-hidden="true"></i>
               {t('cafes.detail.share_copy')}
             </Button>
           </div>

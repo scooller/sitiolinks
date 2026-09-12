@@ -1,0 +1,691 @@
+/* ==========================================================================
+   Apple HIG Cafes Module (Section & Interior Detail)
+   Layer Discipline: Liquid Glass for chrome/filters, Grouped Cards for content
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Cafes Section & Grid (Explorador / Homepage)
+   -------------------------------------------------------------------------- */
+.cafes-section {
+  position: relative;
+  overflow: hidden;
+  background: var(--cafe-bg-gradient);
+  padding: var(--space-12) 0;
+}
+
+.cafes-section-heading {
+  max-width: var(--container-heading-max);
+  margin: 0 auto var(--space-8);
+}
+
+.cafes-section-kicker {
+  display: inline-block;
+  color: var(--cafe-primary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+.cafes-section-title {
+  font-size: clamp(1.85rem, 4vw, 2.75rem);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--cafe-title-color);
+  line-height: var(--lh-tight);
+}
+
+.cafes-section-subtitle {
+  color: var(--cafe-desc-color);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  margin-top: var(--space-2);
+}
+
+/* Barra de Filtros Liquid Glass */
+.cafes-filter-bar {
+  background: var(--apple-glass-bg);
+  -webkit-backdrop-filter: var(--glass-filter-nav);
+  backdrop-filter: var(--glass-filter-nav);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-2xl);
+  box-shadow: var(--apple-glass-shadow);
+  padding: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.cafes-filter-input,
+.cafes-filter-select {
+  background: var(--apple-glass-dropdown-bg) !important;
+  border: 1px solid var(--apple-glass-border) !important;
+  border-radius: var(--rounded-lg) !important;
+  color: var(--text-main) !important;
+  min-height: var(--size-touch-min);
+  font-size: var(--fs-sm) !important;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cafes-filter-input:focus,
+.cafes-filter-select:focus {
+  border-color: var(--cafe-primary) !important;
+  box-shadow: var(--shadow-focus-ring) !important;
+  outline: none;
+}
+
+.cafes-filter-reset-btn {
+  min-height: var(--size-touch-min);
+  border-radius: var(--rounded-lg) !important;
+  border: none !important;
+  background: var(--apple-glass-dropdown-bg) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-button);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-sm);
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cafes-filter-reset-btn:hover:not(:disabled) {
+  background: rgba(var(--cafe-primary-rgb), 0.15) !important;
+  color: var(--cafe-primary) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.cafes-filter-reset-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-button-active);
+}
+
+.cafes-filter-reset-btn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* Tarjeta de Café (Apple Grouped Tile) */
+.cafe-tile {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--cafe-tile-bg);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--duration-normal) var(--ease-apple),
+              box-shadow var(--duration-normal) var(--ease-apple),
+              border-color var(--duration-normal) var(--ease-apple);
+}
+
+.cafe-tile:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: rgba(var(--cafe-primary-rgb), 0.35);
+}
+
+.cafe-tile-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cafe-tile-link:focus-visible {
+  outline: 3px solid var(--cafe-primary);
+  outline-offset: 3px;
+  border-radius: var(--rounded-2xl);
+}
+
+.cafe-tile-media {
+  position: relative;
+  aspect-ratio: var(--ratio-tile);
+  overflow: hidden;
+  background: var(--cafe-media-bg);
+}
+
+.cafe-tile-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-apple);
+}
+
+.cafe-tile:hover .cafe-tile-media img {
+  transform: scale(1.05);
+}
+
+.cafe-tile-placeholder {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: rgba(var(--cafe-border-rgb), 0.45);
+  font-size: var(--icon-xl);
+}
+
+/* Rating flotante Liquid Glass sobre la foto */
+.cafe-tile-rating {
+  position: absolute;
+  bottom: var(--space-3);
+  left: var(--space-3);
+  z-index: var(--z-base);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.65);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: var(--rounded-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-pill);
+}
+
+.cafe-tile-rating i {
+  color: var(--cafe-rating);
+}
+
+.cafe-tile-arrow {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: var(--z-base);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--rounded-circle);
+  background: rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: var(--icon-xs);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-button);
+  transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cafe-tile:hover .cafe-tile-arrow {
+  background: var(--cafe-primary);
+  transform: translate(2px, -2px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.cafe-tile-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: var(--space-5);
+  gap: var(--space-2);
+}
+
+.cafe-tile-title {
+  color: var(--cafe-title-color);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-tight);
+}
+
+.cafe-tile-description {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--cafe-desc-color);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.cafe-tile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--apple-glass-border);
+  color: var(--cafe-meta-color);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+
+.cafe-tile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(var(--cafe-primary-rgb), 0.08);
+  color: var(--cafe-primary);
+  padding: 3px 8px;
+  border-radius: var(--rounded-md);
+}
+
+/* --------------------------------------------------------------------------
+   2. Interior / Vista de Detalle (CafeDetail.tsx)
+   -------------------------------------------------------------------------- */
+.cafe-detail-page {
+  max-width: var(--container-detail-max);
+  padding: var(--space-8) var(--space-4) var(--space-12);
+}
+
+/* Cabecera Editorial & Botones de Acción Flotantes */
+.cafe-detail-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.cafe-detail-back-btn,
+.cafe-detail-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-touch-min);
+  padding: 0 var(--space-4);
+  border-radius: var(--rounded-full) !important;
+  border: none !important;
+  background: var(--apple-glass-dropdown-bg) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-button);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  transition: transform var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cafe-detail-back-btn:hover,
+.cafe-detail-action-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(var(--cafe-primary-rgb), 0.15) !important;
+  color: var(--cafe-primary) !important;
+  box-shadow: var(--shadow-button-hover);
+}
+
+.cafe-detail-back-btn:active,
+.cafe-detail-action-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-button-active);
+}
+
+/* Hero Visual Banner */
+.cafe-detail-hero-card {
+  position: relative;
+  background: var(--cafe-tile-bg);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: var(--space-8);
+}
+
+.cafe-detail-cover-wrapper {
+  position: relative;
+  width: 100%;
+  max-height: 420px;
+  overflow: hidden;
+  background: var(--cafe-media-bg);
+}
+
+.cafe-detail-cover {
+  width: 100%;
+  height: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-apple);
+}
+
+.cafe-detail-cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.7) 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-6);
+}
+
+.cafe-detail-hero-content {
+  color: #ffffff;
+  width: 100%;
+}
+
+.cafe-detail-hero-kicker {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--cafe-secondary);
+}
+
+.cafe-detail-hero-title {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-tight);
+  margin: var(--space-1) 0 var(--space-3);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.cafe-detail-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.cafe-pill-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.22);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  padding: 5px 12px;
+  border-radius: var(--rounded-full);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-sm);
+  box-shadow: var(--shadow-pill);
+}
+
+.cafe-pill-rating i {
+  color: var(--cafe-rating);
+}
+
+.cafe-pill-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 5px 12px;
+  border-radius: var(--rounded-full);
+  font-size: var(--fs-sm);
+  box-shadow: var(--shadow-pill);
+}
+
+/* Tarjeta Agrupada Apple (Inset Grouped Card) */
+.cafe-apple-card {
+  background: var(--cafe-tile-bg);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-2xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-6);
+}
+
+.cafe-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--apple-glass-border);
+}
+
+.cafe-card-title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--cafe-title-color);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Apple Segmented Control para selección de sucursales */
+.apple-segmented-control {
+  display: flex;
+  background: rgba(var(--cafe-border-rgb), 0.08);
+  padding: 4px;
+  border-radius: var(--rounded-xl);
+  gap: 4px;
+  overflow-x: auto;
+  margin-bottom: var(--space-5);
+  -webkit-overflow-scrolling: touch;
+}
+
+.apple-segment-btn {
+  flex: 1;
+  min-width: 140px;
+  min-height: var(--size-touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 6px var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--cafe-desc-color);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  border-radius: var(--rounded-lg);
+  transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+  white-space: nowrap;
+}
+
+.apple-segment-btn:hover {
+  color: var(--cafe-title-color);
+}
+
+.apple-segment-btn.active {
+  background: var(--bg-card, #ffffff);
+  color: var(--cafe-primary);
+  font-weight: var(--fw-semibold);
+  box-shadow: var(--shadow-button);
+}
+
+[data-bs-theme="dark"] .apple-segment-btn.active {
+  background: var(--form-bg);
+  color: var(--cafe-primary);
+  box-shadow: var(--shadow-button);
+}
+
+/* Filas de Información Estilo Lista Inset Apple */
+.apple-list-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.apple-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--apple-glass-border);
+  gap: var(--space-3);
+  font-size: var(--fs-sm);
+}
+
+.apple-list-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.apple-list-row-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--cafe-desc-color);
+  font-weight: var(--fw-medium);
+}
+
+.apple-list-row-value {
+  color: var(--cafe-title-color);
+  font-weight: var(--fw-semibold);
+  text-align: right;
+}
+
+/* Grilla de Creadores */
+.cafe-creators-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-4);
+}
+
+.cafe-creator-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  padding: var(--space-3);
+  border-radius: var(--rounded-xl);
+  background: rgba(var(--cafe-primary-rgb), 0.035);
+  border: 1px solid var(--apple-glass-border);
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+
+.cafe-creator-pill:hover {
+  transform: translateY(-3px);
+  background: rgba(var(--cafe-primary-rgb), 0.08);
+  color: var(--cafe-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.cafe-creator-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--rounded-circle);
+  object-fit: cover;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-2);
+}
+
+.cafe-creator-avatar-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--rounded-circle);
+  display: grid;
+  place-items: center;
+  background: rgba(var(--cafe-primary-rgb), 0.12);
+  color: var(--cafe-primary);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-xl);
+  margin-bottom: var(--space-2);
+}
+
+.cafe-creator-name {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+}
+
+/* Reseñas (Apple Testimonial Card) */
+.cafe-review-item {
+  background: rgba(var(--cafe-primary-rgb), 0.035);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-xl);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.cafe-review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.cafe-review-comment {
+  font-size: var(--fs-sm);
+  color: var(--cafe-desc-color);
+  line-height: var(--lh-normal);
+  margin: 0;
+}
+
+/* Acciones Rápidas (Sidebar en Desktop) */
+.cafe-action-card {
+  position: sticky;
+  top: calc(var(--size-touch-min) + var(--space-6));
+}
+
+.cafe-primary-action-btn {
+  width: 100%;
+  min-height: var(--size-touch-md);
+  border-radius: var(--rounded-pill) !important;
+  background: var(--cafe-primary) !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-base);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-primary-btn);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cafe-primary-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-primary-btn-hover);
+}
+
+.cafe-primary-action-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-button-active);
+}
+
+.cafe-secondary-action-btn {
+  width: 100%;
+  min-height: var(--size-touch-md);
+  border-radius: var(--rounded-pill) !important;
+  border: none !important;
+  background: var(--apple-glass-dropdown-bg) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-button);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  transition: transform var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cafe-secondary-action-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(var(--cafe-primary-rgb), 0.15) !important;
+  color: var(--cafe-primary) !important;
+  box-shadow: var(--shadow-button-hover);
+}
+
+.cafe-secondary-action-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-button-active);
+}
+
+/* Accesibilidad & Modo Reducido */
+@media (prefers-reduced-motion: reduce) {
+  .cafe-tile,
+  .cafe-tile:hover,
+  .cafe-tile-media img,
+  .cafe-tile-arrow,
+  .cafe-creator-pill,
+  .cafe-primary-action-btn {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .cafe-detail-hero-title {
+    font-size: 1.85rem;
+  }
+  .cafe-apple-card {
+    padding: var(--space-4);
+  }
+  .apple-segment-btn {
+    min-width: 120px;
+    font-size: var(--fs-xs);
+  }
+}

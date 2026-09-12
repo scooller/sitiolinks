@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { motion } from 'motion/react';
+import { fadeIn, defaultTransition } from '../lib/animations';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -31,33 +33,133 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Container className="py-5">
-      <Row className="justify-content-center">
-        <Col md={6} lg={5}>
-          <Card>
-            <Card.Body className="p-4">
-              <h2 className="text-center mb-4">{t('auth.login_title')}</h2>
-              {error && <Alert variant="danger">{error}</Alert>}
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3" controlId="email">
-                  <Form.Label>{t('auth.email')}</Form.Label>
-                  <Form.Control type="email" placeholder={t('auth.email_placeholder')} value={email} onChange={(e) => setEmail(e.target.value)} required disabled={loading} />
-                </Form.Group>
-                <Form.Group className="mb-3" controlId="password">
-                  <Form.Label>{t('auth.password')}</Form.Label>
-                  <Form.Control type="password" placeholder={t('auth.password_placeholder')} value={password} onChange={(e) => setPassword(e.target.value)} required disabled={loading} />
-                </Form.Group>
-                <Form.Group className="mb-3" controlId="remember">
-                  <Form.Check type="checkbox" label={t('auth.remember')} checked={remember} onChange={(e) => setRemember(e.target.checked)} disabled={loading} />
-                </Form.Group>
-                <Button variant="primary" type="submit" className="w-100" disabled={loading}>{loading ? t('auth.logging_in') : t('auth.login')}</Button>
-                <div className="text-center mt-3"><p className="mb-0">{t('auth.no_account')} <Link to="/register">{t('auth.register_here')}</Link></p></div>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+    <div className="auth-page-wrapper">
+      <Container>
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={fadeIn}
+          transition={defaultTransition}
+        >
+          {/* Cabecera Editorial Apple */}
+          <div className="auth-hero">
+            <span className="auth-kicker">
+              <i className="fas fa-shield-halved" aria-hidden="true"></i> {t('auth.login_kicker')}
+            </span>
+            <h1 className="auth-title">{t('auth.login_title')}</h1>
+            <p className="auth-subtitle">{t('auth.login_subtitle')}</p>
+          </div>
+
+          <Row className="justify-content-center">
+            <Col md={8} lg={6} xl={5}>
+              {/* Tarjeta Liquid Glass Apple */}
+              <div className="auth-apple-card">
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="auth-status-alert alert-danger"
+                    role="alert"
+                  >
+                    <i className="fas fa-circle-exclamation me-2 flex-shrink-0" aria-hidden="true"></i>
+                    <div>{error}</div>
+                  </motion.div>
+                )}
+
+                <Form onSubmit={handleSubmit} noValidate>
+                  {/* Campo Email */}
+                  <Form.Group className="auth-input-group" controlId="loginEmail">
+                    <div className="auth-label-row">
+                      <Form.Label className="auth-label">{t('auth.email')}</Form.Label>
+                    </div>
+                    <div className="auth-input-wrapper">
+                      <i className="fas fa-envelope auth-field-icon" aria-hidden="true"></i>
+                      <Form.Control
+                        type="email"
+                        placeholder={t('auth.email_placeholder')}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={loading}
+                        className="auth-input"
+                        autoComplete="email"
+                      />
+                    </div>
+                  </Form.Group>
+
+                  {/* Campo Contraseña */}
+                  <Form.Group className="auth-input-group" controlId="loginPassword">
+                    <div className="auth-label-row">
+                      <Form.Label className="auth-label">{t('auth.password')}</Form.Label>
+                    </div>
+                    <div className="auth-input-wrapper">
+                      <i className="fas fa-lock auth-field-icon" aria-hidden="true"></i>
+                      <Form.Control
+                        type="password"
+                        placeholder={t('auth.password_placeholder')}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={loading}
+                        className="auth-input"
+                        autoComplete="current-password"
+                      />
+                    </div>
+                  </Form.Group>
+
+                  {/* Checkbox Recordarme */}
+                  <div className="auth-terms-box">
+                    <Form.Check
+                      type="checkbox"
+                      id="rememberMe"
+                      label={t('auth.remember')}
+                      checked={remember}
+                      onChange={(e) => setRemember(e.target.checked)}
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {/* Botón 100% Sólido */}
+                  <div className="mt-4">
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="auth-submit-btn"
+                    >
+                      {loading ? (
+                        <>
+                          <i className="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
+                          <span>{t('auth.logging_in')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                          <span>{t('auth.login')}</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Enlace alternar a Registro */}
+                  <div className="auth-switch-link">
+                    <p className="mb-0">
+                      {t('auth.no_account')}{' '}
+                      <Link to="/register">{t('auth.register_here')}</Link>
+                    </p>
+                  </div>
+
+                  {/* Insignia de Seguridad SSL */}
+                  <div className="auth-trust-badge">
+                    <i className="fas fa-shield-halved" aria-hidden="true"></i>
+                    <span>{t('auth.security_ssl')}</span>
+                  </div>
+                </Form>
+              </div>
+            </Col>
+          </Row>
+        </motion.div>
+      </Container>
+    </div>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { appleEase } from '../lib/animations';
 
 interface Props {
   children: React.ReactNode;
@@ -14,9 +15,9 @@ const AnimatedHover: React.FC<Props> = ({ children, className = '', style = {}, 
       className={className}
       style={{ display: 'inline-block', ...style }}
       role={role}
-      whileHover={{ scale: 1.03, y: -2 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.12, ease: 'easeOut' }}
+      whileHover={{ scale: 1.02, y: -1 }}
+      whileTap={{ scale: 0.96 }}
+      transition={{ duration: 0.16, ease: appleEase }}
     >
       {children}
     </motion.span>

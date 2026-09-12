@@ -1,16 +1,16 @@
 import React from 'react';
-import { Navbar, Nav, Container, NavDropdown, Button, Badge, Dropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
+import { Navbar, Nav, Container, NavDropdown, Badge, Dropdown, Offcanvas, Toast, ToastContainer } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'motion/react';
 import AnimatedHover from './AnimatedHover';
-import { fadeIn } from '../lib/animations';
+import { fadeIn, appleEase } from '../lib/animations';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { queries } from '../lib/graphql/queries';
 import { initEcho, getEcho } from '../lib/echo';
-import { BACKEND_URL } from '../config/constants';
 import LanguageSwitcher from './LanguageSwitcher';
+import ThemeSwitcher from './ThemeSwitcher';
 
 const Navigation: React.FC = () => {
   const { t } = useTranslation();
@@ -194,13 +194,7 @@ const Navigation: React.FC = () => {
   };
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" style={{
-      boxShadow: `0px 1px 1px rgba(120, 120, 120, 0.08),
-      0px 5px 4px rgba(120, 120, 120, 0.08),
-      0px 12px 9px rgba(120, 120, 120, 0.08),
-      0px 20px 15px rgba(120, 120, 120, 0.08),
-      0px 32px 24px rgba(120, 120, 120, 0.08)`
-    }}>
+    <Navbar expand="lg" className="apple-liquid-glass-nav py-2">
       <Container>
         <Navbar.Brand as={Link} to="/">
           <AnimatedHover>
@@ -213,23 +207,48 @@ const Navigation: React.FC = () => {
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            <Nav.Link as={Link} to="/explorar">
-              <AnimatedHover>
-                <i className="fa-solid fa-person-dress"></i>
-                {t('nav.explore')}
+          <Nav className="me-auto align-items-center">
+            <Nav.Link as={Link} to="/explorar" className="apple-tab-link">
+              <AnimatedHover className="apple-tab-content">
+                <i className="fa-solid fa-person-dress apple-tab-icon"></i>
+                <span className="apple-tab-label">{t('nav.explore')}</span>
               </AnimatedHover>
             </Nav.Link>
-            <NavDropdown title={<><i className="fas fa-mug-hot me-1"></i> {t('nav.cafes')}</>} id="cafes-dropdown">
+            <NavDropdown
+              className="apple-tab-dropdown"
+              title={
+                <AnimatedHover className="apple-tab-content">
+                  <i className="fas fa-mug-hot apple-tab-icon"></i>
+                  <span className="apple-tab-label">
+                    {t('nav.cafes')}
+                    <i className="fas fa-chevron-down apple-tab-caret ms-1"></i>
+                  </span>
+                </AnimatedHover>
+              }
+              id="cafes-dropdown"
+            >
               <NavDropdown.Item as={Link} to="/cafes">{t('nav.cafes')}</NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/sugerir-cafe">{t('nav.suggest_cafe')}</NavDropdown.Item>
             </NavDropdown>
-            <Nav.Link as={Link} to="/ranking">
-              <AnimatedHover>
-                <i className="fas fa-trophy me-1"></i>{t('nav.ranking')}
+            <Nav.Link as={Link} to="/ranking" className="apple-tab-link">
+              <AnimatedHover className="apple-tab-content">
+                <i className="fas fa-trophy apple-tab-icon"></i>
+                <span className="apple-tab-label">{t('nav.ranking')}</span>
               </AnimatedHover>
             </Nav.Link>
-            <NavDropdown title={<><i className="fas fa-info-circle me-1"></i><br></br> {t('nav.info')}</>} id="info-dropdown">
+            <NavDropdown
+              className="apple-tab-dropdown"
+              title={
+                <AnimatedHover className="apple-tab-content">
+                  <i className="fas fa-info-circle apple-tab-icon"></i>
+                  <span className="apple-tab-label">
+                    {t('nav.info')}
+                    <i className="fas fa-chevron-down apple-tab-caret ms-1"></i>
+                  </span>
+                </AnimatedHover>
+              }
+              id="info-dropdown"
+            >
               <NavDropdown.Item as={Link} to="/contacto">{t('nav.contact')}</NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/preguntas-frecuentes">{t('nav.faqs')}</NavDropdown.Item>
               <NavDropdown.Divider />
@@ -241,82 +260,332 @@ const Navigation: React.FC = () => {
             {isAuthenticated ? (
               <>
                 {user?.username && (
-                  <Nav.Link
+                  <div
                     onClick={() => setShowUserMenu(true)}
                     role="button"
-                    className="me-3 ms-auto d-none d-lg-block"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowUserMenu(true); }}
+                    className="apple-nav-user-pill me-3 ms-auto d-none d-lg-inline-flex"
+                    aria-label={t('nav.my_profile')}
                   >
-                    <AnimatedHover>
-                      <i className="fas fa-user me-2"></i>
-                      {user?.name || user?.username}
-                    </AnimatedHover>
-                  </Nav.Link>
+                    {user?.avatar_thumb || user?.avatar_url ? (
+                      <img
+                        src={user.avatar_thumb || user.avatar_url}
+                        alt={user.name || user.username}
+                        className="apple-nav-user-mini-avatar"
+                      />
+                    ) : (
+                      <div className="apple-nav-user-mini-avatar">
+                        <i className="fas fa-user"></i>
+                      </div>
+                    )}
+                    <span>{user?.name || user?.username}</span>
+                    <i className="fas fa-chevron-down ms-1" style={{ fontSize: '0.7rem', opacity: 0.6 }}></i>
+                  </div>
                 )}
                 {user?.username && (
-                  <Nav.Link
+                  <div
                     onClick={() => setShowUserMenu(true)}
                     role="button"
-                    className="mx-auto d-block d-lg-none"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowUserMenu(true); }}
+                    className="apple-nav-user-pill mx-auto my-2 d-inline-flex d-lg-none"
+                    aria-label={t('nav.my_profile')}
                   >
-                    <i className="fas fa-user me-2"></i>
-                    {user?.name || user?.username}
-                  </Nav.Link>
+                    {user?.avatar_thumb || user?.avatar_url ? (
+                      <img
+                        src={user.avatar_thumb || user.avatar_url}
+                        alt={user.name || user.username}
+                        className="apple-nav-user-mini-avatar"
+                      />
+                    ) : (
+                      <div className="apple-nav-user-mini-avatar">
+                        <i className="fas fa-user"></i>
+                      </div>
+                    )}
+                    <span>{user?.name || user?.username}</span>
+                    <i className="fas fa-chevron-down ms-1" style={{ fontSize: '0.7rem', opacity: 0.6 }}></i>
+                  </div>
                 )}
 
-                {/* Offcanvas del usuario: contiene los demás botones, excepto notificaciones */}
-                <Offcanvas show={showUserMenu} onHide={() => setShowUserMenu(false)} placement="end" backdrop data-bs-theme="dark">
-                  <Offcanvas.Header closeButton>
-                    <Offcanvas.Title>
-                      <i className="fas fa-user me-2"></i>
-                      {user?.name || user?.username}
-                    </Offcanvas.Title>
+                {/* Offcanvas del usuario: Rediseño Apple HIG 2026 */}
+                <Offcanvas
+                  show={showUserMenu}
+                  onHide={() => setShowUserMenu(false)}
+                  placement="end"
+                  backdrop
+                  className="apple-liquid-glass-offcanvas"
+                >
+                  <Offcanvas.Header className="apple-offcanvas-header">
+                    <span className="apple-offcanvas-kicker">
+                      <i className="fas fa-fingerprint"></i>
+                      {t('nav.account_section')}
+                    </span>
+                    <button
+                      type="button"
+                      className="apple-offcanvas-close-btn"
+                      onClick={() => setShowUserMenu(false)}
+                      aria-label="Cerrar"
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
                   </Offcanvas.Header>
-                  <Offcanvas.Body>
+                  <Offcanvas.Body className="apple-offcanvas-body">
                     <AnimatePresence mode="wait">
                       {showUserMenu && (
                         <motion.div
-                          key="user-menu"
+                          key="user-menu-content"
                           initial={fadeIn.initial}
                           animate={fadeIn.animate}
                           exit={fadeIn.exit}
-                          transition={{ duration: 0.25 }}
+                          transition={{ duration: 0.22, ease: appleEase }}
+                          className="d-flex flex-column gap-3"
                         >
-                          <Nav className="flex-column">
-                            <Nav.Link as={Link} to={`/u/${user?.username}`} onClick={() => setShowUserMenu(false)}>
-                              <AnimatedHover>
-                                <i className="fas fa-id-card me-2"></i>{t('nav.my_profile')}
-                              </AnimatedHover>
-                            </Nav.Link>
-                            {(hasRole('creator') || hasRole('admin')) && (
-                              <Nav.Link as={Link} to="/mis-galerias" onClick={() => setShowUserMenu(false)}>
-                                <AnimatedHover>
-                                  <i className="fas fa-images me-2"></i>{t('nav.my_galleries')}
-                                </AnimatedHover>
-                              </Nav.Link>
-                            )}
-                            {(hasRole('admin') || hasRole('super_admin') || hasRole('moderator')) ? (
-                              <Nav.Link href={adminUrl} target="_blank" rel="noopener noreferrer" onClick={() => setShowUserMenu(false)}>
-                                <AnimatedHover>
-                                  <i className="fas fa-cog me-2"></i>{t('nav.admin_panel')}
-                                </AnimatedHover>
-                              </Nav.Link>
-                            ) : (
-                              user?.email_verified_at && (
-                                <Nav.Link as={Link} to="/tickets" onClick={() => setShowUserMenu(false)}>
-                                  <AnimatedHover>
-                                    <i className="fas fa-ticket me-2"></i>{t('nav.tickets')}
-                                  </AnimatedHover>
-                                </Nav.Link>
-                              )
-                            )}
-                          </Nav>
-                          <LanguageSwitcher />
-                          <div className="mt-3">
-                            <Button variant="outline-danger" className="w-100" onClick={() => { setShowUserMenu(false); handleLogout(); }}>
-                              <AnimatedHover>
-                                <i className="fa-solid fa-person-hiking"></i> {t('nav.logout')}
-                              </AnimatedHover>
-                            </Button>
+                          {/* Tarjeta Hero de Identidad de Usuario */}
+                          <Link
+                            to={`/u/${user?.username}`}
+                            onClick={() => setShowUserMenu(false)}
+                            className="apple-offcanvas-user-card"
+                            title={t('nav.view_profile')}
+                          >
+                            <div className="apple-offcanvas-avatar-wrapper">
+                              {user?.avatar_thumb || user?.avatar_url ? (
+                                <img
+                                  src={user.avatar_thumb || user.avatar_url}
+                                  alt={user.name || user.username}
+                                  className="apple-offcanvas-avatar"
+                                />
+                              ) : (
+                                <div className="apple-offcanvas-avatar">
+                                  <i className="fas fa-user"></i>
+                                </div>
+                              )}
+                              {user?.is_verified && (
+                                <div className="apple-offcanvas-verified-badge" title="Verificado">
+                                  <i className="fas fa-check"></i>
+                                </div>
+                              )}
+                            </div>
+                            <div className="apple-offcanvas-user-info">
+                              <div className="apple-offcanvas-user-name">
+                                {user?.name || user?.username}
+                              </div>
+                              <div className="apple-offcanvas-user-handle">
+                                @{user?.username}
+                              </div>
+                              <div className="apple-offcanvas-badges-row">
+                                {(hasRole('admin') || hasRole('super_admin')) && (
+                                  <span className="apple-offcanvas-role-pill role-admin">
+                                    <i className="fas fa-shield-halved"></i>
+                                    {t('nav.role_admin')}
+                                  </span>
+                                )}
+                                {hasRole('creator') && (
+                                  <span className="apple-offcanvas-role-pill role-creator">
+                                    <i className="fas fa-wand-magic-sparkles"></i>
+                                    {t('nav.role_creator')}
+                                  </span>
+                                )}
+                                {hasRole('vip') && (
+                                  <span className="apple-offcanvas-role-pill role-vip">
+                                    <i className="fas fa-crown"></i>
+                                    {t('nav.role_vip')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <i className="fas fa-chevron-right apple-offcanvas-view-profile-arrow"></i>
+                          </Link>
+
+                          {/* Sección 1: Mi Cuenta */}
+                          <div className="apple-offcanvas-section">
+                            <span className="apple-offcanvas-section-title">
+                              {t('nav.account_section')}
+                            </span>
+                            <div className="apple-offcanvas-inset-group">
+                              <Link
+                                to={`/u/${user?.username}`}
+                                className="apple-offcanvas-row"
+                                onClick={() => setShowUserMenu(false)}
+                              >
+                                <div className="apple-offcanvas-row-left">
+                                  <div className="apple-offcanvas-icon-plate icon-plate-blue">
+                                    <i className="fas fa-id-card"></i>
+                                  </div>
+                                  <span className="apple-offcanvas-row-label">
+                                    {t('nav.my_profile')}
+                                  </span>
+                                </div>
+                                <i className="fas fa-chevron-right apple-offcanvas-chevron"></i>
+                              </Link>
+
+                              <Link
+                                to="/perfil/editar"
+                                className="apple-offcanvas-row"
+                                onClick={() => setShowUserMenu(false)}
+                              >
+                                <div className="apple-offcanvas-row-left">
+                                  <div className="apple-offcanvas-icon-plate icon-plate-teal">
+                                    <i className="fas fa-user-pen"></i>
+                                  </div>
+                                  <span className="apple-offcanvas-row-label">
+                                    {t('nav.edit_profile')}
+                                  </span>
+                                </div>
+                                <i className="fas fa-chevron-right apple-offcanvas-chevron"></i>
+                              </Link>
+
+                              {(hasRole('creator') || hasRole('admin')) && (
+                                <>
+                                  <Link
+                                    to="/mis-galerias"
+                                    className="apple-offcanvas-row"
+                                    onClick={() => setShowUserMenu(false)}
+                                  >
+                                    <div className="apple-offcanvas-row-left">
+                                      <div className="apple-offcanvas-icon-plate icon-plate-purple">
+                                        <i className="fas fa-images"></i>
+                                      </div>
+                                      <span className="apple-offcanvas-row-label">
+                                        {t('nav.my_galleries')}
+                                      </span>
+                                    </div>
+                                    <i className="fas fa-chevron-right apple-offcanvas-chevron"></i>
+                                  </Link>
+
+                                  <Link
+                                    to="/mis-galerias/nueva"
+                                    className="apple-offcanvas-row"
+                                    onClick={() => setShowUserMenu(false)}
+                                  >
+                                    <div className="apple-offcanvas-row-left">
+                                      <div className="apple-offcanvas-icon-plate icon-plate-rose">
+                                        <i className="fas fa-plus"></i>
+                                      </div>
+                                      <span className="apple-offcanvas-row-label">
+                                        {t('nav.new_gallery')}
+                                      </span>
+                                    </div>
+                                    <i className="fas fa-chevron-right apple-offcanvas-chevron"></i>
+                                  </Link>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Sección 2: Gestión & Soporte */}
+                          <div className="apple-offcanvas-section">
+                            <span className="apple-offcanvas-section-title">
+                              {t('nav.management_section')}
+                            </span>
+                            <div className="apple-offcanvas-inset-group">
+                              <Link
+                                to="/notificaciones"
+                                className="apple-offcanvas-row"
+                                onClick={() => setShowUserMenu(false)}
+                              >
+                                <div className="apple-offcanvas-row-left">
+                                  <div className="apple-offcanvas-icon-plate icon-plate-orange">
+                                    <i className="fas fa-bell"></i>
+                                  </div>
+                                  <span className="apple-offcanvas-row-label">
+                                    {t('nav.notifications')}
+                                  </span>
+                                </div>
+                                <div className="apple-offcanvas-row-right">
+                                  {unreadCount > 0 && (
+                                    <Badge bg="danger" pill style={{ fontSize: '0.72rem' }}>
+                                      {unreadCount > 99 ? '99+' : unreadCount}
+                                    </Badge>
+                                  )}
+                                  <i className="fas fa-chevron-right apple-offcanvas-chevron"></i>
+                                </div>
+                              </Link>
+
+                              {(hasRole('admin') || hasRole('super_admin') || hasRole('moderator')) ? (
+                                <a
+                                  href={adminUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="apple-offcanvas-row"
+                                  onClick={() => setShowUserMenu(false)}
+                                >
+                                  <div className="apple-offcanvas-row-left">
+                                    <div className="apple-offcanvas-icon-plate icon-plate-slate">
+                                      <i className="fas fa-shield-halved"></i>
+                                    </div>
+                                    <span className="apple-offcanvas-row-label">
+                                      {t('nav.admin_panel')}
+                                    </span>
+                                  </div>
+                                  <i className="fas fa-arrow-up-right-from-square apple-offcanvas-chevron"></i>
+                                </a>
+                              ) : (
+                                user?.email_verified_at && (
+                                  <Link
+                                    to="/tickets"
+                                    className="apple-offcanvas-row"
+                                    onClick={() => setShowUserMenu(false)}
+                                  >
+                                    <div className="apple-offcanvas-row-left">
+                                      <div className="apple-offcanvas-icon-plate icon-plate-emerald">
+                                        <i className="fas fa-ticket"></i>
+                                      </div>
+                                      <span className="apple-offcanvas-row-label">
+                                        {t('nav.tickets')}
+                                      </span>
+                                    </div>
+                                    <i className="fas fa-chevron-right apple-offcanvas-chevron"></i>
+                                  </Link>
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Sección 3: Preferencias */}
+                          <div className="apple-offcanvas-section">
+                            <span className="apple-offcanvas-section-title">
+                              {t('nav.preferences_section')}
+                            </span>
+                            <div className="apple-offcanvas-inset-group">
+                              <div className="apple-offcanvas-pref-row position-relative">
+                                <div className="apple-offcanvas-row-left">
+                                  <div className="apple-offcanvas-icon-plate icon-plate-indigo">
+                                    <i className="fas fa-globe"></i>
+                                  </div>
+                                  <span className="apple-offcanvas-row-label">
+                                    {t('nav.language')}
+                                  </span>
+                                </div>
+                                <LanguageSwitcher />
+                              </div>
+                              <div className="apple-offcanvas-pref-row position-relative">
+                                <div className="apple-offcanvas-row-left">
+                                  <div className="apple-offcanvas-icon-plate icon-plate-teal">
+                                    <i className="fas fa-circle-half-stroke"></i>
+                                  </div>
+                                  <span className="apple-offcanvas-row-label">
+                                    {t('nav.appearance')}
+                                  </span>
+                                </div>
+                                <ThemeSwitcher inline showLabel={false} />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Botón de Cierre de Sesión Tactil Sólido */}
+                          <div className="pt-2">
+                            <button
+                              type="button"
+                              className="apple-offcanvas-logout-btn"
+                              onClick={() => {
+                                setShowUserMenu(false);
+                                handleLogout();
+                              }}
+                            >
+                              <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                              <span>{t('nav.logout')}</span>
+                            </button>
                           </div>
                         </motion.div>
                       )}
@@ -324,9 +593,11 @@ const Navigation: React.FC = () => {
                   </Offcanvas.Body>
                 </Offcanvas>
 
+                <ThemeSwitcher inline className="me-2" />
+
                 {/* Campana al extremo derecho (se mantiene fuera del offcanvas) */}
                 <Dropdown align="end">
-                  <Dropdown.Toggle variant="link" className="text-white position-relative p-0 border-0" style={{ background: 'none' }}>
+                  <Dropdown.Toggle variant="link" className="text-reset position-relative p-0 border-0 d-inline-flex align-items-center justify-content-center" style={{ background: 'none', width: '44px', height: '44px' }} aria-label={t('nav.notifications')}>
                     <AnimatedHover>
                       <i className="fas fa-bell fa-lg"></i>
                     </AnimatedHover>
@@ -335,7 +606,7 @@ const Navigation: React.FC = () => {
                         pill
                         bg="danger"
                         className="position-absolute top-0 start-100 translate-middle"
-                        style={{ fontSize: '0.7rem' }}
+                        style={{ fontSize: '0.75rem' }}
                       >
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </Badge>
@@ -345,15 +616,15 @@ const Navigation: React.FC = () => {
                         pill
                         bg="warning"
                         text="dark"
-                        className="position-absolute top-100 start-100 translate-middle"
-                        style={{ fontSize: '0.65rem' }}
+                        className="position-absolute top-100 start-100 translate-middle fw-bold"
+                        style={{ fontSize: '0.75rem' }}
                       >
                         VIP {vipUnreadCount > 99 ? '99+' : vipUnreadCount}
                       </Badge>
                     )}
                   </Dropdown.Toggle>
 
-                  <Dropdown.Menu style={{ minWidth: '320px', maxHeight: '400px', overflowY: 'auto' }}>
+                  <Dropdown.Menu className="apple-liquid-glass-dropdown" style={{ minWidth: '320px', maxHeight: '400px', overflowY: 'auto' }}>
                     <Dropdown.Header><i className="fa-solid fa-inbox"></i> {t('nav.notifications')}</Dropdown.Header>
                     {notifications.length === 0 ? (
                       <Dropdown.Item disabled className="text-muted">
@@ -364,15 +635,15 @@ const Navigation: React.FC = () => {
                         {notifications.map((notif) => (
                           <motion.div
                             key={notif.id}
-                            className={`dropdown-item ${!notif.read_at ? 'bg-light' : ''} py-2 position-relative`}
+                            className={`dropdown-item ${!notif.read_at ? 'bg-primary-subtle' : ''} py-2 position-relative`}
                             style={{
                               whiteSpace: 'normal',
                               wordWrap: 'break-word',
-                              paddingRight: '35px',
+                              paddingRight: '48px',
                               cursor: 'pointer'
                             }}
                             whileHover={{ scale: 1.01 }}
-                            transition={{ duration: 0.08 }}
+                            transition={{ duration: 0.16, ease: appleEase }}
                           >
                             <div
                               className="d-flex align-items-start"
@@ -393,7 +664,7 @@ const Navigation: React.FC = () => {
                                 </small>
                               </div>
                               {!notif.read_at && (
-                                <Badge bg="primary" pill className="ms-2" style={{ fontSize: '0.65rem' }}>
+                                <Badge bg="primary" pill className="ms-2" style={{ fontSize: '0.75rem' }}>
                                   {t('notifications.new')}
                                 </Badge>
                               )}
@@ -401,15 +672,15 @@ const Navigation: React.FC = () => {
                             </div>
                             <button
                               onClick={(e) => handleDismissNotification(e, notif.id)}
-                              className="position-absolute top-50 end-0 translate-middle-y btn btn-link text-muted p-0 me-2"
+                              className="position-absolute top-50 end-0 translate-middle-y btn btn-link text-muted d-flex align-items-center justify-content-center p-0 me-1"
                               style={{
                                 fontSize: '1.1rem',
-                                width: '24px',
-                                height: '24px',
-                                lineHeight: '1',
+                                width: '44px',
+                                height: '44px',
                                 zIndex: 10
                               }}
                               title={t('notifications.mark_read')}
+                              aria-label={t('notifications.mark_read')}
                               type="button"
                             >
                               <i className="fas fa-times"></i>
@@ -430,6 +701,7 @@ const Navigation: React.FC = () => {
                 <Nav.Link className='ms-auto' as={Link} to="/login">{t('nav.login')}</Nav.Link>
                 <Nav.Link href="/register">{t('nav.register')}</Nav.Link>
                 <LanguageSwitcher />
+                <ThemeSwitcher inline className="ms-2" />
               </>
             )}
           </Nav>

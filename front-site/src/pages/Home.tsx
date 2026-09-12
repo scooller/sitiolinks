@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { useAuth } from '../contexts/AuthContext';
 import { useSiteSettings } from '../hooks/useSiteSettings';
+import { appleEase } from '../lib/animations';
 import FeaturedGalleries from '../components/FeaturedGalleries';
 import CafesWithReviews from '../components/CafesWithReviews';
 import UsersGrid from '../components/UsersGrid';
@@ -14,10 +15,12 @@ import type { Page, User } from '../types';
 
 export default function Home(): React.ReactElement {
   const { t, i18n, ready } = useTranslation();
+  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { settings, loading: loadingSettings } = useSiteSettings();
   const [pageContent, setPageContent] = useState<Page | null>(null);
   const [vipUsers, setVipUsers] = useState<User[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingVips, setLoadingVips] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,8 +129,10 @@ export default function Home(): React.ReactElement {
 
   if (loading) {
     return (
-      <Container className="mt-5 text-center">
-        <Spinner animation="border" variant="primary" />
+      <Container className="mt-5 text-center" role="status">
+        <Spinner animation="border" variant="primary">
+          <span className="visually-hidden">{t('common.loading')}</span>
+        </Spinner>
       </Container>
     );
   }
@@ -140,25 +145,88 @@ export default function Home(): React.ReactElement {
     );
   }
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/explorar?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate('/explorar');
+    }
+  };
+
   return (
     <>
+      {/* Hero Section Apple HIG */}
+      <section className="apple-hero-section py-4">
+        <Container>
+          <motion.div
+            className="apple-hero-container"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: appleEase }}
+          >
+            <h1 className="apple-hero-title">
+              {settings?.site_title || t('home.hero_title', 'Descubre Creadores y Lugares Exclusivos')}
+            </h1>
+            <p className="apple-hero-subtitle">
+              {settings?.site_description || t('home.hero_subtitle', 'Explora perfiles destacados, cafeterías recomendadas y contenido seleccionado con la mejor experiencia visual.')}
+            </p>
 
-      {/* Contenido de la página */}
-      <Container className="mt-5 mb-5">
-        <Row className="justify-content-center">
-          <Col lg={10} xl={8}>
-            <motion.div
-              className="page-content"
-              dangerouslySetInnerHTML={{ __html: pageContent?.content || `<p>${t('home.content_unavailable')}</p>` }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-            />
-          </Col>
-        </Row>
-      </Container>
+            {/* Apple Liquid Glass Search Pill */}
+            <form onSubmit={handleSearchSubmit} className="apple-search-pill-wrapper">
+              <div className="apple-search-pill">
+                <i className="fas fa-search text-muted me-3"></i>
+                <input
+                  type="text"
+                  className="apple-search-input"
+                  placeholder={t('home.search_placeholder', 'Buscar creadores, cafeterías o etiquetas...')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label={t('common.search', 'Buscar')}
+                />
+                <button
+                  type="submit"
+                  className="btn btn-primary apple-search-btn shadow-sm"
+                  aria-label={t('common.search', 'Buscar')}
+                >
+                  <i className="fas fa-arrow-right d-sm-none"></i>
+                  <span className="d-none d-sm-inline">{t('common.search', 'Buscar')}</span>
+                </button>
+              </div>
+            </form>
 
-      {/* Galerías destacadas */}
+            {/* Botones de acción rápida cápsula HIG */}
+            <div className="d-flex flex-wrap justify-content-center gap-3">
+              <Link to="/explorar" className="btn btn-primary rounded-pill px-4 py-2 fw-medium shadow-sm">
+                <i className="fa-solid fa-person-dress me-2"></i>
+                {t('nav.explore', 'Explorar creadores')}
+              </Link>
+              <Link to="/cafes" className="btn btn-secondary rounded-pill px-4 py-2 fw-medium shadow-sm">
+                <i className="fas fa-mug-hot me-2"></i>
+                {t('nav.cafes', 'Ver Cafeterías')}
+              </Link>
+            </div>
+          </motion.div>
+        </Container>
+      </section>
+
+      {/* Contenido editorial de la página (Grouped Card) */}
+      {pageContent?.content && (
+        <Container className="mb-5">
+          <Row className="justify-content-center">
+            <Col lg={10} xl={8}>
+              <motion.div
+                className="apple-grouped-card page-content"
+                dangerouslySetInnerHTML={{ __html: pageContent.content }}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.28, ease: appleEase }}
+              />
+            </Col>
+          </Row>
+        </Container>
+      )}
+
       {/* Galerías destacadas - Solo para usuarios autenticados */}
       {isAuthenticated && <FeaturedGalleries limit={8} />}
 
@@ -168,10 +236,10 @@ export default function Home(): React.ReactElement {
           <Container>
             <motion.div
               className="text-center mb-4"
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, y: -12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.28, ease: appleEase }}
             >
               <h2 className="mb-2">
                 <i className="fas fa-crown text-warning me-2"></i>
@@ -182,32 +250,27 @@ export default function Home(): React.ReactElement {
               </p>
             </motion.div>
 
-            {loadingVips ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" variant="warning" />
+            <UsersGrid
+              users={vipUsers}
+              showTags
+              size={settings?.avatar_width || 96}
+              colsDesktop={settings?.grid_cols_desktop || 5}
+              colsMobile={settings?.grid_cols_mobile || 2}
+              defaultAvatar={settings?.default_avatar_url || ''}
+              vipBadgeLabel={settings?.vip_badge_label || 'VIP'}
+              vipBadgeIcon={settings?.vip_badge_icon || 'fas fa-crown'}
+              emptyMessage=""
+              loading={loadingVips}
+              skeletonCount={settings?.grid_cols_desktop || 5}
+            />
+            {!loadingVips && vipUsers.length > 0 && (
+              <div className="text-center mt-4">
+                <Link to="/explorar" className="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm">
+                  <i className="fas fa-users me-2"></i>
+                  {t('home.view_all_users')}
+                </Link>
               </div>
-            ) : vipUsers.length > 0 ? (
-              <>
-                <UsersGrid
-                  users={vipUsers}
-                  showTags
-                  size={settings?.avatar_width || 96}
-                  colsDesktop={settings?.grid_cols_desktop || 5}
-                  colsMobile={settings?.grid_cols_mobile || 2}
-                  defaultAvatar={settings?.default_avatar_url || ''}
-                  vipBadgeLabel={settings?.vip_badge_label || 'VIP'}
-                  vipBadgeIcon={settings?.vip_badge_icon || 'fas fa-crown'}
-                  emptyMessage=""
-                  loading={false}
-                />
-                <div className="text-center mt-4">
-                  <Link to="/explorar" className="btn btn-outline-warning">
-                    <i className="fas fa-users me-2"></i>
-                    {t('home.view_all_users')}
-                  </Link>
-                </div>
-              </>
-            ) : null}
+            )}
           </Container>
         </section>
       )}

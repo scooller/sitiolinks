@@ -1,0 +1,164 @@
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: var(--font-mono);
+}
+
+/* Fix para contraste y legibilidad accesible (WCAG AA) */
+.text-muted,
+[data-bs-theme="light"] .text-muted,
+[data-bs-theme="dark"] .text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-bs-theme="dark"] .bg-light {
+  background-color: var(--color-bg-subtle, #343a40) !important;
+}
+
+[data-bs-theme="dark"] .card {
+  background-color: var(--bg-card);
+  border-color: var(--border-card);
+}
+[data-bs-theme="light"] .card {
+  background-color: var(--bg-card);
+}
+
+[data-bs-theme="dark"] h1,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] h3,
+[data-bs-theme="dark"] h4,
+[data-bs-theme="dark"] h5,
+[data-bs-theme="dark"] h6 {
+  color: var(--text-main) !important;
+}
+
+[data-bs-theme="dark"] .lead {
+  color: var(--color-border, #dee2e6) !important;
+}
+
+[data-bs-theme="dark"] small,
+[data-bs-theme="dark"] .small {
+  color: #ced4da;
+}
+
+/* Asegurar contraste en badges con fondo claro */
+[data-bs-theme="dark"] .badge.bg-light {
+  color: #212529 !important;
+}
+
+[data-bs-theme="light"] .cafes-section-title {
+  color: var(--cafe-title-color) !important;
+}
+
+[data-bs-theme="dark"] .cafes-section-title {
+  color: var(--cafe-title-color) !important;
+}
+
+/* Formularios en modo oscuro */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+  background-color: var(--form-bg);
+  border-color: var(--form-border);
+  color: var(--text-main);
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+  background-color: var(--form-bg);
+  border-color: var(--form-focus-border);
+  color: var(--text-main);
+}
+
+[data-bs-theme="dark"] .form-control::placeholder {
+  color: var(--text-muted);
+}
+
+/* Contrastes en alertas */
+[data-bs-theme="dark"] .alert {
+  border-color: var(--form-border);
+}
+
+/* Links globales de alto contraste (WCAG AA) */
+a {
+  color: var(--link-color);
+  transition: color var(--transition-fast) var(--ease-apple);
+}
+
+a:hover {
+  color: var(--link-hover-color);
+}
+
+/* Forzado de enlaces de texto con exclusión de componentes */
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.badge):not(.page-link):not(.profile-btn-solid):not(.cafe-primary-action-btn):not(.cafe-secondary-action-btn):not(.gallery-btn-solid):not(.user-apple-card):not(.gallery-apple-card):not(.cafe-tile):not(.profile-link-item):not(.gallery-author-chip) {
+  color: var(--link-color) !important;
+}
+
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.badge):not(.page-link):not(.profile-btn-solid):not(.cafe-primary-action-btn):not(.cafe-secondary-action-btn):not(.gallery-btn-solid):not(.user-apple-card):not(.gallery-apple-card):not(.cafe-tile):not(.profile-link-item):not(.gallery-author-chip):hover {
+  color: var(--link-hover-color) !important;
+}
+
+.link-primary {
+  color: var(--link-color) !important;
+}
+
+.link-primary:hover,
+.link-primary:focus {
+  color: var(--link-hover-color) !important;
+}
+
+/* Override modal backdrop opacity */
+.modal-backdrop {
+  --bs-backdrop-opacity: var(--opacity-backdrop);
+}
+
+.profile-links .list-group-item {
+  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease, color var(--duration-fast) ease, background-color var(--duration-fast) ease;
+  border-radius: var(--radius-sm);
+}
+
+.profile-links .list-group-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover, 0 6px 14px rgba(0,0,0,.08));
+  background-color: rgba(var(--bs-primary-rgb, 13,110,253), .06);
+}
+
+.profile-links .list-group-item .fa-external-link-alt {
+  transition: transform var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.profile-links .list-group-item:hover .fa-external-link-alt {
+  transform: translateX(2px);
+  color: var(--bs-link-hover-color, var(--bs-primary));
+}
+.card {
+  padding-top: 1rem;
+}
+body.perfil .card.perfil {
+  padding-top: 0;
+  box-shadow: var(--shadow-float);
+}
+body.perfil .card.perfil-info {
+  padding-top: 0;
+  box-shadow: var(--shadow-card);
+}
+/* Sobrescribir variables de Bootstrap para fuentes */
+:root {
+  --bs-body-font-family: var(--font-sans);
+  --bs-font-sans-serif: var(--font-sans);
+}
+
+/* Asegurar que body use la variable */
+body {
+  font-family: var(--font-sans) !important;
+}
+
+/* Forzar fuentes en todos los elementos si es necesario */
+* {
+  font-family: inherit;
+}
+

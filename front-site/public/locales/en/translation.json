@@ -1,6 +1,8 @@
 {
     "suggest": {
+        "kicker": "Community & Cafés",
         "title": "Suggest a Café",
+        "subtitle": "Recommend your favorite coffee spots so fellow creators can discover them and meet up.",
         "notice": "Suggestions are reviewed by an administrator before publishing. Images cannot be uploaded.",
         "name": "Café name",
         "city": "City",
@@ -9,9 +11,20 @@
         "google_maps": "Google Maps URL",
         "notes": "Additional notes",
         "submit": "Submit suggestion",
+        "success_title": "Suggestion Received!",
         "success": "Suggestion sent! An administrator will review it soon.",
         "error": "Error sending suggestion",
-        "login_required": "You must be logged in to suggest a café."
+        "submit_another": "Suggest another café",
+        "view_cafes": "Explore Cafés",
+        "name_placeholder": "E.g. The Artisan Coffeehouse",
+        "city_placeholder": "E.g. New York, London...",
+        "address_placeholder": "E.g. 123 Broadway St",
+        "website_placeholder": "https://...",
+        "maps_placeholder": "https://maps.google.com/...",
+        "notes_placeholder": "Tell us about the atmosphere, power outlets, wifi, specialty roasts...",
+        "login_required_title": "Sign In Required",
+        "login_required": "You must be logged in to suggest a café.",
+        "login_required_desc": "To preserve directory quality and authenticity, you must have an active account to suggest coffee shops."
     },
     "app": {
         "title": "..."
@@ -36,7 +49,18 @@
         "terms": "Terms and Conditions",
         "privacy": "Privacy Policy",
         "no_notifications": "You have no notifications",
-        "view_all_notifications": "View all notifications"
+        "view_all_notifications": "View all notifications",
+        "edit_profile": "Edit Profile",
+        "new_gallery": "New Gallery",
+        "account_section": "My Account",
+        "management_section": "Management & Support",
+        "preferences_section": "Preferences",
+        "appearance": "Appearance",
+        "language": "Language",
+        "view_profile": "View full profile",
+        "role_creator": "Creator",
+        "role_vip": "VIP",
+        "role_admin": "Staff"
     },
     "home": {
         "vip_creators": "VIP Creators",
@@ -91,6 +115,8 @@
         "grid_title": "Cafes Grid",
         "grid_desc": "Search and filter cafes by city, tag, and rating",
         "detail": {
+            "eyebrow": "CAFE / DETAIL",
+            "open_image": "Open cafe image",
             "view": "View detail",
             "not_found": "The requested cafe was not found.",
             "invalid_id": "Invalid cafe id.",
@@ -144,23 +170,38 @@
         }
     },
     "ranking": {
-        "title": "User Ranking",
-        "subtitle": "The most popular users on the platform",
+        "title": "Creator Ranking",
+        "kicker": "Top Creators & Models",
+        "subtitle": "The most popular and impactful profiles on the platform",
         "sort_by_views": "Views",
         "sort_by_followers": "Followers",
         "views": "Views",
         "followers": "Followers",
         "following": "Following",
+        "view_profile": "View Profile",
         "no_users": "No users in ranking.",
         "error_loading": "Error loading ranking",
-        "ranking_text": "El ranking se actualiza en tiempo real según las visitas únicas a cada perfil. Solo se contabiliza una visita por usuario cada 24 horas."
+        "ranking_text": "The ranking updates in real-time based on unique profile visits. Only one visit per user is counted every 24 hours."
     },
     "tag": {
-        "users_with_tag": "Users with tag:",
-        "back": "Back",
-        "no_users": "No users with this tag.",
-        "error_loading": "Error loading users",
-        "explore_by_tags": "Explore by tags"
+        "kicker": "Explore Tag",
+        "title_prefix": "Creators with",
+        "subtitle": "Discover verified and featured profiles categorized under the #{{tag}} tag.",
+        "users_with_tag": "Creators with tag:",
+        "back": "Back to Explore",
+        "no_users": "No creators found",
+        "no_users_desc": "There are no active profiles tagged with #{{tag}} or matching your filters.",
+        "explore_others": "Explore other creators",
+        "filter_gender": "Gender",
+        "filter_gender_all": "Gender: All",
+        "filter_country": "Country",
+        "filter_country_all": "Country: All",
+        "min_price": "Min price",
+        "max_price": "Max price",
+        "reset_filters": "Reset filters",
+        "error_loading": "Error loading creators",
+        "explore_by_tags": "Explore by tags",
+        "showing_results": "Showing results for #{{tag}}"
     },
     "profile": {
         "followers": "Followers",
@@ -208,6 +249,16 @@
         "qr_code_title": "Profile QR Code",
         "error_loading": "Error loading profile",
         "user_not_found": "User not found",
+        "kicker": "Profile Settings",
+        "subtitle": "Manage your personal data, public presence, and visual customization.",
+        "view_public": "View public profile",
+        "tab_general": "General",
+        "tab_creator": "Creator",
+        "tab_links": "Links",
+        "tab_tags": "Tags",
+        "tab_security": "Security",
+        "current_avatar": "Current avatar",
+        "change_avatar": "Change profile picture",
         "avatar": "Avatar",
         "avatar_help": "Upload a profile image. Max size: 10MB. Formats: JPG, PNG, WEBP.",
         "basic_info": "Basic Information",
@@ -311,7 +362,17 @@
         "only_admins_creators": "Only administrators and creators can create galleries.",
         "featured": "Featured",
         "pending": "Pending",
-        "rejected": "Rejected"
+        "rejected": "Rejected",
+        "empty_search_title": "No search results",
+        "empty_search_desc": "No galleries matched your search. Try different keywords.",
+        "clear_search": "Clear search",
+        "empty_user_title": "No galleries yet",
+        "empty_user_desc": "This creator hasn't published any public photo collections yet.",
+        "view_profile_cta": "View creator profile",
+        "all_galleries": "All galleries",
+        "photos_count": "{{count}} photos",
+        "of_user_simple": "Galleries",
+        "of_creator": "Creator collections"
     },
     "common": {
         "loading": "Loading...",
@@ -369,19 +430,28 @@
     },
 
     "tickets": {
+        "kicker": "Help & Support Center",
         "my_tickets": "My Tickets",
+        "subtitle": "Check the status of your requests or submit a new inquiry to our team.",
         "new": "New Ticket",
+        "new_subtitle": "Provide the details of your inquiry and our team will get back to you shortly.",
         "no_tickets": "You don't have tickets yet.",
         "create_one": "Create a new one.",
+        "empty_title": "No active support requests",
+        "back_to_tickets": "Back to Tickets",
         "subject": "Subject",
+        "subject_placeholder": "Brief summary of your inquiry or issue",
         "status": "Status",
         "priority": "Priority",
         "category": "Category",
         "created": "Created",
         "view": "View",
         "description": "Description",
+        "description_placeholder": "Describe what happened in detail...",
+        "comment_placeholder": "Write a reply or additional details...",
         "create": "Create Ticket",
         "detail": "Ticket Detail",
+        "detail_subtitle": "Discussion thread and case tracking.",
         "not_found": "Ticket not found.",
         "comments": "Comments",
         "no_comments": "No comments yet.",
@@ -415,6 +485,8 @@
         "session_expired": "Your session expired. Please login to continue.",
         "login_required_edit_profile": "You must login to edit your profile",
         "login_title": "Login",
+        "login_kicker": "Secure Access",
+        "login_subtitle": "Enter your credentials to access your profile, messages, and exclusive content.",
         "email": "Email",
         "email_placeholder": "email@example.com",
         "password": "Password",
@@ -426,6 +498,9 @@
         "register_here": "Register here",
         "invalid_credentials": "Login error. Please check your credentials.",
         "register_title": "Create Account",
+        "register_kicker": "Exclusive Registration",
+        "register_subtitle": "Create your account to connect with creators, discover cafes, and access exclusive content.",
+        "security_ssl": "256-bit SSL encrypted connection & intelligent anti-spam protection.",
         "full_name": "Full Name",
         "full_name_placeholder": "John Doe",
         "username": "Username",
@@ -484,20 +559,30 @@
         "remove": "Remove like",
         "login_to_like": "Login to like"
     },
-   "notifications": {
+    "notifications": {
+        "kicker": "Activity & Alerts",
         "title": "Notifications",
+        "subtitle": "Stay updated with follower interactions, system notices, and VIP messages.",
         "loading": "Loading notifications...",
         "new": "New",
         "mark_read": "Mark as read",
         "mark_all_read": "Mark all as read",
         "filter_all": "All",
         "filter_unread": "Unread",
+        "filter_vip": "VIP",
         "unread_count": "{{count}} unread",
         "empty_unread": "You have no unread notifications.",
         "empty_all": "You have no notifications.",
+        "empty_vip": "You have no VIP creator messages.",
         "new_notification": "New Notification",
-        "now": "Now"
-   },
+        "now": "Now",
+        "reply": "Reply",
+        "reply_title": "Reply to VIP message",
+        "reply_placeholder": "Write your reply here...",
+        "reply_send": "Send reply",
+        "reply_sending": "Sending...",
+        "reply_close": "Close"
+    },
     "error_boundary": {
         "title": "Oops! Something went wrong",
         "message": "An unexpected error occurred. Our team has been notified and is working to fix it.",
@@ -530,12 +615,24 @@
         "connection_error": "Connection error. Please try again."
     },
     "modal": {
-        "warning_title": "Important Notice",
-        "ok": "Got it"
+        "warning_title": "Age Verification",
+        "warning_kicker": "Restricted Access (+18)",
+        "ok": "I am 18 or older / Enter",
+        "cancel": "I am under 18 / Exit",
+        "disclaimer": "This site contains content intended exclusively for adults. By entering, you confirm you are of legal age in your jurisdiction."
     },
     "contact": {
         "title": "Contact",
         "intro": "Do you have questions or comments? Send us a message and we will reply soon.",
+        "kicker": "Support & Inquiries",
+        "info_title": "Assistance Channels",
+        "info_desc": "We are committed to providing the best experience and answering your questions promptly.",
+        "response_title": "Response Time",
+        "response_desc": "We reply to most inquiries within 24 business hours.",
+        "direct_title": "Direct Attention",
+        "direct_desc": "Our team reviews each inquiry personally and securely.",
+        "security_title": "Protected Transmission",
+        "security_desc": "256-bit SSL encryption and intelligent anti-spam verification.",
         "name": "Name",
         "name_placeholder": "Your full name",
         "email": "Email",
@@ -555,5 +652,28 @@
             "subject_min": "Subject must be at least 3 characters.",
             "message_min": "Message must be at least 10 characters."
         }
+    },
+    "faqs": {
+        "kicker": "Help & Answers",
+        "title": "Frequently Asked Questions",
+        "subtitle": "Everything you need to know about accounts, creator profiles, galleries, cafes, and security.",
+        "search_placeholder": "Search frequently asked questions...",
+        "clear_search": "Clear",
+        "categories": {
+            "all": "All",
+            "general": "General",
+            "creators": "Creators & Models",
+            "cafes": "Cafes",
+            "security": "Security & Support"
+        },
+        "no_results_title": "No matches found",
+        "no_results_desc": "No questions matched your search criteria. Try a different keyword or category.",
+        "reset_filter": "Reset filters",
+        "cta_title": "Didn't find what you were looking for?",
+        "cta_desc": "We are here to help. Send us a message or submit a personalized support ticket.",
+        "contact_btn": "Contact Support",
+        "tickets_btn": "Open a Ticket"
     }
 }
+
+

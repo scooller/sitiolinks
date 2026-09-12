@@ -9,15 +9,27 @@ export default function Cafes(): React.ReactElement {
 
   return (
     <>
-      <Container className="mt-5 mb-2">
+      <Container className="apple-hero-container">
         <Row className="justify-content-center">
-          <Col md={8} className="text-center">
-            <h1 className="mb-3">{t('cafes.title')}</h1>
-            <p className="lead mb-0">{t('cafes.subtitle')}</p>
-            <Button as={Link} to="/sugerir-cafe" variant="outline-primary" className="mt-3 rounded-pill">
-              <i className="fas fa-circle-plus me-1"></i>
-              {t('suggest.title')}
-            </Button>
+          <Col md={10} className="text-center">
+            <span className="cafes-section-kicker">
+              <i className="fas fa-compass me-1" aria-hidden="true"></i>
+              {t('cafes.directory_kicker', 'Guía de Cafeterías')}
+            </span>
+            <h1 className="apple-hero-title mb-3">{t('cafes.title')}</h1>
+            <p className="apple-hero-subtitle mb-4">{t('cafes.subtitle')}</p>
+            <div>
+              <Button
+                as={Link}
+                to="/sugerir-cafe"
+                variant="primary"
+                className="rounded-pill px-4 shadow-sm"
+                style={{ minHeight: 'var(--size-touch-min)', display: 'inline-flex', alignItems: 'center' }}
+              >
+                <i className="fas fa-circle-plus me-2" aria-hidden="true"></i>
+                {t('suggest.title')}
+              </Button>
+            </div>
           </Col>
         </Row>
       </Container>

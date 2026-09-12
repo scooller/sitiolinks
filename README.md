@@ -169,3 +169,11 @@ La sección de cafés y sucursales quedó alineada con el patrón ya usado en ga
 ### Regla de orden
 - Cuando se necesita elegir una sola imagen para mostrar, se toma la más reciente por `created_at desc` y `id desc` como desempate.
 - Esto aplica tanto en tablas de Filament como en los resolvers GraphQL de cafés y sucursales.
+
+---
+
+## Directrices para Agentes de IA y Registro de Cambios
+
+- **Instrucciones para Agentes**: Consultar [AGENTS.md](AGENTS.md) para los estándares obligatorios (uso de skills, RTK para frontend, consultas mediante Graphify, versionado SemVer y pautas Apple HIG).
+- **Registro de Versiones**: Consultar [CHANGELOG.md](CHANGELOG.md) para el historial de versiones según el estándar *Keep a Changelog*.
+

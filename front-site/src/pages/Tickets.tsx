@@ -1,6 +1,8 @@
-import React, { type ReactElement } from 'react';
+import React, { type ReactElement, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, Table, Badge, Button, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
+import { motion } from 'motion/react';
+import { fadeIn, defaultTransition, appleEase } from '../lib/animations';
 import { useAuth } from '../contexts/AuthContext';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { queries } from '../lib/graphql/queries';
@@ -22,15 +24,15 @@ const statusLabel = (s: string, t: (k: string, o?: any) => string): string => {
   return labels[s] || s;
 };
 
-const statusColor = (s: string): string => {
-  const colors: Record<string, string> = {
-    abierto: 'danger',
-    en_progreso: 'warning',
-    resuelto: 'success',
-    cerrado: 'secondary',
-    reabierto: 'info',
+const statusClass = (s: string): string => {
+  const map: Record<string, string> = {
+    abierto: 'status-abierto',
+    en_progreso: 'status-en_progreso',
+    resuelto: 'status-resuelto',
+    cerrado: 'status-cerrado',
+    reabierto: 'status-reabierto',
   };
-  return colors[s] || 'secondary';
+  return map[s] || 'status-cerrado';
 };
 
 const priorityLabel = (p: string, t: (k: string, o?: any) => string): string => {
@@ -43,24 +45,24 @@ const priorityLabel = (p: string, t: (k: string, o?: any) => string): string => 
   return labels[p] || p;
 };
 
-const priorityColor = (p: string): string => {
-  const colors: Record<string, string> = {
-    baja: 'secondary',
-    media: 'info',
-    alta: 'warning',
-    urgente: 'danger',
+const priorityClass = (p: string): string => {
+  const map: Record<string, string> = {
+    baja: 'priority-baja',
+    media: 'priority-media',
+    alta: 'priority-alta',
+    urgente: 'priority-urgente',
   };
-  return colors[p] || 'secondary';
+  return map[p] || 'priority-media';
 };
 
 export default function Tickets(): ReactElement {
   const { user } = useAuth();
-  const { t } = useTranslation();
-  const [tickets, setTickets] = React.useState<Ticket[]>([]);
-  const [loading, setLoading] = React.useState<boolean>(true);
-  const [error, setError] = React.useState<string>('');
+  const { t, i18n } = useTranslation();
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
 
-  React.useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     setLoading(true);
     graphqlRequest<TicketsResponse>({
@@ -72,72 +74,146 @@ export default function Tickets(): ReactElement {
         if (!mounted) return;
         setTickets(data?.tickets || []);
       })
-      .catch((e: any) => setError(e?.message || t('errors.loading', { entity: t('entities.tickets') })) )
-      .finally(() => mounted && setLoading(false));
+      .catch((e: any) => {
+        if (mounted) {
+          setError(e?.message || t('errors.loading', { entity: t('entities.tickets') }));
+        }
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
     return () => {
       mounted = false;
     };
-  }, [user?.id]);
+  }, [user?.id, t]);
 
   return (
-    <Container className="py-4">
-      <Row className="mb-3">
-        <Col>
-          <h2>
-            <i className="fas fa-bell me-2" />
-            {t('tickets.my_tickets')}
-          </h2>
-        </Col>
-        <Col className="text-end">
-          <Button as={Link as any} to="/tickets/nuevo" variant="primary">
-            <i className="fas fa-plus me-1" />
-            {t('tickets.new')}
-          </Button>
-        </Col>
-      </Row>
+    <div className="tickets-page-wrapper">
+      <Container>
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={fadeIn}
+          transition={defaultTransition}
+        >
+          <Row className="justify-content-center">
+            <Col lg={10} xl={9}>
+              {/* Cabecera Editorial Apple */}
+              <div className="tickets-hero">
+                <span className="tickets-kicker">
+                  <i className="fas fa-headset" aria-hidden="true"></i> {t('tickets.kicker')}
+                </span>
 
-      {loading ? (
-        <div className="text-center py-5">
-          <Spinner />
-        </div>
-      ) : error ? (
-        <div className="alert alert-danger">{error}</div>
-      ) : tickets.length === 0 ? (
-        <div className="alert alert-info">{t('tickets.no_tickets')} {t('tickets.create_one')}</div>
-      ) : (
-        <Table striped hover responsive>
-          <thead>
-            <tr>
-              <th>{t('tickets.subject')}</th>
-              <th>{t('tickets.status')}</th>
-              <th>{t('tickets.priority')}</th>
-              <th>{t('tickets.category')}</th>
-              <th>{t('tickets.created')}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {tickets.map((ticket) => (
-              <tr key={String(ticket.id)}>
-                <td>{ticket.subject}</td>
-                <td>
-                  <Badge bg={statusColor(ticket.status)}>{statusLabel(ticket.status, t)}</Badge>
-                </td>
-                <td>
-                  <Badge bg={priorityColor(ticket.priority)}>{priorityLabel(ticket.priority, t)}</Badge>
-                </td>
-                <td>{ticket.category}</td>
-                <td>{ticket.created_at}</td>
-                <td className="text-end">
-                  <Button as={Link as any} to={`/tickets/${ticket.id}`} size="sm" variant="outline-secondary">
-                    {t('tickets.view')}
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
-    </Container>
+                <div className="tickets-header-row">
+                  <h1 className="tickets-title">{t('tickets.my_tickets')}</h1>
+
+                  <Link to="/tickets/nuevo" className="tickets-new-btn">
+                    <i className="fas fa-plus" aria-hidden="true"></i>
+                    <span>{t('tickets.new')}</span>
+                  </Link>
+                </div>
+
+                <p className="tickets-subtitle">{t('tickets.subtitle')}</p>
+              </div>
+
+              {/* Estado de Carga */}
+              {loading ? (
+                <div className="text-center py-5">
+                  <Spinner animation="border" variant="primary" role="status" />
+                  <p className="mt-3 text-muted">{t('common.loading')}</p>
+                </div>
+              ) : error ? (
+                /* Estado de Error */
+                <Alert variant="danger" className="rounded-xl shadow-sm">
+                  <i className="fas fa-circle-exclamation me-2" aria-hidden="true"></i>
+                  {error}
+                </Alert>
+              ) : tickets.length === 0 ? (
+                /* Estado Vacío Apple HIG */
+                <div className="tickets-empty-card">
+                  <div className="tickets-empty-icon" aria-hidden="true">
+                    <i className="fas fa-headset"></i>
+                  </div>
+                  <h2 className="tickets-empty-title">{t('tickets.empty_title')}</h2>
+                  <p className="tickets-empty-desc">
+                    {t('tickets.no_tickets')} {t('tickets.create_one')}
+                  </p>
+                  <Link to="/tickets/nuevo" className="tickets-new-btn">
+                    <i className="fas fa-plus" aria-hidden="true"></i>
+                    <span>{t('tickets.new')}</span>
+                  </Link>
+                </div>
+              ) : (
+                /* Lista de Tickets en Tarjetas Liquid Glass */
+                <div className="tickets-list">
+                  {tickets.map((ticket, idx) => (
+                    <motion.div
+                      key={String(ticket.id)}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.24,
+                        delay: Math.min(idx * 0.04, 0.3),
+                        ease: appleEase,
+                      }}
+                    >
+                      <Link
+                        to={`/tickets/${ticket.id}`}
+                        className="ticket-apple-card clickable"
+                        aria-label={`Ver ticket: ${ticket.subject}`}
+                      >
+                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                          <h2 className="fs-5 fw-bold mb-0 text-truncate" style={{ maxWidth: '75%' }}>
+                            {ticket.subject}
+                          </h2>
+                          <span className={`ticket-status-pill ${statusClass(ticket.status)}`}>
+                            {statusLabel(ticket.status, t)}
+                          </span>
+                        </div>
+
+                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 mt-3">
+                          <div className="d-flex align-items-center flex-wrap gap-2">
+                            <span className={`ticket-priority-pill ${priorityClass(ticket.priority)}`}>
+                              <i className="fas fa-flag" aria-hidden="true"></i>
+                              {priorityLabel(ticket.priority, t)}
+                            </span>
+
+                            {ticket.category && (
+                              <span className="ticket-category-tag">
+                                <i className="fas fa-folder" aria-hidden="true"></i>
+                                {t(`tickets.categories.${ticket.category}`) || ticket.category}
+                              </span>
+                            )}
+
+                            <span className="small text-muted d-inline-flex align-items-center gap-1">
+                              <i className="far fa-clock" aria-hidden="true"></i>
+                              {ticket.created_at ? (
+                                <time dateTime={ticket.created_at}>
+                                  {new Date(ticket.created_at).toLocaleDateString(i18n.language, {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: 'numeric',
+                                  })}
+                                </time>
+                              ) : null}
+                            </span>
+                          </div>
+
+                          <span className="ticket-view-btn">
+                            <span>{t('tickets.view')}</span>
+                            <i className="fas fa-arrow-right" aria-hidden="true"></i>
+                          </span>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </Col>
+          </Row>
+        </motion.div>
+      </Container>
+    </div>
   );
 }

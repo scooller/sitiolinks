@@ -498,11 +498,12 @@ export default function MyGalleries() {
                                                 </small>
                                             </div>
 
-                                            {/* Botones de acción */}
+                                            {/* Botones de acción 100% Sólidos */}
                                             <div className="d-grid gap-2">
                                                 <Button
-                                                    variant="outline-dark"
+                                                    variant="dark"
                                                     size="sm"
+                                                    className="rounded-pill shadow-sm"
                                                     as={Link as any}
                                                     to={`/mis-galerias/${gallery.id}/editar`}
                                                 >
@@ -512,9 +513,9 @@ export default function MyGalleries() {
                                                 <div className="d-flex gap-2">
                                                     {gallery.can_be_featured && (
                                                         <Button
-                                                            variant={gallery.is_featured ? "warning" : "outline-warning"}
+                                                            variant={gallery.is_featured ? "warning" : "secondary"}
                                                             size="sm"
-                                                            className="flex-grow-1"
+                                                            className="flex-grow-1 rounded-pill shadow-sm"
                                                             onClick={() => handleToggleFeatured(gallery)}
                                                             disabled={togglingFeatured === parseInt(String(gallery.id))}
                                                             title={gallery.is_featured ? "Quitar destacado" : "Destacar galería"}
@@ -530,17 +531,18 @@ export default function MyGalleries() {
                                                         </Button>
                                                     )}
                                                     <Button
-                                                        variant="outline-secondary"
+                                                        variant="secondary"
                                                         size="sm"
-                                                        className="flex-grow-1"
+                                                        className="flex-grow-1 rounded-pill shadow-sm"
                                                         onClick={() => navigate(`/galleries/${gallery.id}`)}
                                                     >
                                                         <i className="fas fa-eye me-1"></i>
                                                         {t('common.view_profile')}
                                                     </Button>
                                                     <Button
-                                                        variant="outline-danger"
+                                                        variant="danger"
                                                         size="sm"
+                                                        className="rounded-pill shadow-sm"
                                                         onClick={() => setDeleteModal({ show: true, gallery })}
                                                     >
                                                         <i className="fas fa-trash"></i>

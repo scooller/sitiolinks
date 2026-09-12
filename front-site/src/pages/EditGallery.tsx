@@ -512,7 +512,8 @@ export default function EditGallery(): ReactElement | null {
           <Alert.Heading>Error</Alert.Heading>
           <p>{error}</p>
           <hr />
-          <Button variant="outline-danger" onClick={() => navigate('/mis-galerias')}>
+          <Button variant="secondary" className="rounded-pill shadow-sm" onClick={() => navigate('/mis-galerias')}>
+            <i className="fas fa-arrow-left me-1" aria-hidden="true"></i>
             {t('galleries.back_to_my_galleries')}
           </Button>
         </Alert>
@@ -710,7 +711,7 @@ export default function EditGallery(): ReactElement | null {
                       </>
                     )}
                   </Button>
-                  <Button variant="outline-secondary" onClick={() => navigate('/mis-galerias')}>
+                  <Button variant="secondary" className="rounded-pill shadow-sm" onClick={() => navigate('/mis-galerias')}>
                     Volver
                   </Button>
                 </div>

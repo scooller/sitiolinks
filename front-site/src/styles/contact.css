@@ -1,0 +1,396 @@
+/* ==========================================================================
+   Apple HIG Contact Styles - Link Persons (HIG 2026 Edition)
+   ========================================================================== */
+
+/* Contenedor y Hero */
+.contact-page-wrapper {
+  padding: var(--space-6) 0 var(--space-12);
+}
+
+.contact-hero {
+  margin-bottom: var(--space-8);
+}
+
+.contact-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--cafe-primary);
+  margin-bottom: var(--space-2);
+}
+
+.contact-title {
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-tight);
+  color: var(--apple-glass-text);
+  margin-bottom: var(--space-3);
+}
+
+.contact-subtitle {
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  color: var(--apple-glass-text-muted);
+  max-width: 620px;
+  margin: 0;
+}
+
+/* Tarjeta Principal de Contacto Apple Liquid Glass */
+.contact-apple-card {
+  background: var(--apple-glass-bg);
+  backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-saturate));
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-2xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-8);
+  transition: box-shadow var(--duration-normal) var(--ease-apple), transform var(--duration-normal) var(--ease-apple);
+}
+
+@media (max-width: 767.98px) {
+  .contact-apple-card {
+    padding: var(--space-5);
+  }
+}
+
+/* Tarjeta de Información / Soporte Lateral */
+.contact-info-card {
+  background: var(--apple-glass-bg);
+  backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-saturate));
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-2xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-8);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+@media (max-width: 991.98px) {
+  .contact-info-card {
+    margin-top: var(--space-6);
+  }
+}
+
+.contact-info-header {
+  margin-bottom: var(--space-6);
+}
+
+.contact-info-title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--apple-glass-text);
+  margin-bottom: var(--space-2);
+}
+
+.contact-info-desc {
+  font-size: var(--fs-sm);
+  color: var(--apple-glass-text-muted);
+  margin-bottom: 0;
+}
+
+.contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.contact-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.contact-info-icon-box {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: var(--rounded-xl);
+  background: rgba(var(--cafe-primary-rgb), 0.12);
+  color: var(--cafe-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-md);
+  box-shadow: var(--shadow-2xs);
+  transition: transform var(--duration-fast) ease;
+}
+
+.contact-info-item:hover .contact-info-icon-box {
+  transform: scale(1.06);
+}
+
+.contact-info-content h4 {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  color: var(--apple-glass-text);
+  margin-bottom: 2px;
+}
+
+.contact-info-content p {
+  font-size: var(--fs-sm);
+  color: var(--apple-glass-text-muted);
+  margin: 0;
+  line-height: var(--lh-snug);
+}
+
+/* Insignia de Seguridad SSL */
+.contact-security-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--rounded-xl);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  color: #059669;
+}
+
+[data-bs-theme="dark"] .contact-security-badge {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.contact-security-icon {
+  font-size: var(--fs-lg);
+  flex-shrink: 0;
+}
+
+.contact-security-text {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-snug);
+  margin: 0;
+}
+
+/* Campos de Formulario Apple HIG */
+.contact-input-group {
+  margin-bottom: var(--space-4);
+}
+
+.contact-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.contact-label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--apple-glass-text);
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+.contact-label-required {
+  color: var(--cafe-primary);
+  margin-left: 2px;
+}
+
+.contact-char-pill {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  padding: 2px 8px;
+  border-radius: var(--rounded-full);
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--apple-glass-text-muted);
+}
+
+[data-bs-theme="dark"] .contact-char-pill {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--apple-glass-text-muted);
+}
+
+.contact-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.contact-field-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--apple-glass-text-muted);
+  font-size: var(--fs-base);
+  pointer-events: none;
+  z-index: 2;
+  transition: color var(--duration-fast) ease;
+}
+
+.contact-input-wrapper.textarea-wrapper .contact-field-icon {
+  top: 1rem;
+  transform: none;
+}
+
+.contact-input {
+  min-height: 48px;
+  padding-left: 2.75rem !important;
+  padding-right: 1rem !important;
+  border-radius: var(--rounded-lg) !important;
+  border: 1px solid var(--border-card, #dee2e6) !important;
+  background-color: var(--bs-body-bg, #ffffff) !important;
+  color: var(--apple-glass-text) !important;
+  font-size: var(--fs-sm) !important;
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease !important;
+}
+
+[data-bs-theme="dark"] .contact-input {
+  background-color: #212529 !important;
+  border-color: #495057 !important;
+  color: var(--apple-glass-text) !important;
+}
+
+.contact-input:focus {
+  border-color: var(--cafe-primary) !important;
+  box-shadow: var(--shadow-focus-ring) !important;
+  outline: none !important;
+}
+
+.contact-input:focus ~ .contact-field-icon,
+.contact-input-wrapper:focus-within .contact-field-icon {
+  color: var(--cafe-primary);
+}
+
+.contact-textarea {
+  min-height: 130px;
+  padding-left: 2.75rem !important;
+  padding-top: 0.85rem !important;
+  padding-right: 1rem !important;
+  border-radius: var(--rounded-lg) !important;
+  resize: vertical;
+}
+
+/* Feedback de Validación */
+.contact-feedback-error {
+  display: block;
+  font-size: var(--fs-xs);
+  color: #dc3545;
+  font-weight: var(--fw-medium);
+  margin-top: 0.35rem;
+  padding-left: 0.25rem;
+}
+
+.contact-input.is-invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.18) !important;
+}
+
+/* Contenedor Altcha */
+.contact-altcha-container {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--rounded-lg);
+  background: rgba(var(--cafe-primary-rgb), 0.04);
+  border: 1px solid var(--apple-glass-border);
+  margin-bottom: var(--space-4);
+}
+
+/* Botón de Envío 100% Sólido */
+.contact-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--rounded-full);
+  background-color: var(--cafe-primary) !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.01em;
+  box-shadow: var(--shadow-primary-btn);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease, transform var(--duration-fast) var(--ease-apple);
+}
+
+.contact-submit-btn:hover:not(:disabled) {
+  background-color: #864b24 !important;
+  box-shadow: var(--shadow-primary-btn-hover);
+  transform: translateY(-1px);
+}
+
+.contact-submit-btn:active:not(:disabled) {
+  transform: scale(0.985) translateY(0);
+  box-shadow: var(--shadow-button-active);
+}
+
+.contact-submit-btn:disabled {
+  opacity: var(--opacity-disabled);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Alertas de Estado Apple HIG */
+.contact-status-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--rounded-xl);
+  margin-bottom: var(--space-5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--fs-sm);
+}
+
+.contact-status-alert.alert-success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  color: #065f46;
+}
+
+[data-bs-theme="dark"] .contact-status-alert.alert-success {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.36);
+  color: #6ee7b7;
+}
+
+.contact-status-alert.alert-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  color: #991b1b;
+}
+
+[data-bs-theme="dark"] .contact-status-alert.alert-danger {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.36);
+  color: #fca5a5;
+}
+
+.contact-status-icon {
+  font-size: var(--fs-lg);
+  flex-shrink: 0;
+}
+
+.contact-status-content {
+  flex-grow: 1;
+}
+
+.contact-status-close {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 0 4px;
+  font-size: var(--fs-md);
+  transition: opacity var(--duration-fast) ease;
+}
+
+.contact-status-close:hover {
+  opacity: 1;
+}

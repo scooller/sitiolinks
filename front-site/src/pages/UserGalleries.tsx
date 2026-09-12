@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import type { ReactElement } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Container, Row, Col, Card, Badge, Spinner, Alert, Form, InputGroup, Placeholder } from 'react-bootstrap';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Spinner, Placeholder } from 'react-bootstrap';
 import { motion } from 'motion/react';
+import { fadeIn, defaultTransition, appleEase } from '../lib/animations';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { queries } from '../lib/graphql/queries';
 import { useAuth } from '../contexts/AuthContext';
-import Paginator from '../components/Paginator.tsx';
+import Paginator from '../components/Paginator';
 import OptimizedImage from '../components/OptimizedImage';
 import LikeButton from '../components/LikeButton';
 import type { GalleryPaginator, User } from '../types';
@@ -19,6 +20,7 @@ interface UserResponse {
 export default function UserGalleries(): ReactElement {
   const { t } = useTranslation();
   const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [galleries, setGalleries] = useState<GalleryPaginator | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -26,7 +28,6 @@ export default function UserGalleries(): ReactElement {
   const [galleriesLoading, setGalleriesLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [imagesLoaded, setImagesLoaded] = useState<Set<string>>(new Set());
-  const [hoveredGallery, setHoveredGallery] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchInput, setSearchInput] = useState<string>('');
@@ -38,9 +39,9 @@ export default function UserGalleries(): ReactElement {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      const term = searchInput && searchInput.length >= 4 ? searchInput : '';
+      const term = searchInput && searchInput.length >= 3 ? searchInput : '';
       setSearchTerm(term);
-    }, 400);
+    }, 350);
     return () => clearTimeout(handler);
   }, [searchInput]);
 
@@ -65,6 +66,8 @@ export default function UserGalleries(): ReactElement {
               avatar_url
               avatar_thumb
               avatar_thumb_webp
+              avatar_small_webp
+              avatar_medium_webp
             }
           }
         `,
@@ -72,7 +75,7 @@ export default function UserGalleries(): ReactElement {
       });
 
       if (!userResponse.user) {
-        setError('Usuario no encontrado');
+        setError(t('errors.user_not_found', 'Usuario no encontrado'));
         return;
       }
 
@@ -80,14 +83,7 @@ export default function UserGalleries(): ReactElement {
       await loadGalleries(userResponse.user.id);
     } catch (err: any) {
       console.error('❌ Error en loadInitial:', err);
-      console.error('Error detalles:', {
-        message: err?.message,
-        response: err?.response,
-        graphQLErrors: err?.response?.errors,
-        networkError: err?.networkError
-      });
-      
-      const errorMessage = err?.response?.errors?.[0]?.message || err?.message || t('errors.loading', { entity: t('entities.user_galleries') });
+      const errorMessage = err?.response?.errors?.[0]?.message || err?.message || t('errors.loading', { entity: t('entities.user_galleries', 'galerías') });
       setError(`Error: ${errorMessage}`);
     } finally {
       setLoadingUser(false);
@@ -109,17 +105,6 @@ export default function UserGalleries(): ReactElement {
       setGalleries(galleriesResponse.galleries);
     } catch (err: any) {
       console.error('❌ Error cargando galerías del usuario:', err);
-      console.error('LoadGalleries error detalles:', {
-        userId: uid,
-        page: currentPage,
-        perPage: perPage,
-        searchTerm: searchTerm,
-        message: err?.message,
-        response: err?.response,
-        graphQLErrors: err?.response?.errors,
-        networkError: err?.networkError
-      });
-      
       const errorMessage = err?.response?.errors?.[0]?.message || err?.message;
       if (errorMessage) {
         setError(`Error al cargar galerías: ${errorMessage}`);
@@ -133,21 +118,78 @@ export default function UserGalleries(): ReactElement {
     setImagesLoaded(prev => new Set(prev).add(String(galleryId)));
   };
 
-  const getVisibilityBadge = (visibility: string): { bg: string; text: string } => {
-    const badges: Record<string, { bg: string; text: string }> = {
-      public: { bg: 'success', text: 'Pública' },
-      private: { bg: 'danger', text: 'Privada' },
-      followers: { bg: 'warning', text: 'Seguidores' },
+  const getVisibilityBadge = (visibility: string): { bgClass: string; text: string; icon: string } => {
+    const badges: Record<string, { bgClass: string; text: string; icon: string }> = {
+      public: { bgClass: 'public', text: t('galleries.visibility_public', 'Pública'), icon: 'fa-globe' },
+      private: { bgClass: 'private', text: t('galleries.visibility_private', 'Privada'), icon: 'fa-lock' },
+      followers: { bgClass: 'followers', text: t('galleries.visibility_followers', 'Seguidores'), icon: 'fa-users' },
     };
-    return badges[visibility] || { bg: 'secondary', text: visibility };
+    return badges[visibility] || { bgClass: 'public', text: visibility, icon: 'fa-eye' };
   };
 
   if (loadingUser) {
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </Spinner>
+      <Container className="py-4" aria-busy="true" aria-live="polite">
+        {/* Segmented Control Skeleton */}
+        <div className="profile-segmented-control mb-4">
+          <div className="profile-segment-btn apple-skeleton" style={{ height: '44px' }} />
+          <div className="profile-segment-btn apple-skeleton" style={{ height: '44px' }} />
+        </div>
+
+        {/* Creator Hero Skeleton */}
+        <div className="gallery-creator-hero">
+          <div className="gallery-creator-info">
+            <div className="gallery-creator-avatar-wrap">
+              <div
+                className="apple-skeleton gallery-creator-avatar"
+                style={{ width: '64px', height: '64px' }}
+              />
+            </div>
+            <div>
+              <div className="apple-skeleton apple-skeleton-text mb-2" style={{ width: '160px', height: '20px' }} />
+              <div className="apple-skeleton apple-skeleton-text" style={{ width: '90px', height: '14px' }} />
+            </div>
+          </div>
+          <div className="gallery-creator-count-badge apple-skeleton" style={{ width: '95px', height: '32px' }} />
+        </div>
+
+        {/* Search Bar Skeleton */}
+        <div className="gallery-search-bar mb-5">
+          <div className="apple-skeleton rounded-full w-100" style={{ height: '48px' }} />
+        </div>
+
+        {/* Galleries Grid Skeleton */}
+        <Row xs={1} md={2} lg={3} className="g-4">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <Col key={idx}>
+              <div className="gallery-apple-card">
+                <div className="gallery-card-media-wrap">
+                  <div className="apple-skeleton" style={{ width: '100%', height: '100%' }} />
+                  <div
+                    className="apple-skeleton rounded-pill"
+                    style={{
+                      position: 'absolute',
+                      top: '12px',
+                      right: '12px',
+                      width: '64px',
+                      height: '24px',
+                      zIndex: 4,
+                    }}
+                  />
+                </div>
+                <div className="gallery-card-body">
+                  <div className="apple-skeleton apple-skeleton-text w-75 mb-2" style={{ height: '18px' }} />
+                  <div className="apple-skeleton apple-skeleton-text w-100 mb-1" style={{ height: '12px' }} />
+                  <div className="apple-skeleton apple-skeleton-text w-60 mb-3" style={{ height: '12px' }} />
+                  <div className="gallery-card-footer">
+                    <div className="apple-skeleton apple-skeleton-text" style={{ width: '70px', height: '13px' }} />
+                    <div className="apple-skeleton rounded-pill" style={{ width: '48px', height: '24px' }} />
+                  </div>
+                </div>
+              </div>
+            </Col>
+          ))}
+        </Row>
       </Container>
     );
   }
@@ -155,185 +197,263 @@ export default function UserGalleries(): ReactElement {
   if (error) {
     return (
       <Container className="py-5">
-        <Alert variant="danger">{error}</Alert>
+        <div className="gallery-error-card">
+          <div className="gallery-error-halo">
+            <i className="fas fa-triangle-exclamation" aria-hidden="true" />
+          </div>
+          <h2 className="gallery-error-title">{t('common.error', 'Error')}</h2>
+          <p className="gallery-error-desc">{error}</p>
+          <div className="galleries-empty-actions">
+            <button
+              type="button"
+              className="galleries-empty-cta"
+              onClick={loadInitial}
+            >
+              <i className="fas fa-rotate-right" aria-hidden="true" />
+              <span>{t('common.retry', 'Reintentar')}</span>
+            </button>
+            <Link to="/explorar" className="galleries-secondary-cta">
+              <i className="fas fa-compass" aria-hidden="true" />
+              <span>{t('nav.explore', 'Explorar')}</span>
+            </Link>
+          </div>
+        </div>
       </Container>
     );
   }
 
   return (
-    <Container className="py-5">
-      <motion.div 
-        className="d-flex align-items-center mb-4"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        {user && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="me-3"
-          >
-            <Link to={`/u/${user?.username}`} className="text-decoration-none">
+    <Container className="py-4">
+      {/* 1. Apple Segmented Control para alternar entre Perfil y Galerías */}
+      <div className="profile-segmented-control mb-4" role="tablist">
+        <button
+          type="button"
+          className="profile-segment-btn"
+          onClick={() => navigate(`/u/${username}`)}
+          role="tab"
+          aria-selected="false"
+        >
+          <i className="fas fa-id-card me-1" aria-hidden="true" />
+          <span>{t('profile.tab_profile', 'Perfil')}</span>
+        </button>
+        <button
+          type="button"
+          className="profile-segment-btn active"
+          role="tab"
+          aria-selected="true"
+        >
+          <i className="fas fa-images me-1" aria-hidden="true" />
+          <span>
+            {t('profile.tab_galleries', 'Galerías')}{' '}
+            {galleries?.paginatorInfo?.total ? `(${galleries.paginatorInfo.total})` : ''}
+          </span>
+        </button>
+      </div>
+
+      {/* 2. Hero del Creador Apple Liquid Glass */}
+      {user && (
+        <motion.div
+          className="gallery-creator-hero"
+          variants={fadeIn}
+          initial="initial"
+          animate="animate"
+          transition={defaultTransition}
+        >
+          <div className="gallery-creator-info">
+            <Link to={`/u/${user.username}`} className="gallery-creator-avatar-wrap" aria-label={`Perfil de @${user.username}`}>
               <OptimizedImage
-                  webpUrl={(user as any).avatar_thumb_webp}
-                  fallbackUrl={(user as any).avatar_thumb || user.avatar_url}
-                  smallWebpUrl={(user as any).avatar_small_webp}
-                  mediumWebpUrl={(user as any).avatar_medium_webp}
-                  alt={user.username}
-                className="rounded-circle"
-                style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                size={60}
+                webpUrl={(user as any).avatar_thumb_webp}
+                fallbackUrl={(user as any).avatar_thumb || user.avatar_url}
+                smallWebpUrl={(user as any).avatar_small_webp}
+                mediumWebpUrl={(user as any).avatar_medium_webp}
+                alt={user.username}
+                className="gallery-creator-avatar"
+                size={64}
                 showSkeleton={true}
               />
             </Link>
-          </motion.div>
-        )}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <h2 className="mb-1">{t('galleries.of_user', { name: user?.name })}</h2>
-          <p className="text-muted text-start mb-0">
-            <Link to={`/u/${user?.username}`} className="text-muted text-decoration-none">@{user?.username}</Link>
-          </p>
+            <div>
+              <h1 className="gallery-creator-title">{t('galleries.of_user', { name: user.name })}</h1>
+              <Link to={`/u/${user.username}`} className="gallery-creator-handle">
+                <i className="fas fa-user-circle me-1" aria-hidden="true" />
+                @{user.username}
+              </Link>
+            </div>
+          </div>
+
+          <div className="gallery-creator-count-badge">
+            <i className="fas fa-images text-primary" aria-hidden="true" />
+            <span>{galleries?.paginatorInfo?.total || 0} {t('galleries.of_user_simple', 'Galerías')}</span>
+          </div>
         </motion.div>
-      </motion.div>
-
-      <div className="mb-4">
-        <InputGroup>
-          <InputGroup.Text>
-            <i className="fas fa-search"></i>
-          </InputGroup.Text>
-          <Form.Control
-            type="text"
-            placeholder={t('galleries.search_placeholder')}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-        </InputGroup>
-      </div>
-
-      {!galleries || galleries.data.length === 0 ? (
-        <Alert variant="info">
-          {searchTerm ? t('galleries.no_results_search') : t('galleries.no_public')}
-        </Alert>
-      ) : (
-        <>
-        <Row as={motion.div} xs={1} md={2} lg={3} className="g-4">
-          {galleries.data.map((gallery, index) => {
-            const isLoaded = imagesLoaded.has(String(gallery.id));
-            const galleryId = String(gallery.id);
-            const isHovered = hoveredGallery === galleryId;
-            
-            return (
-            <Col key={galleryId}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ 
-                      opacity: 1, 
-                      y: 0, 
-                      scale: 1,
-                    }}
-                    whileHover={{ y: -8, scale: 1.02 }}
-                    onHoverStart={() => setHoveredGallery(galleryId)}
-                    onHoverEnd={() => setHoveredGallery(null)}
-                    transition={{ duration: 0.3, ease: 'easeOut', delay: index * 0.05 }}
-                    style={{ borderRadius: 6, height: '100%' }}
-                  >
-                  <Card className="h-100 shadow-sm" style={{ boxShadow: isHovered ? '0 0.75rem 1.5rem rgba(0,0,0,0.18)' : undefined }}>
-                <Link to={`/galleries/${gallery.id}`} className="text-decoration-none">
-                  <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
-                    {(gallery as any).media && (gallery as any).media.length > 0 && (gallery as any).media[0].thumb_url ? (
-                      <>
-                        {!isLoaded && (
-                          <Placeholder 
-                            as="div" 
-                            animation="glow" 
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}
-                          >
-                            <Placeholder xs={12} style={{ height: '100%' }} />
-                          </Placeholder>
-                        )}
-                        <OptimizedImage
-                          webpUrl={(gallery as any).media[0].thumb_webp_url}
-                          fallbackUrl={(gallery as any).media[0].thumb_url}
-                          alt={gallery.title}
-                          className="gallery-thumbnail"
-                          style={{ 
-                            height: '200px', 
-                            width: '100%', 
-                            objectFit: 'cover',
-                            opacity: isLoaded ? 1 : 0,
-                            transition: 'opacity 0.3s ease, filter 0.3s ease',
-                            filter: isHovered ? 'blur(0)' : 'blur(5px)'
-                          }}
-                          loading="lazy"
-                          onLoad={() => handleImageLoad(gallery.id)}
-                        />
-                      </>
-                    ) : (
-                      <div className="bg-light d-flex align-items-center justify-content-center" style={{ height: '200px' }}>
-                        <i className="fas fa-images fs-1 text-muted"></i>
-                      </div>
-                    )}
-                  </div>
-
-                  <Card.Body>
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <Card.Title className="mb-0 flex-grow-1" style={{ color: isHovered ? 'var(--bs-primary)' : undefined }}>{gallery.title}</Card.Title>
-                      <Badge bg={getVisibilityBadge(gallery.visibility).bg} className="ms-2">
-                        {getVisibilityBadge(gallery.visibility).text}
-                      </Badge>
-                    </div>
-
-                    {gallery.description && (
-                      <Card.Text className="text-muted small">
-                        {gallery.description.length > 100 ? gallery.description.substring(0, 100) + '...' : gallery.description}
-                      </Card.Text>
-                    )}
-
-                    <div className="d-flex justify-content-between align-items-center mt-3">
-                      <small className="text-muted">
-                        <i className="fas fa-images me-1"></i>
-                        {(gallery as any).media_count} {t('galleries.images', { count: (gallery as any).media_count })}
-                      </small>
-                      <LikeButton
-                        galleryId={Number(gallery.id)}
-                        ownerUserId={Number((user as any)?.id)}
-                        initialLikesCount={Number(gallery.likes_count || 0)}
-                        initialLiked={Boolean(gallery.liked_by_user)}
-                      />
-                    </div>
-                  </Card.Body>
-                </Link>
-              </Card>
-                  </motion.div>
-            </Col>
-            );
-          })}
-        </Row>
-
-        <div className="mt-4">
-          <Paginator
-            currentPage={galleries.paginatorInfo.currentPage}
-            lastPage={galleries.paginatorInfo.lastPage}
-            total={galleries.paginatorInfo.total}
-            perPage={galleries.paginatorInfo.perPage}
-            onPageChange={setCurrentPage}
-            loading={galleriesLoading}
-          />
-        </div>
-        </>
       )}
 
-      <style>{`
-        .h-100:hover .gallery-thumbnail {
-          filter: blur(0px) !important;
-        }
-      `}</style>
+      {/* 3. Barra de Búsqueda Liquid Glass */}
+      <div className="gallery-search-bar">
+        <div className="gallery-search-input-wrap">
+          <i className="fas fa-search gallery-search-icon" aria-hidden="true" />
+          <input
+            type="text"
+            className="gallery-search-input"
+            placeholder={t('galleries.search_placeholder', 'Buscar galerías...')}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            aria-label={t('galleries.search_placeholder', 'Buscar galerías...')}
+          />
+          {searchInput && (
+            <button
+              type="button"
+              className="gallery-search-clear"
+              onClick={() => {
+                setSearchInput('');
+                setSearchTerm('');
+              }}
+              aria-label={t('galleries.clear_search', 'Limpiar búsqueda')}
+            >
+              <i className="fas fa-times-circle" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 4. Contenido de Galerías */}
+      {!galleries || galleries.data.length === 0 ? (
+        <motion.div
+          className="galleries-empty-card"
+          variants={fadeIn}
+          initial="initial"
+          animate="animate"
+          transition={defaultTransition}
+        >
+          <div className="galleries-empty-halo">
+            <i className={`fas ${searchTerm ? 'fa-magnifying-glass' : 'fa-images'}`} aria-hidden="true" />
+          </div>
+          <h2 className="galleries-empty-title">
+            {searchTerm ? t('galleries.empty_search_title', 'Sin resultados de búsqueda') : t('galleries.empty_user_title', 'Aún no hay galerías')}
+          </h2>
+          <p className="galleries-empty-desc">
+            {searchTerm
+              ? t('galleries.empty_search_desc', 'No encontramos ninguna galería que coincida con tu búsqueda.')
+              : t('galleries.empty_user_desc', 'Este creador todavía no ha publicado colecciones de fotos.')}
+          </p>
+          <div className="galleries-empty-actions">
+            {searchTerm ? (
+              <button
+                type="button"
+                className="galleries-empty-cta"
+                onClick={() => {
+                  setSearchInput('');
+                  setSearchTerm('');
+                }}
+              >
+                <i className="fas fa-rotate-left" aria-hidden="true" />
+                <span>{t('galleries.clear_search', 'Limpiar búsqueda')}</span>
+              </button>
+            ) : (
+              <Link to={`/u/${username}`} className="galleries-empty-cta">
+                <i className="fas fa-user" aria-hidden="true" />
+                <span>{t('galleries.view_profile_cta', 'Ver perfil del creador')}</span>
+              </Link>
+            )}
+            <Link to="/explorar" className="galleries-secondary-cta">
+              <i className="fas fa-compass" aria-hidden="true" />
+              <span>{t('nav.explore', 'Explorar otros creadores')}</span>
+            </Link>
+          </div>
+        </motion.div>
+      ) : (
+        <>
+          <Row xs={1} md={2} lg={3} className="g-4">
+            {galleries.data.map((gallery, index) => {
+              const isLoaded = imagesLoaded.has(String(gallery.id));
+              const galleryId = String(gallery.id);
+              const badge = getVisibilityBadge(gallery.visibility);
+
+              return (
+                <Col key={galleryId}>
+                  <motion.div
+                    className="gallery-apple-card"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.28, ease: appleEase, delay: Math.min(index * 0.04, 0.3) }}
+                  >
+                    <Link to={`/galleries/${gallery.id}`} className="text-decoration-none">
+                      <div className="gallery-card-media-wrap">
+                        <span className={`gallery-visibility-pill ${badge.bgClass}`}>
+                          <i className={`fas ${badge.icon} me-1`} aria-hidden="true" />
+                          {badge.text}
+                        </span>
+
+                        {(gallery as any).media && (gallery as any).media.length > 0 && (gallery as any).media[0].thumb_url ? (
+                          <>
+                            {!isLoaded && (
+                              <div
+                                className="apple-skeleton"
+                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}
+                              />
+                            )}
+                            <OptimizedImage
+                              webpUrl={(gallery as any).media[0].thumb_webp_url}
+                              fallbackUrl={(gallery as any).media[0].thumb_url}
+                              alt={gallery.title}
+                              className="gallery-card-img"
+                              style={{ opacity: isLoaded ? 1 : 0 }}
+                              loading="lazy"
+                              onLoad={() => handleImageLoad(gallery.id)}
+                            />
+                          </>
+                        ) : (
+                          <div className="d-flex align-items-center justify-content-center h-100 text-muted">
+                            <i className="fas fa-images fs-1 opacity-50" aria-hidden="true" />
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+
+                    <div className="gallery-card-body">
+                      <Link to={`/galleries/${gallery.id}`} className="text-decoration-none">
+                        <h2 className="gallery-card-title">{gallery.title}</h2>
+                        {gallery.description && (
+                          <p className="gallery-card-desc">{gallery.description}</p>
+                        )}
+                      </Link>
+
+                      <div className="gallery-card-footer">
+                        <span className="gallery-card-photo-count">
+                          <i className="fas fa-camera me-1" aria-hidden="true" />
+                          {(gallery as any).media_count || 0} {t('galleries.images', { count: (gallery as any).media_count || 0 })}
+                        </span>
+                        <LikeButton
+                          galleryId={Number(gallery.id)}
+                          ownerUserId={Number((user as any)?.id)}
+                          initialLikesCount={Number(gallery.likes_count || 0)}
+                          initialLiked={Boolean(gallery.liked_by_user)}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                </Col>
+              );
+            })}
+          </Row>
+
+          {galleries.paginatorInfo.lastPage > 1 && (
+            <div className="mt-5 d-flex justify-content-center">
+              <Paginator
+                currentPage={galleries.paginatorInfo.currentPage}
+                lastPage={galleries.paginatorInfo.lastPage}
+                total={galleries.paginatorInfo.total}
+                perPage={galleries.paginatorInfo.perPage}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                loading={galleriesLoading}
+              />
+            </div>
+          )}
+        </>
+      )}
     </Container>
   );
 }

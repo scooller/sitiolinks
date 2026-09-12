@@ -70,7 +70,7 @@ export default function FeaturedGalleries({ limit = 12 }: FeaturedGalleriesProps
         networkError: err?.networkError,
         stack: err?.stack
       });
-      
+
       const errorMessage = err?.response?.errors?.[0]?.message || err?.message || t('errors.loading', { entity: t('entities.featured_galleries') });
       setError(`Error: ${errorMessage}`);
     } finally {
@@ -84,10 +84,39 @@ export default function FeaturedGalleries({ limit = 12 }: FeaturedGalleriesProps
 
   if (loading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" variant="warning" />
-        <p className="text-muted mt-2">{t('common.loading')}</p>
-      </div>
+      <section className="featured-galleries-section py-5 bg-light" aria-busy="true" aria-live="polite">
+        <Container>
+          <div className="text-center mb-4">
+            <h2 className="mb-2">
+              <i className="fas fa-star text-warning me-2" aria-hidden="true" />
+              {t('galleries.featured_title')}
+            </h2>
+            <p className="text-muted">
+              {t('galleries.featured_desc')}
+            </p>
+          </div>
+          <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <Col key={idx}>
+                <Card className="h-100 shadow-sm hover-card border-0 position-relative overflow-hidden">
+                  <div className="apple-skeleton" style={{ height: '200px', width: '100%' }} />
+                  <Card.Body className="d-flex flex-column p-3">
+                    <div className="apple-skeleton apple-skeleton-text w-75 mb-2" style={{ height: '16px' }} />
+                    <div className="d-flex align-items-center gap-2 mb-3 mt-1">
+                      <div className="apple-skeleton rounded-circle" style={{ width: '24px', height: '24px' }} />
+                      <div className="apple-skeleton apple-skeleton-text w-50" style={{ height: '12px' }} />
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
+                      <div className="apple-skeleton apple-skeleton-text" style={{ width: '65px', height: '12px' }} />
+                      <div className="apple-skeleton rounded-pill" style={{ width: '45px', height: '24px' }} />
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </Container>
+      </section>
     );
   }
 
@@ -130,8 +159,8 @@ export default function FeaturedGalleries({ limit = 12 }: FeaturedGalleriesProps
 
             return (
               <Col key={gallery.id}>
-                <Link 
-                  to={`/galleries/${gallery.id}`} 
+                <Link
+                  to={`/galleries/${gallery.id}`}
                   className="text-decoration-none"
                   style={{ display: 'block', height: '100%' }}
                   onMouseEnter={() => setHoveredGallery(String(gallery.id))}
@@ -141,8 +170,8 @@ export default function FeaturedGalleries({ limit = 12 }: FeaturedGalleriesProps
                     {/* Badge VIP en esquina superior derecha */}
                     {isVIP && (
                       <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
-                        <Badge bg="warning" text="dark">
-                          <i className="fas fa-crown me-1"></i>
+                        <Badge bg="warning" text="dark" className="px-2 py-1 shadow-sm fw-bold" style={{ border: '1px solid #d97706' }}>
+                          <i className="fas fa-crown me-1 text-dark"></i>
                           VIP
                         </Badge>
                       </div>
@@ -150,9 +179,9 @@ export default function FeaturedGalleries({ limit = 12 }: FeaturedGalleriesProps
 
                     {/* Badge destacada en esquina superior izquierda */}
                     <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 10 }}>
-                      <Badge bg="warning" text="dark">
-                        <i className="fas fa-star me-1"></i>
-                        Destacada
+                      <Badge bg="warning" text="dark" className="px-2 py-1 shadow-sm fw-bold" style={{ border: '1px solid #d97706' }}>
+                        <i className="fas fa-star me-1 text-dark"></i>
+                        {t('galleries.featured_badge', 'Destacada')}
                       </Badge>
                     </div>
 
@@ -161,15 +190,15 @@ export default function FeaturedGalleries({ limit = 12 }: FeaturedGalleriesProps
                       {gallery.media && gallery.media.length > 0 && gallery.media[0].thumb_url ? (
                         <>
                           {!isLoaded && (
-                            <div 
-                              className="skeleton-loader" 
-                              style={{ 
-                                position: 'absolute', 
-                                top: 0, 
-                                left: 0, 
-                                width: '100%', 
-                                height: '100%' 
-                              }} 
+                            <div
+                              className="skeleton-loader"
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%'
+                              }}
                             />
                           )}
                           <OptimizedImage
@@ -177,20 +206,20 @@ export default function FeaturedGalleries({ limit = 12 }: FeaturedGalleriesProps
                             fallbackUrl={gallery.media[0].thumb_url}
                             alt={gallery.title}
                             className="gallery-thumbnail"
-                            style={{ 
-                              height: '200px', 
-                              width: '100%', 
+                            style={{
+                              height: '200px',
+                              width: '100%',
                               objectFit: 'cover',
                               opacity: isLoaded ? 1 : 0,
-                              transition: 'opacity 0.3s ease, filter 0.3s ease',
-                              filter: isHovered ? 'blur(0)' : 'blur(5px)'
+                              transform: isHovered ? 'scale(1.04)' : 'scale(1)',
+                              transition: 'opacity 0.3s ease, transform 0.3s ease'
                             }}
                             loading="lazy"
                             onLoad={() => handleImageLoad(gallery.id)}
                           />
                         </>
                       ) : (
-                        <div 
+                        <div
                           className="bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center"
                           style={{ height: '200px' }}
                         >
@@ -198,14 +227,14 @@ export default function FeaturedGalleries({ limit = 12 }: FeaturedGalleriesProps
                         </div>
                       )}
                     </div>
-                    
+
                     <Card.Body>
                       <Card.Title className="mb-2 text-truncate" title={gallery.title}>
                         {gallery.title}
                       </Card.Title>
-                      
+
                       {gallery.description && (
-                        <Card.Text 
+                        <Card.Text
                           className="text-muted small mb-2"
                           style={{
                             display: '-webkit-box',
@@ -241,8 +270,8 @@ export default function FeaturedGalleries({ limit = 12 }: FeaturedGalleriesProps
         {/* Ver todas */}
         {galleries.length >= limit && (
           <div className="text-center mt-4">
-            <Link to="/explorar" className="btn btn-outline-warning">
-              <i className="fas fa-th me-2"></i>
+            <Link to="/explorar" className="gallery-btn-solid gallery-btn-primary px-4 py-2">
+              <i className="fas fa-th me-2" aria-hidden="true"></i>
               {t('galleries.view_more')}
             </Link>
           </div>
@@ -254,7 +283,7 @@ export default function FeaturedGalleries({ limit = 12 }: FeaturedGalleriesProps
         .hover-card {
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        
+
         .hover-card:hover {
           transform: translateY(-5px);
           box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;

@@ -9,6 +9,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Rebing\GraphQL\Support\Facades\GraphQL;
 use Rebing\GraphQL\Support\Mutation;
@@ -28,7 +29,7 @@ class CreateTicketMutation extends Mutation
     public function args(): array
     {
         return [
-            'user_id' => ['type' => Type::nonNull(Type::int())],
+            'user_id' => ['type' => Type::int()],
             'subject' => ['type' => Type::nonNull(Type::string())],
             'description' => ['type' => Type::nonNull(Type::string())],
             'category' => ['type' => Type::nonNull(Type::string())],
@@ -38,21 +39,38 @@ class CreateTicketMutation extends Mutation
 
     public function resolve($root, $args)
     {
+        $viewer = auth('web')->user() ?? auth('sanctum')->user();
+        if (! $viewer) {
+            throw new \Exception('Debes iniciar sesión para crear un ticket de soporte.');
+        }
+
+        $isAdmin = $viewer->hasAnyRole(['super_admin', 'admin', 'moderator']);
+        $targetUserId = isset($args['user_id']) ? (int) $args['user_id'] : (int) $viewer->id;
+
+        if (! $isAdmin && $targetUserId !== (int) $viewer->id) {
+            throw new \Exception('No estás autorizado para crear tickets en nombre de otro usuario.');
+        }
+
+        $user = $isAdmin ? User::findOrFail($targetUserId) : $viewer;
+
+        // Solo usuarios con email verificado pueden crear tickets
+        if (! $user->email_verified_at) {
+            throw new \Exception('Debes verificar tu correo electrónico para poder crear tickets de soporte.');
+        }
+
+        // Rate limit por usuario: máx 5 tickets por hora
+        $rateLimitKey = sprintf('create_ticket:%d', $user->id);
+        if (! RateLimiter::attempt($rateLimitKey, 5, fn () => null, 3600)) {
+            throw new \Exception('Has alcanzado el límite de creación de tickets. Intenta más tarde.');
+        }
+
         $validator = Validator::make($args, [
-            'user_id' => ['required', 'integer', 'exists:users,id'],
             'subject' => ['required', 'string', 'min:3', 'max:190'],
             'description' => ['required', 'string', 'min:10'],
             'category' => ['required', 'in:tecnico,facturacion,cuenta,contenido,otro'],
             'priority' => ['required', 'in:baja,media,alta,urgente'],
         ]);
         $validator->validate();
-
-        $user = User::findOrFail($args['user_id']);
-
-        // Solo usuarios con email verificado pueden crear tickets
-        if (! $user->email_verified_at) {
-            throw new \Exception('Debes verificar tu correo electrónico para poder crear tickets de soporte.');
-        }
 
         $ticket = Ticket::create([
             'user_id' => $user->id,

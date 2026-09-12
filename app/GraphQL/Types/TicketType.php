@@ -73,12 +73,27 @@ class TicketType extends GraphQLType
             'comments' => [
                 'type' => Type::listOf(GraphQL::type('TicketComment')),
                 'description' => 'Comentarios del ticket',
+                'resolve' => function ($root) {
+                    $viewer = auth('web')->user() ?? auth('sanctum')->user();
+                    $isAdmin = $viewer && $viewer->hasAnyRole(['super_admin', 'admin', 'moderator']);
+                    if ($isAdmin) {
+                        return $root->comments;
+                    }
+
+                    return $root->comments ? $root->comments->where('is_internal', false)->values() : collect();
+                },
             ],
             'comments_count' => [
                 'type' => Type::int(),
                 'description' => 'Número de comentarios',
                 'resolve' => function ($root) {
-                    return $root->comments()->count();
+                    $viewer = auth('web')->user() ?? auth('sanctum')->user();
+                    $isAdmin = $viewer && $viewer->hasAnyRole(['super_admin', 'admin', 'moderator']);
+                    if ($isAdmin) {
+                        return $root->comments()->count();
+                    }
+
+                    return $root->comments()->where('is_internal', false)->count();
                 },
             ],
         ];

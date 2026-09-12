@@ -1,0 +1,481 @@
+/* ==========================================================================
+   Apple HIG Explore Module (Creadores & Directorio de Perfiles)
+   Layer Discipline: Liquid Glass for filters & chrome, Grouped Inset Cards
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Cabecera Hero Editorial Apple
+   -------------------------------------------------------------------------- */
+.explore-hero-container {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-6);
+  text-align: center;
+}
+
+.explore-section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-primary, #0071e3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+.explore-hero-title {
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-main);
+  line-height: var(--lh-tight);
+  margin-bottom: var(--space-2);
+}
+
+.explore-hero-subtitle {
+  color: var(--text-muted);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  max-width: 640px;
+  margin: 0 auto var(--space-4);
+}
+
+.explore-counter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 16px;
+  border-radius: var(--rounded-pill);
+  background: var(--apple-glass-bg);
+  -webkit-backdrop-filter: var(--glass-filter-nav);
+  backdrop-filter: var(--glass-filter-nav);
+  border: 1px solid var(--apple-glass-border);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--text-main);
+}
+
+.explore-counter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--rounded-circle);
+  background: #34c759;
+  box-shadow: 0 0 6px rgba(52, 199, 89, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   2. Barra de Filtros Liquid Glass
+   -------------------------------------------------------------------------- */
+.explore-filter-bar {
+  background: var(--apple-glass-bg);
+  -webkit-backdrop-filter: var(--glass-filter-nav);
+  backdrop-filter: var(--glass-filter-nav);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-2xl);
+  box-shadow: var(--apple-glass-shadow);
+  padding: var(--space-4);
+  margin-bottom: var(--space-8);
+  transition: box-shadow var(--duration-normal) var(--ease-apple);
+}
+
+.explore-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.explore-search-icon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.explore-search-input {
+  width: 100%;
+  min-height: var(--size-touch-min);
+  padding-left: calc(var(--space-3) + 20px) !important;
+  padding-right: calc(var(--space-3) + 24px) !important;
+  border-radius: var(--rounded-xl) !important;
+  background: var(--apple-glass-dropdown-bg) !important;
+  border: 1px solid var(--apple-glass-border) !important;
+  color: var(--text-main) !important;
+  font-size: var(--fs-sm) !important;
+  box-shadow: var(--shadow-2xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.explore-search-input:focus {
+  border-color: var(--color-primary, #0071e3) !important;
+  box-shadow: var(--shadow-focus-ring) !important;
+  outline: none;
+}
+
+.explore-search-clear {
+  position: absolute;
+  right: var(--space-3);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--rounded-circle);
+  cursor: pointer;
+  z-index: 2;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.explore-search-clear:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-main);
+}
+
+.explore-filter-input,
+.explore-filter-select {
+  min-height: var(--size-touch-min);
+  border-radius: var(--rounded-lg) !important;
+  background: var(--apple-glass-dropdown-bg) !important;
+  border: 1px solid var(--apple-glass-border) !important;
+  color: var(--text-main) !important;
+  font-size: var(--fs-sm) !important;
+  box-shadow: var(--shadow-2xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.explore-filter-input:focus,
+.explore-filter-select:focus {
+  border-color: var(--color-primary, #0071e3) !important;
+  box-shadow: var(--shadow-focus-ring) !important;
+  outline: none;
+}
+
+.explore-filter-reset-btn {
+  min-height: var(--size-touch-min);
+  border-radius: var(--rounded-lg) !important;
+  border: none !important;
+  background: var(--apple-glass-dropdown-bg) !important;
+  color: var(--text-main) !important;
+  box-shadow: var(--shadow-button);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.explore-filter-reset-btn:hover:not(:disabled) {
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.12) !important;
+  color: var(--color-primary, #0071e3) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.explore-filter-reset-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-button-active);
+}
+
+.explore-filter-reset-btn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   3. Tarjeta de Usuario Apple (Grouped Inset Card)
+   -------------------------------------------------------------------------- */
+.user-apple-card {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--apple-glass-border) !important;
+  border-radius: var(--rounded-2xl) !important;
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--duration-normal) var(--ease-apple),
+              box-shadow var(--duration-normal) var(--ease-apple),
+              border-color var(--duration-normal) var(--ease-apple);
+}
+
+.user-apple-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: rgba(var(--color-primary-rgb, 0, 113, 227), 0.3) !important;
+}
+
+.user-apple-card.is-vip {
+  border-color: rgba(217, 119, 6, 0.45) !important;
+  box-shadow: 0 4px 18px rgba(217, 119, 6, 0.15), var(--shadow-card);
+}
+
+.user-apple-card.is-vip:hover {
+  box-shadow: 0 8px 28px rgba(217, 119, 6, 0.25), var(--shadow-card-hover);
+}
+
+/* Badge VIP flotante tipo cápsula Apple */
+.user-vip-pill {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--rounded-full);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4);
+}
+
+/* Avatar con aro refinado */
+.user-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  margin: 0 auto var(--space-3);
+}
+
+.user-avatar-img {
+  border-radius: var(--rounded-circle);
+  object-fit: cover;
+  box-shadow: var(--shadow-button);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  transition: transform var(--duration-slow) var(--ease-apple);
+}
+
+.user-apple-card:hover .user-avatar-img {
+  transform: scale(1.04);
+}
+
+/* Username y Verificación */
+.user-card-username {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: var(--space-1);
+  text-decoration: none;
+}
+
+.user-card-username:hover {
+  color: var(--color-primary, #0071e3);
+}
+
+.user-card-bio {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  line-height: var(--lh-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+  min-height: 2.4em;
+}
+
+/* Fila de Metadatos (Chips de píldora) */
+.user-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: var(--space-3);
+}
+
+.user-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--rounded-pill);
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-main);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  border: 1px solid var(--apple-glass-border);
+}
+
+[data-bs-theme="dark"] .user-meta-pill {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.user-meta-pill.price-pill {
+  background: rgba(52, 199, 89, 0.12);
+  color: #248a3d;
+  font-weight: var(--fw-bold);
+  border-color: rgba(52, 199, 89, 0.25);
+}
+
+[data-bs-theme="dark"] .user-meta-pill.price-pill {
+  background: rgba(52, 199, 89, 0.18);
+  color: #4cd964;
+}
+
+/* Fila de Etiquetas / Tags */
+.user-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: var(--space-4);
+}
+
+.user-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: var(--rounded-md);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.08);
+  color: var(--color-primary, #0071e3);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.user-tag-pill:hover {
+  background: var(--color-primary, #0071e3);
+  color: #ffffff;
+}
+
+/* Botón CTA Sólido de Tarjeta */
+.user-card-cta {
+  margin-top: auto;
+  min-height: var(--size-touch-min);
+  border-radius: var(--rounded-pill) !important;
+  background: var(--color-primary, #0071e3) !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-primary-btn);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  text-decoration: none;
+}
+
+.user-card-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-primary-btn-hover);
+  color: #ffffff !important;
+}
+
+.user-card-cta:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-button-active);
+}
+
+/* --------------------------------------------------------------------------
+   4. Estado Vacío Apple (Empty State)
+   -------------------------------------------------------------------------- */
+.explore-empty-state {
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+  background: var(--bg-card);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-2xl);
+  box-shadow: var(--shadow-sm);
+  margin: var(--space-6) 0;
+}
+
+.explore-empty-icon {
+  font-size: 3rem;
+  color: var(--text-muted);
+  opacity: var(--opacity-muted);
+  margin-bottom: var(--space-4);
+}
+
+.explore-empty-title {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-main);
+  margin-bottom: var(--space-2);
+}
+
+.explore-empty-desc {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  max-width: 420px;
+  margin: 0 auto var(--space-5);
+}
+
+/* --------------------------------------------------------------------------
+   5. Paginación Apple
+   -------------------------------------------------------------------------- */
+.explore-pagination-wrapper {
+  margin-top: var(--space-8);
+  padding: var(--space-4) 0;
+}
+
+.explore-pagination-wrapper .pagination {
+  gap: 4px;
+}
+
+.explore-pagination-wrapper .page-item .page-link {
+  min-height: var(--size-touch-min);
+  min-width: var(--size-touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rounded-lg) !important;
+  border: 1px solid var(--apple-glass-border);
+  background: var(--apple-glass-dropdown-bg);
+  color: var(--text-main);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  box-shadow: var(--shadow-2xs);
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.explore-pagination-wrapper .page-item .page-link:hover {
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.12);
+  color: var(--color-primary, #0071e3);
+  transform: translateY(-1px);
+}
+
+.explore-pagination-wrapper .page-item.active .page-link {
+  background: var(--color-primary, #0071e3) !important;
+  border-color: var(--color-primary, #0071e3) !important;
+  color: #ffffff !important;
+  box-shadow: var(--shadow-button);
+}
+
+/* --------------------------------------------------------------------------
+   6. Accesibilidad & Modo Reducido
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .user-apple-card,
+  .user-apple-card:hover,
+  .user-avatar-img,
+  .user-card-cta,
+  .explore-filter-reset-btn {
+    transition: none !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,454 @@
+/* ==========================================================================
+   Apple HIG User Profile Module (Perfil de Usuario / Modelo)
+   Layer Discipline: Liquid Glass for chrome & hero accents, Inset Grouped Cards
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tarjeta Principal de Perfil (Sidebar / Hero Card)
+   -------------------------------------------------------------------------- */
+.profile-apple-card {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--apple-glass-border) !important;
+  border-radius: var(--rounded-2xl) !important;
+  box-shadow: var(--shadow-card);
+  padding: var(--space-6);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--space-6);
+  transition: box-shadow var(--duration-normal) var(--ease-apple),
+              transform var(--duration-normal) var(--ease-apple);
+}
+
+.profile-apple-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.profile-avatar-container {
+  position: relative;
+  display: inline-block;
+  margin: 0 auto var(--space-4);
+}
+
+.profile-avatar-img {
+  border-radius: var(--rounded-2xl);
+  object-fit: cover;
+  box-shadow: var(--shadow-md);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  transition: transform var(--duration-slow) var(--ease-apple);
+}
+
+[data-bs-theme="dark"] .profile-avatar-img {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.profile-avatar-container:hover .profile-avatar-img {
+  transform: scale(1.02);
+}
+
+.profile-vip-pill {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: var(--rounded-full);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  box-shadow: 0 2px 10px rgba(217, 119, 6, 0.45);
+}
+
+.profile-username-title {
+  font-size: clamp(1.35rem, 3vw, 1.65rem);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: var(--space-1);
+}
+
+.profile-gender-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--rounded-full);
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.08);
+  color: var(--color-primary, #0071e3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--space-3);
+}
+
+/* Barra de Estadísticas Tipo Métrica Apple */
+.profile-stats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--apple-glass-dropdown-bg);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-xl);
+  margin-bottom: var(--space-4);
+}
+
+.profile-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 var(--space-2);
+  color: var(--text-main);
+  font-size: var(--fs-xs);
+  text-decoration: none;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.profile-stat-item strong {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  color: var(--text-main);
+}
+
+.profile-stat-item.interactive {
+  cursor: pointer;
+}
+
+.profile-stat-item.interactive:hover {
+  transform: translateY(-1px);
+  color: var(--color-primary, #0071e3);
+}
+
+.profile-stat-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--apple-glass-border);
+}
+
+/* Botones de Acción de Perfil (100% Sólidos) */
+.profile-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.profile-btn-solid {
+  min-height: var(--size-touch-min);
+  padding: 0 var(--space-4);
+  border-radius: var(--rounded-pill) !important;
+  border: none !important;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-button);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.profile-btn-solid:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.profile-btn-solid:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-button-active);
+}
+
+.profile-btn-primary {
+  background: var(--color-primary, #0071e3) !important;
+  color: #ffffff !important;
+  box-shadow: var(--shadow-primary-btn);
+}
+
+.profile-btn-primary:hover:not(:disabled) {
+  box-shadow: var(--shadow-primary-btn-hover);
+}
+
+.profile-btn-secondary {
+  background: var(--apple-glass-dropdown-bg) !important;
+  color: var(--text-main) !important;
+}
+
+.profile-btn-secondary:hover:not(:disabled) {
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.12) !important;
+  color: var(--color-primary, #0071e3) !important;
+}
+
+.profile-btn-warning {
+  background: #f59e0b !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+}
+
+.profile-btn-warning:hover:not(:disabled) {
+  background: #d97706 !important;
+  box-shadow: 0 6px 18px rgba(217, 119, 6, 0.45);
+}
+
+.profile-btn-dark {
+  background: #212529 !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] .profile-btn-dark {
+  background: #343a40 !important;
+}
+
+/* Píldoras de Tags */
+.profile-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: var(--space-4);
+}
+
+.profile-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--rounded-md);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.08);
+  color: var(--color-primary, #0071e3);
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.profile-tag-pill:hover {
+  background: var(--color-primary, #0071e3);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Enlaces Externos / Redes Sociales */
+.profile-links-container {
+  margin-top: var(--space-4);
+  text-align: left;
+}
+
+.profile-links-title {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.profile-link-item {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--apple-glass-dropdown-bg);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-xl);
+  margin-bottom: var(--space-2);
+  text-decoration: none;
+  color: var(--text-main);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  box-shadow: var(--shadow-2xs);
+  transition: transform var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.profile-link-item:hover {
+  transform: translateY(-1px);
+  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.1);
+  color: var(--color-primary, #0071e3);
+}
+
+.profile-link-badge-18 {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  padding: 2px 6px;
+  border-radius: var(--rounded-sm);
+  background: #dc3545;
+  color: #ffffff;
+  margin-right: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   2. Segmented Control Apple (Perfil / Galerías)
+   -------------------------------------------------------------------------- */
+.profile-segmented-control {
+  display: flex;
+  background: rgba(var(--cafe-border-rgb, 0, 0, 0), 0.08);
+  padding: 4px;
+  border-radius: var(--rounded-xl);
+  gap: 4px;
+  margin-bottom: var(--space-5);
+}
+
+[data-bs-theme="dark"] .profile-segmented-control {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-segment-btn {
+  flex: 1;
+  min-height: var(--size-touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 8px var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  border-radius: var(--rounded-lg);
+  transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+  cursor: pointer;
+}
+
+.profile-segment-btn:hover {
+  color: var(--text-main);
+}
+
+.profile-segment-btn.active {
+  background: var(--bg-card, #ffffff);
+  color: var(--color-primary, #0071e3);
+  font-weight: var(--fw-semibold);
+  box-shadow: var(--shadow-button);
+}
+
+[data-bs-theme="dark"] .profile-segment-btn.active {
+  background: var(--form-bg);
+  color: var(--color-primary, #0071e3);
+}
+
+/* --------------------------------------------------------------------------
+   3. Tarjeta de Información Inset Apple (Info & QR)
+   -------------------------------------------------------------------------- */
+.profile-info-card {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--apple-glass-border) !important;
+  border-radius: var(--rounded-2xl) !important;
+  box-shadow: var(--shadow-card);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.profile-info-heading {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-main);
+  margin-bottom: var(--space-3);
+}
+
+.profile-bio-text {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: var(--lh-normal);
+  margin-bottom: var(--space-5);
+}
+
+/* Lista Inset Apple con Líneas Hairline */
+.profile-details-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--apple-glass-dropdown-bg);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-xl);
+  overflow: hidden;
+  margin-bottom: var(--space-6);
+}
+
+.profile-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--apple-glass-border);
+  gap: var(--space-3);
+  font-size: var(--fs-sm);
+}
+
+.profile-detail-row:last-child {
+  border-bottom: none;
+}
+
+.profile-detail-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-weight: var(--fw-medium);
+}
+
+.profile-detail-value {
+  color: var(--text-main);
+  font-weight: var(--fw-semibold);
+  text-align: right;
+}
+
+/* Sección Código QR */
+.profile-qr-wrapper {
+  background: var(--apple-glass-dropdown-bg);
+  border: 1px solid var(--apple-glass-border);
+  border-radius: var(--rounded-xl);
+  padding: var(--space-6);
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+}
+
+.profile-qr-canvas-container {
+  display: inline-block;
+  padding: var(--space-3);
+  background: #ffffff;
+  border-radius: var(--rounded-xl);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-3);
+}
+
+.profile-qr-link {
+  font-size: var(--fs-xs);
+  color: var(--color-primary, #0071e3);
+  word-break: break-all;
+  text-decoration: none;
+}
+
+.profile-qr-link:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   4. Modales Apple (Seguidos & Mensaje VIP)
+   -------------------------------------------------------------------------- */
+.profile-modal-content {
+  border-radius: var(--rounded-2xl) !important;
+  border: 1px solid var(--apple-glass-border) !important;
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+}
+
+/* Accesibilidad & Modo Reducido */
+@media (prefers-reduced-motion: reduce) {
+  .profile-apple-card,
+  .profile-avatar-img,
+  .profile-btn-solid,
+  .profile-segment-btn,
+  .profile-link-item {
+    transition: none !important;
+    transform: none !important;
+  }
+}

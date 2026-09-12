@@ -41,13 +41,32 @@ class UserType extends GraphQLType
             ],
             'email' => [
                 'type' => Type::string(),
+                'resolve' => function (User $user) {
+                    $currentUser = auth('web')->user() ?? auth('sanctum')->user();
+                    if (! $currentUser) {
+                        return null;
+                    }
+                    if ($currentUser->id === $user->id || $currentUser->hasAnyRole(['super_admin', 'admin', 'moderator'])) {
+                        return $user->email;
+                    }
+
+                    return null;
+                },
             ],
             'email_verified_at' => [
                 'type' => Type::string(),
                 'description' => 'Fecha de verificación del email',
                 'selectable' => false,
                 'resolve' => function (User $user) {
-                    return $user->email_verified_at?->toIso8601String();
+                    $currentUser = auth('web')->user() ?? auth('sanctum')->user();
+                    if (! $currentUser) {
+                        return null;
+                    }
+                    if ($currentUser->id === $user->id || $currentUser->hasAnyRole(['super_admin', 'admin', 'moderator'])) {
+                        return $user->email_verified_at?->toIso8601String();
+                    }
+
+                    return null;
                 },
             ],
             'views' => [

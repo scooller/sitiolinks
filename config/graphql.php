@@ -81,7 +81,6 @@ use App\GraphQL\Types\TicketType;
 use App\GraphQL\Types\UserLikeType;
 use App\GraphQL\Types\UserPaginatorType;
 use App\GraphQL\Types\UserType;
-use App\Support\GraphQLErrorsHandler;
 use Rebing\GraphQL\GraphQL;
 use Rebing\GraphQL\GraphQLController;
 use Rebing\GraphQL\Support\CursorPaginationType;
@@ -180,8 +179,11 @@ return [
                 VipNotificationsQuery::class,
                 VipUnreadNotificationsCountQuery::class,
                 SystemStatsQuery::class, // v2.7.23 Analytics
+                TicketsQuery::class,
+                TicketQuery::class,
             ],
             'mutation' => [
+                CreateTicketMutation::class,
                 CreateLinkMutation::class,
                 UpdateLinkMutation::class,
                 DeleteLinkMutation::class,
@@ -338,7 +340,7 @@ return [
      *
      * The default handler will pass exceptions to laravel Error Handling mechanism
      */
-    'errors_handler' => [GraphQLErrorsHandler::class, 'handle'],
+    'errors_handler' => fn(array $errors, callable $formatter): array => array_map($formatter, $errors),
 
     /*
      * Options to limit the query complexity and depth. See the doc

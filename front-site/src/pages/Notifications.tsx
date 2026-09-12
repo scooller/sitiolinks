@@ -1,6 +1,8 @@
 import { type ReactElement, useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Badge, Button, Alert, Spinner, ButtonGroup, Modal, Form } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
+import { fadeIn, defaultTransition, appleEase } from '../lib/animations';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { useAuth } from '../contexts/AuthContext';
 import { initEcho, getEcho } from '../lib/echo';
@@ -38,6 +40,7 @@ export default function Notifications(): ReactElement {
   const [replySending, setReplySending] = useState<boolean>(false);
   const [replyStatus, setReplyStatus] = useState<{ variant: 'success' | 'danger'; text: string } | null>(null);
   const { t, i18n } = useTranslation();
+
   const viewerRoles: string[] = Array.isArray((user as any)?.roles)
     ? (user as any).roles.map((role: any) => (typeof role === 'string' ? role : role?.name)).filter(Boolean)
     : [];
@@ -117,7 +120,9 @@ export default function Notifications(): ReactElement {
     });
 
     return () => {
-      try { getEcho()?.leave(channelName); } catch {}
+      try {
+        getEcho()?.leave(channelName);
+      } catch {}
     };
   }, [isAuthenticated, user?.id]);
 
@@ -177,11 +182,11 @@ export default function Notifications(): ReactElement {
         authenticated: true,
       });
 
-      // Actualizar el estado local sin refetch
-      setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, read_at: new Date().toISOString() } : n)
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString() } : n))
       );
-    } catch (err: any) {
+    } catch {
+      // Ignorar errores de red en segundo plano
     }
   };
 
@@ -193,12 +198,10 @@ export default function Notifications(): ReactElement {
         authenticated: true,
       });
 
-      // Actualizar el estado local sin refetch
       const now = new Date().toISOString();
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, read_at: n.read_at || now }))
-      );
-    } catch (err: any) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, read_at: n.read_at || now })));
+    } catch {
+      // Ignorar errores de red en segundo plano
     }
   };
 
@@ -211,9 +214,9 @@ export default function Notifications(): ReactElement {
       case 'gallery_approved':
         return 'fa-check-circle';
       case 'gallery_rejected':
-        return 'fa-times-circle';
+        return 'fa-circle-xmark';
       case 'system':
-        return 'fa-info-circle';
+        return 'fa-circle-info';
       case 'vip_user_message':
         return 'fa-crown';
       default:
@@ -221,30 +224,27 @@ export default function Notifications(): ReactElement {
     }
   };
 
-  const getTypeColor = (type: string): string => {
+  const getTypeBadgeClass = (type: string): string => {
     switch (type) {
       case 'follow':
-        return 'primary';
-      case 'gallery_featured':
-        return 'warning';
-      case 'gallery_approved':
-        return 'success';
-      case 'gallery_rejected':
-        return 'danger';
-      case 'system':
-        return 'info';
+        return 'type-follow';
       case 'vip_user_message':
-        return 'warning';
+        return 'type-vip';
+      case 'gallery_featured':
+        return 'type-featured';
+      case 'gallery_approved':
+        return 'type-approved';
+      case 'gallery_rejected':
+        return 'type-rejected';
+      case 'system':
+        return 'type-system';
       default:
-        return 'secondary';
+        return 'type-default';
     }
   };
 
   const parseNotificationData = (notification: Notification): Record<string, any> | null => {
-    if (!notification.data) {
-      return null;
-    }
-
+    if (!notification.data) return null;
     try {
       return JSON.parse(notification.data);
     } catch {
@@ -253,48 +253,28 @@ export default function Notifications(): ReactElement {
   };
 
   const getSenderText = (notification: Notification): string | null => {
-    if (notification.type !== 'vip_user_message') {
-      return null;
-    }
-
+    if (notification.type !== 'vip_user_message') return null;
     const parsed = parseNotificationData(notification);
     const username = parsed?.sender_username;
-
     if (typeof username === 'string' && username.trim() !== '') {
       return `@${username}`;
     }
-
     return null;
   };
 
   const getReplyTarget = (notification: Notification): { id: number; username: string } | null => {
-    if (notification.type !== 'vip_user_message') {
-      return null;
-    }
-
+    if (notification.type !== 'vip_user_message') return null;
     const parsed = parseNotificationData(notification);
     const senderId = Number(parsed?.sender_id ?? 0);
-
-    if (!Number.isInteger(senderId) || senderId <= 0) {
-      return null;
-    }
-
-    if (user?.id && Number(user.id) === senderId) {
-      return null;
-    }
-
+    if (!Number.isInteger(senderId) || senderId <= 0) return null;
+    if (user?.id && Number(user.id) === senderId) return null;
     const senderUsername = typeof parsed?.sender_username === 'string' ? parsed.sender_username : '';
-
     return { id: senderId, username: senderUsername };
   };
 
   const openReplyModal = (notification: Notification): void => {
     const target = getReplyTarget(notification);
-
-    if (!target) {
-      return;
-    }
-
+    if (!target) return;
     setReplyRecipientId(target.id);
     setReplyRecipientUsername(target.username);
     setReplyMessage('');
@@ -304,18 +284,14 @@ export default function Notifications(): ReactElement {
 
   const handleReplySend = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
-
     if (!replyRecipientId) {
-      setReplyStatus({ variant: 'danger', text: 'No se encontro destinatario para la respuesta.' });
-
+      setReplyStatus({ variant: 'danger', text: 'No se encontró destinatario para la respuesta.' });
       return;
     }
 
     const cleanedMessage = replyMessage.trim();
-
     if (cleanedMessage.length < 3) {
       setReplyStatus({ variant: 'danger', text: 'El mensaje debe tener al menos 3 caracteres.' });
-
       return;
     }
 
@@ -345,180 +321,311 @@ export default function Notifications(): ReactElement {
     }
   };
 
-  if (loading) {
-    return (
-      <Container className="mt-5 text-center">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-3">{t('notifications.loading')}</p>
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container className="mt-5">
-        <Alert variant="danger">{error}</Alert>
-      </Container>
-    );
-  }
-
   const unreadCount = notifications.filter((n) => !n.read_at).length;
 
   return (
-    <Container className="mt-5 mb-5">
-      <Row className="justify-content-center">
-        <Col lg={8}>
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-              <i className="fas fa-bell me-2"></i>
-              {t('notifications.title')}
-              {unreadCount > 0 && (
-                <Badge bg="danger" className="ms-2">
-                  {t('notifications.unread_count', { count: unreadCount })}
-                </Badge>
-              )}
-            </h1>
-            {unreadCount > 0 && (
-              <Button variant="outline-primary" size="sm" onClick={handleMarkAllAsRead}>
-                <i className="fas fa-check-double me-1"></i>
-                {t('notifications.mark_all_read')}
-              </Button>
-            )}
-          </div>
+    <div className="notifications-page-wrapper">
+      <Container>
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={fadeIn}
+          transition={defaultTransition}
+        >
+          <Row className="justify-content-center">
+            <Col lg={9} xl={8}>
+              {/* Cabecera Editorial Apple */}
+              <div className="notifications-hero">
+                <span className="notif-kicker">
+                  <i className="fas fa-bell" aria-hidden="true"></i> {t('notifications.kicker')}
+                </span>
 
-          <ButtonGroup className="mb-3 w-100">
-            <Button
-              variant={filter === 'all' ? 'primary' : 'outline-primary'}
-              onClick={() => setFilter('all')}
-            >
-              {t('notifications.filter_all')}
-            </Button>
-            <Button
-              variant={filter === 'unread' ? 'primary' : 'outline-primary'}
-              onClick={() => setFilter('unread')}
-            >
-              {t('notifications.filter_unread')} ({unreadCount})
-            </Button>
-            <Button
-              variant={filter === 'vip' ? 'warning' : 'outline-warning'}
-              onClick={() => setFilter('vip')}
-            >
-              VIP
-            </Button>
-          </ButtonGroup>
+                <div className="notif-header-title-row">
+                  <h1 className="notif-title">
+                    <span>{t('notifications.title')}</span>
+                    {unreadCount > 0 && (
+                      <span className="notif-unread-badge">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </h1>
 
-          {notifications.length === 0 ? (
-            <Alert variant="info" className="text-center">
-              {filter === 'unread'
-                ? t('notifications.empty_unread')
-                : t('notifications.empty_all')}
-            </Alert>
-          ) : (
-            <div className="notifications-list">
-              {notifications.map((notif) => (
-                <Card
-                  key={notif.id}
-                  className={`mb-3 ${!notif.read_at ? 'border-primary border-2' : ''}`}
-                  style={{ cursor: notif.url ? 'pointer' : 'default' }}
-                  onClick={() => {
-                    if (!notif.read_at) handleMarkAsRead(notif.id);
-                    if (notif.url) navigate(notif.url);
-                  }}
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      className="notif-mark-all-btn"
+                      onClick={handleMarkAllAsRead}
+                      aria-label={t('notifications.mark_all_read')}
+                    >
+                      <i className="fas fa-check-double" aria-hidden="true"></i>
+                      <span>{t('notifications.mark_all_read')}</span>
+                    </button>
+                  )}
+                </div>
+
+                <p className="notif-subtitle">{t('notifications.subtitle')}</p>
+              </div>
+
+              {/* Segmented Control (Apple HIG Tabs) */}
+              <nav className="notif-segmented-nav" aria-label="Filtro de notificaciones">
+                <button
+                  type="button"
+                  className={`notif-segment-btn ${filter === 'all' ? 'active' : ''}`}
+                  onClick={() => setFilter('all')}
+                  aria-pressed={filter === 'all'}
                 >
-                  <Card.Body>
-                    <div className="d-flex align-items-start">
-                      <div
-                        className={`rounded-circle bg-${getTypeColor(notif.type)} bg-opacity-10 p-3 me-3`}
-                        style={{ minWidth: '56px', height: '56px' }}
-                      >
-                        <i className={`fas ${getTypeIcon(notif.type)} fa-lg text-${getTypeColor(notif.type)}`}></i>
-                      </div>
-                      <div className="grow text-start">
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                          <h5 className="mb-0">{notif.title}</h5>
-                          {!notif.read_at && (
-                            <Badge bg="primary" pill>
-                              {t('notifications.new')}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="mb-2">{notif.message}</p>
-                        {getSenderText(notif) && (
-                          <small className="text-muted d-block mb-2">
-                            <i className="fas fa-user me-1"></i>
-                            {getSenderText(notif)}
-                          </small>
-                        )}
-                        <small className="text-muted">
-                          <i className="fas fa-clock me-1"></i>
-                          {new Date(notif.created_at).toLocaleString(i18n.language, {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </small>
-                        {isVipViewer && getReplyTarget(notif) && (
-                          <div className="mt-3">
-                            <Button
-                              size="sm"
-                              variant="outline-warning"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                openReplyModal(notif);
-                              }}
-                            >
-                              <i className="fas fa-reply me-1"></i>
-                              Responder
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </Card.Body>
-                </Card>
-              ))}
-            </div>
-          )}
-        </Col>
-      </Row>
+                  <span>{t('notifications.filter_all')}</span>
+                </button>
 
-      <Modal show={showReplyModal} onHide={() => setShowReplyModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <i className="fas fa-reply me-2"></i>
-            Responder {replyRecipientUsername ? `a @${replyRecipientUsername}` : 'mensaje VIP'}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {replyStatus && (
-            <Alert variant={replyStatus.variant}>{replyStatus.text}</Alert>
-          )}
-          <Form onSubmit={handleReplySend}>
-            <Form.Group className="mb-3">
-              <Form.Label>Mensaje</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
-                maxLength={500}
-                value={replyMessage}
-                onChange={(event) => setReplyMessage(event.target.value)}
-                placeholder="Escribe tu respuesta"
-                required
-              />
-            </Form.Group>
-            <div className="d-flex justify-content-end gap-2">
-              <Button variant="outline-secondary" onClick={() => setShowReplyModal(false)} disabled={replySending}>
-                Cerrar
-              </Button>
-              <Button type="submit" variant="warning" disabled={replySending}>
-                {replySending ? 'Enviando...' : 'Enviar respuesta'}
-              </Button>
-            </div>
-          </Form>
-        </Modal.Body>
-      </Modal>
-    </Container>
+                <button
+                  type="button"
+                  className={`notif-segment-btn ${filter === 'unread' ? 'active' : ''}`}
+                  onClick={() => setFilter('unread')}
+                  aria-pressed={filter === 'unread'}
+                >
+                  <span>{t('notifications.filter_unread')}</span>
+                  {unreadCount > 0 && (
+                    <span className="notif-count-pill">{unreadCount}</span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  className={`notif-segment-btn ${filter === 'vip' ? 'active' : ''}`}
+                  onClick={() => setFilter('vip')}
+                  aria-pressed={filter === 'vip'}
+                >
+                  <i className="fas fa-crown text-warning" aria-hidden="true"></i>
+                  <span>{t('notifications.filter_vip')}</span>
+                </button>
+              </nav>
+
+              {/* Estados de Carga y Error */}
+              {loading ? (
+                <div className="text-center py-5">
+                  <Spinner animation="border" variant="primary" role="status" />
+                  <p className="mt-3 text-muted">{t('notifications.loading')}</p>
+                </div>
+              ) : error ? (
+                <Alert variant="danger" className="rounded-xl shadow-sm">
+                  <i className="fas fa-circle-exclamation me-2" aria-hidden="true"></i>
+                  {error}
+                </Alert>
+              ) : notifications.length === 0 ? (
+                /* Estado Vacío Apple HIG */
+                <div className="notif-empty-card">
+                  <div className="notif-empty-icon" aria-hidden="true">
+                    {filter === 'unread' ? (
+                      <i className="fas fa-check-double"></i>
+                    ) : filter === 'vip' ? (
+                      <i className="fas fa-crown"></i>
+                    ) : (
+                      <i className="fas fa-bell-slash"></i>
+                    )}
+                  </div>
+                  <h2 className="notif-empty-title">
+                    {filter === 'unread'
+                      ? t('notifications.empty_unread')
+                      : filter === 'vip'
+                      ? t('notifications.empty_vip')
+                      : t('notifications.empty_all')}
+                  </h2>
+                  <p className="notif-empty-desc">
+                    {filter === 'unread'
+                      ? t('notifications.empty_all')
+                      : t('notifications.subtitle')}
+                  </p>
+                </div>
+              ) : (
+                /* Lista de Notificaciones Apple Liquid Glass */
+                <div className="notifications-list" role="feed" aria-label="Lista de notificaciones">
+                  {notifications.map((notif, idx) => {
+                    const isUnread = !notif.read_at;
+                    const sender = getSenderText(notif);
+                    const canReply = isVipViewer && getReplyTarget(notif);
+                    const badgeClass = getTypeBadgeClass(notif.type);
+                    const iconClass = getTypeIcon(notif.type);
+
+                    return (
+                      <motion.article
+                        key={notif.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          duration: 0.24,
+                          delay: Math.min(idx * 0.03, 0.3),
+                          ease: appleEase,
+                        }}
+                        className={`notif-apple-card ${isUnread ? 'unread' : ''} ${
+                          notif.url ? 'clickable' : ''
+                        }`}
+                        onClick={() => {
+                          if (isUnread) handleMarkAsRead(notif.id);
+                          if (notif.url) navigate(notif.url);
+                        }}
+                      >
+                        {/* Icono de Tipo en Halo Apple */}
+                        <div className={`notif-type-badge ${badgeClass}`} aria-hidden="true">
+                          <i className={`fas ${iconClass}`}></i>
+                        </div>
+
+                        {/* Cuerpo de la Notificación */}
+                        <div className="notif-card-body">
+                          <div className="notif-header-row">
+                            <h2 className="notif-item-title">{notif.title}</h2>
+                            {isUnread && (
+                              <span className="notif-new-pill">
+                                {t('notifications.new')}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="notif-item-message">{notif.message}</p>
+
+                          {/* Metadatos y Acciones */}
+                          <div className="notif-meta-row">
+                            <div className="notif-meta-left">
+                              {sender && (
+                                <span className="notif-sender-pill">
+                                  <i className="fas fa-crown text-warning" aria-hidden="true"></i>
+                                  {sender}
+                                </span>
+                              )}
+
+                              <span className="notif-time">
+                                <i className="far fa-clock" aria-hidden="true"></i>
+                                <time dateTime={notif.created_at}>
+                                  {new Date(notif.created_at).toLocaleString(i18n.language, {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </time>
+                              </span>
+                            </div>
+
+                            {/* Botón de Respuesta VIP (100% Sólido) */}
+                            {canReply && (
+                              <button
+                                type="button"
+                                className="notif-reply-btn"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  openReplyModal(notif);
+                                }}
+                                aria-label={`${t('notifications.reply')} ${sender || ''}`}
+                              >
+                                <i className="fas fa-reply" aria-hidden="true"></i>
+                                <span>{t('notifications.reply')}</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </motion.article>
+                    );
+                  })}
+                </div>
+              )}
+            </Col>
+          </Row>
+        </motion.div>
+      </Container>
+
+      {/* Modal de Respuesta VIP (Apple Liquid Glass) */}
+      <AnimatePresence>
+        {showReplyModal && (
+          <motion.div
+            key="reply-modal-backdrop"
+            className="notif-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: appleEase }}
+            onClick={() => setShowReplyModal(false)}
+          >
+            <motion.div
+              key="reply-modal-card"
+              className="notif-modal-card"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="reply-modal-title"
+              initial={{ opacity: 0, scale: 0.94, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 16 }}
+              transition={{ duration: 0.26, ease: appleEase }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="notif-modal-header">
+                <h2 id="reply-modal-title" className="notif-modal-title">
+                  <i className="fas fa-reply text-warning" aria-hidden="true"></i>
+                  <span>
+                    {replyRecipientUsername
+                      ? `${t('notifications.reply')} @${replyRecipientUsername}`
+                      : t('notifications.reply_title')}
+                  </span>
+                </h2>
+                <button
+                  type="button"
+                  className="notif-modal-close"
+                  onClick={() => setShowReplyModal(false)}
+                  aria-label={t('notifications.reply_close')}
+                >
+                  <i className="fas fa-xmark" aria-hidden="true"></i>
+                </button>
+              </div>
+
+              {replyStatus && (
+                <Alert variant={replyStatus.variant} className="rounded-lg mb-3">
+                  {replyStatus.text}
+                </Alert>
+              )}
+
+              <form onSubmit={handleReplySend}>
+                <textarea
+                  className="notif-modal-textarea"
+                  rows={4}
+                  maxLength={500}
+                  value={replyMessage}
+                  onChange={(event) => setReplyMessage(event.target.value)}
+                  placeholder={t('notifications.reply_placeholder')}
+                  required
+                  autoFocus
+                />
+
+                <div className="notif-modal-actions">
+                  <button
+                    type="button"
+                    className="notif-btn-solid-neutral"
+                    onClick={() => setShowReplyModal(false)}
+                    disabled={replySending}
+                  >
+                    {t('notifications.reply_close')}
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="notif-btn-solid-primary"
+                    disabled={replySending || replyMessage.trim().length < 3}
+                  >
+                    {replySending ? (
+                      <>
+                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                        <span>{t('notifications.reply_sending')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-paper-plane" aria-hidden="true"></i>
+                        <span>{t('notifications.reply_send')}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

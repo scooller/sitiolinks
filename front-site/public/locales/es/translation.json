@@ -1,6 +1,8 @@
 {
     "suggest": {
+        "kicker": "Comunidad & Cafeterías",
         "title": "Sugerir un Café",
+        "subtitle": "Recomienda tus cafeterías favoritas para que otros creadores las descubran y puedan reunirse.",
         "notice": "Las sugerencias son revisadas por un administrador antes de publicarse. No se pueden subir imágenes.",
         "name": "Nombre del café",
         "city": "Ciudad",
@@ -9,9 +11,20 @@
         "google_maps": "URL de Google Maps",
         "notes": "Notas adicionales",
         "submit": "Enviar sugerencia",
+        "success_title": "¡Sugerencia Recibida!",
         "success": "¡Sugerencia enviada! Un administrador la revisará pronto.",
         "error": "Error al enviar la sugerencia",
-        "login_required": "Debes iniciar sesión para sugerir un café."
+        "submit_another": "Sugerir otro café",
+        "view_cafes": "Explorar Cafés",
+        "name_placeholder": "Ej. Café de los Artistas",
+        "city_placeholder": "Ej. Buenos Aires, Madrid...",
+        "address_placeholder": "Ej. Av. Corrientes 1234",
+        "website_placeholder": "https://...",
+        "maps_placeholder": "https://maps.google.com/...",
+        "notes_placeholder": "Cuéntanos sobre el ambiente, enchufes, wifi, cafés de especialidad...",
+        "login_required_title": "Inicio de Sesión Requerido",
+        "login_required": "Debes iniciar sesión para sugerir un café.",
+        "login_required_desc": "Para mantener la calidad y autenticidad del directorio, debes tener una cuenta activa para sugerir cafeterías."
     },
     "app": {
         "title": "..."
@@ -36,7 +49,18 @@
         "terms": "Términos y Condiciones",
         "privacy": "Política de Privacidad",
         "no_notifications": "No tienes notificaciones",
-        "view_all_notifications": "Ver todas las notificaciones"
+        "view_all_notifications": "Ver todas las notificaciones",
+        "edit_profile": "Editar Perfil",
+        "new_gallery": "Nueva Galería",
+        "account_section": "Mi Cuenta",
+        "management_section": "Gestión & Soporte",
+        "preferences_section": "Preferencias",
+        "appearance": "Apariencia",
+        "language": "Idioma",
+        "view_profile": "Ver perfil completo",
+        "role_creator": "Creador",
+        "role_vip": "VIP",
+        "role_admin": "Staff"
     },
     "home": {
         "vip_creators": "Creadores VIP",
@@ -91,6 +115,8 @@
         "grid_title": "Grilla de Cafés",
         "grid_desc": "Busca y filtra cafés por ciudad, etiqueta y calificación",
         "detail": {
+            "eyebrow": "CAFÉ / DETALLE",
+            "open_image": "Abrir imagen del café",
             "view": "Ver detalle",
             "not_found": "No se encontró el café solicitado.",
             "invalid_id": "ID de café inválido.",
@@ -144,23 +170,38 @@
         }
     },
     "ranking": {
-        "title": "Ranking de Usuarios",
-        "subtitle": "Los usuarios más populares de la plataforma",
+        "title": "Ranking de Creadores",
+        "kicker": "Top Creadores & Modelos",
+        "subtitle": "Los perfiles más populares y con mayor impacto en la plataforma",
         "sort_by_views": "Vistas",
         "sort_by_followers": "Seguidores",
         "views": "Vistas",
         "followers": "Seguidores",
         "following": "Siguiendo",
+        "view_profile": "Ver Perfil",
         "no_users": "No hay usuarios en el ranking.",
         "error_loading": "Error al cargar el ranking",
         "ranking_text": "El ranking se actualiza en tiempo real según las visitas únicas a cada perfil. Solo se contabiliza una visita por usuario cada 24 horas."
     },
     "tag": {
-        "users_with_tag": "Usuarios con el tag:",
-        "back": "Volver",
-        "no_users": "No hay usuarios con este tag.",
+        "kicker": "Explorar Etiqueta",
+        "title_prefix": "Creadores con",
+        "subtitle": "Descubre todos los creadores y perfiles verificados destacados bajo la etiqueta #{{tag}}.",
+        "users_with_tag": "Creadores con la etiqueta:",
+        "back": "Volver a Explorar",
+        "no_users": "No se encontraron creadores",
+        "no_users_desc": "No hay perfiles activos con la etiqueta seleccionada o que coincidan con los filtros aplicados.",
+        "explore_others": "Explorar otros creadores",
+        "filter_gender": "Sexo",
+        "filter_gender_all": "Todos los sexos",
+        "filter_country": "País",
+        "filter_country_all": "Todos los países",
+        "min_price": "Precio mín",
+        "max_price": "Precio máx",
+        "reset_filters": "Limpiar filtros",
         "error_loading": "Error al cargar usuarios",
-        "explore_by_tags": "Explorar por etiquetas"
+        "explore_by_tags": "Explorar por etiquetas",
+        "showing_results": "Mostrando resultados para #{{tag}}"
     },
     "profile": {
         "followers": "Seguidores",
@@ -208,6 +249,16 @@
         "qr_code_title": "Código QR del Perfil",
         "error_loading": "Error al cargar el perfil",
         "user_not_found": "Usuario no encontrado",
+        "kicker": "Ajustes de Perfil",
+        "subtitle": "Administra tus datos personales, presencia pública y personalización.",
+        "view_public": "Ver perfil público",
+        "tab_general": "General",
+        "tab_creator": "Creador",
+        "tab_links": "Enlaces",
+        "tab_tags": "Etiquetas",
+        "tab_security": "Seguridad",
+        "current_avatar": "Avatar actual",
+        "change_avatar": "Cambiar imagen de perfil",
         "avatar": "Avatar",
         "avatar_help": "Sube una imagen de perfil. Tamaño máximo: 10MB. Formatos: JPG, PNG, WEBP.",
         "basic_info": "Información Básica",
@@ -310,7 +361,17 @@
         "only_admins_creators": "Solo administradores y creadores pueden crear galerías.",
         "featured": "Destacada",
         "pending": "Pendiente",
-        "rejected": "Rechazada"
+        "rejected": "Rechazada",
+        "empty_search_title": "Sin resultados de búsqueda",
+        "empty_search_desc": "No encontramos ninguna galería que coincida con tu búsqueda. Intenta con otros términos.",
+        "clear_search": "Limpiar búsqueda",
+        "empty_user_title": "Aún no hay galerías",
+        "empty_user_desc": "Este creador todavía no ha publicado colecciones de fotos o están configuradas como privadas.",
+        "view_profile_cta": "Ver perfil del creador",
+        "all_galleries": "Todas las galerías",
+        "photos_count": "{{count}} fotos",
+        "of_user_simple": "Galerías",
+        "of_creator": "Colecciones del creador"
     },
     "common": {
         "loading": "Cargando...",
@@ -368,19 +429,28 @@
     },
 
     "tickets": {
+        "kicker": "Centro de Ayuda & Asistencia",
         "my_tickets": "Mis Tickets",
+        "subtitle": "Consulta el estado de tus solicitudes o crea una nueva consulta para nuestro equipo.",
         "new": "Nuevo Ticket",
+        "new_subtitle": "Completa los detalles de tu consulta y te responderemos a la brevedad.",
         "no_tickets": "Aún no tienes tickets.",
         "create_one": "Crea uno nuevo.",
+        "empty_title": "No tienes solicitudes activas",
+        "back_to_tickets": "Volver a Tickets",
         "subject": "Asunto",
+        "subject_placeholder": "Breve resumen de tu consulta o problema",
         "status": "Estado",
         "priority": "Prioridad",
         "category": "Categoría",
         "created": "Creado",
         "view": "Ver",
         "description": "Descripción",
+        "description_placeholder": "Describe detalladamente lo que sucede...",
+        "comment_placeholder": "Escribe una respuesta o información adicional...",
         "create": "Crear Ticket",
         "detail": "Detalle del Ticket",
+        "detail_subtitle": "Hilo de conversación y seguimiento del caso.",
         "not_found": "Ticket no encontrado.",
         "comments": "Comentarios",
         "no_comments": "No hay comentarios aún.",
@@ -414,6 +484,8 @@
         "session_expired": "Tu sesión expiró. Inicia sesión para continuar.",
         "login_required_edit_profile": "Debes iniciar sesión para editar tu perfil",
         "login_title": "Iniciar Sesión",
+        "login_kicker": "Acceso Seguro",
+        "login_subtitle": "Ingresa tus credenciales para acceder a tu perfil, mensajes y contenido exclusivo.",
         "email": "Email",
         "email_placeholder": "correo@ejemplo.com",
         "password": "Contraseña",
@@ -425,6 +497,9 @@
         "register_here": "Regístrate aquí",
         "invalid_credentials": "Error al iniciar sesión. Verifica tus credenciales.",
         "register_title": "Crear Cuenta",
+        "register_kicker": "Registro Exclusivo",
+        "register_subtitle": "Crea tu cuenta para conectar con creadores, descubrir cafeterías y acceder a contenido exclusivo.",
+        "security_ssl": "Conexión cifrada SSL de 256 bits y protección anti-spam inteligente.",
         "full_name": "Nombre Completo",
         "full_name_placeholder": "Juan Pérez",
         "username": "Nombre de Usuario",
@@ -484,18 +559,28 @@
         "login_to_like": "Inicia sesión para dar like"
     },
     "notifications": {
+        "kicker": "Actividad & Avisos",
         "title": "Notificaciones",
+        "subtitle": "Mantente al día con interacciones de tus seguidores, avisos del sistema y mensajes VIP.",
         "loading": "Cargando notificaciones...",
         "new": "Nueva",
         "mark_read": "Marcar como leída",
         "mark_all_read": "Marcar todas como leídas",
         "filter_all": "Todas",
         "filter_unread": "Sin leer",
+        "filter_vip": "VIP",
         "unread_count": "{{count}} sin leer",
         "empty_unread": "No tienes notificaciones sin leer.",
         "empty_all": "No tienes notificaciones.",
+        "empty_vip": "No tienes mensajes de creadores VIP.",
         "new_notification": "Nueva Notificación",
-        "now": "Ahora"
+        "now": "Ahora",
+        "reply": "Responder",
+        "reply_title": "Responder mensaje VIP",
+        "reply_placeholder": "Escribe tu respuesta aquí...",
+        "reply_send": "Enviar respuesta",
+        "reply_sending": "Enviando...",
+        "reply_close": "Cerrar"
     },
     "error_boundary": {
         "title": "¡Ups! Algo salió mal",
@@ -529,12 +614,24 @@
         "connection_error": "Error de conexión. Inténtalo de nuevo."
     },
     "modal": {
-        "warning_title": "Aviso Importante",
-        "ok": "Entendido"
+        "warning_title": "Aviso de Edad",
+        "warning_kicker": "Acceso Restringido (+18)",
+        "ok": "Soy mayor de 18 años / Entrar",
+        "cancel": "Soy menor de edad / Salir",
+        "disclaimer": "Este sitio contiene material exclusivo para adultos. Al entrar confirmas ser mayor de edad según las leyes de tu jurisdicción."
     },
     "contact": {
         "title": "Contacto",
         "intro": "¿Tienes preguntas o comentarios? Envíanos un mensaje y te responderemos a la brevedad.",
+        "kicker": "Atención & Soporte",
+        "info_title": "Canales de Asistencia",
+        "info_desc": "Nos comprometemos a brindarte la mejor experiencia y resolver tus inquietudes con rapidez.",
+        "response_title": "Tiempo de Respuesta",
+        "response_desc": "Atendemos la mayoría de los mensajes en menos de 24 horas hábiles.",
+        "direct_title": "Atención Directa",
+        "direct_desc": "Nuestro equipo revisa cada caso de forma personalizada.",
+        "security_title": "Transmisión Protegida",
+        "security_desc": "Cifrado SSL de 256 bits y verificación inteligente anti-spam.",
         "name": "Nombre",
         "name_placeholder": "Tu nombre completo",
         "email": "Email",
@@ -554,5 +651,28 @@
             "subject_min": "El asunto debe tener al menos 3 caracteres.",
             "message_min": "El mensaje debe tener al menos 10 caracteres."
         }
+    },
+    "faqs": {
+        "kicker": "Ayuda & Respuestas",
+        "title": "Preguntas Frecuentes",
+        "subtitle": "Todo lo que necesitas saber sobre cuentas, perfiles de creadores, galerías, cafeterías y seguridad.",
+        "search_placeholder": "Buscar en las preguntas frecuentes...",
+        "clear_search": "Limpiar",
+        "categories": {
+            "all": "Todas",
+            "general": "General",
+            "creators": "Creadores & Modelos",
+            "cafes": "Cafeterías",
+            "security": "Seguridad & Soporte"
+        },
+        "no_results_title": "No encontramos coincidencias",
+        "no_results_desc": "No hay preguntas que coincidan con tu término de búsqueda. Intenta con otra palabra clave.",
+        "reset_filter": "Restablecer filtros",
+        "cta_title": "¿No encontraste lo que buscabas?",
+        "cta_desc": "Estamos aquí para asistirte. Envíanos un mensaje o abre un ticket de atención personalizada.",
+        "contact_btn": "Escribir al Soporte",
+        "tickets_btn": "Abrir un Ticket"
     }
 }
+
+

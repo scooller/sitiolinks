@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
+import { fadeIn, defaultTransition } from '../lib/animations';
 import { useAuth } from '../contexts/AuthContext';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +16,14 @@ interface SuggestFormData {
   notes: string;
 }
 
-const EMPTY: SuggestFormData = { name: '', city: '', address: '', website: '', google_maps_url: '', notes: '' };
+const EMPTY: SuggestFormData = {
+  name: '',
+  city: '',
+  address: '',
+  website: '',
+  google_maps_url: '',
+  notes: '',
+};
 
 export default function SuggestCafe(): React.ReactElement {
   const { user } = useAuth();
@@ -38,7 +47,8 @@ export default function SuggestCafe(): React.ReactElement {
     setError(null);
     setSuccess(false);
     try {
-      const captchaToken = (e.currentTarget.querySelector('input[name="captcha"]') as HTMLInputElement | null)?.value ?? '';
+      const captchaToken =
+        (e.currentTarget.querySelector('input[name="captcha"]') as HTMLInputElement | null)?.value ?? '';
 
       await graphqlRequest<boolean>({
         query: `
@@ -83,74 +93,292 @@ export default function SuggestCafe(): React.ReactElement {
     }
   };
 
+  // Pantalla para usuarios no autenticados (Apple Auth Gate)
   if (!user) {
     return (
-      <Container className="mt-4">
-        <Alert variant="warning">
-          {t('suggest.login_required')}{' '}
-          <Link to="/login">{t('nav.login')}</Link>
-        </Alert>
-      </Container>
+      <div className="suggest-page-wrapper">
+        <Container>
+          <motion.div
+            initial="initial"
+            animate="animate"
+            variants={fadeIn}
+            transition={defaultTransition}
+          >
+            <div className="suggest-hero">
+              <span className="suggest-kicker">
+                <i className="fas fa-mug-saucer" aria-hidden="true"></i> {t('suggest.kicker')}
+              </span>
+              <h1 className="suggest-title">{t('suggest.title')}</h1>
+              <p className="suggest-subtitle">{t('suggest.subtitle')}</p>
+            </div>
+
+            <Row className="justify-content-center">
+              <Col md={8} lg={6}>
+                <div className="suggest-apple-card suggest-state-card">
+                  <div className="suggest-state-icon-wrapper auth">
+                    <i className="fas fa-lock" aria-hidden="true"></i>
+                  </div>
+                  <h2 className="suggest-state-title">{t('suggest.login_required_title')}</h2>
+                  <p className="suggest-state-desc">{t('suggest.login_required_desc')}</p>
+                  <div className="suggest-state-actions">
+                    <Link to="/login" className="suggest-btn-solid-primary">
+                      <i className="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                      <span>{t('nav.login')}</span>
+                    </Link>
+                    <Link to="/register" className="suggest-btn-solid-secondary">
+                      <i className="fas fa-user-plus" aria-hidden="true"></i>
+                      <span>{t('nav.register')}</span>
+                    </Link>
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </motion.div>
+        </Container>
+      </div>
     );
   }
 
   return (
-    <Container className="mt-4">
-      <Row>
-        <Col md={{ span: 8, offset: 2 }}>
-          <Card>
-            <Card.Header>
-              <h4>{t('suggest.title')}</h4>
-            </Card.Header>
-            <Card.Body>
-              {success && <Alert variant="success">{t('suggest.success')}</Alert>}
-              {error && <Alert variant="danger">{error}</Alert>}
-              <Alert variant="info" className="small">{t('suggest.notice')}</Alert>
+    <div className="suggest-page-wrapper">
+      <Container>
+        <motion.div
+          initial="initial"
+          animate="animate"
+          variants={fadeIn}
+          transition={defaultTransition}
+        >
+          {/* Cabecera Editorial Apple */}
+          <div className="suggest-hero">
+            <span className="suggest-kicker">
+              <i className="fas fa-mug-saucer" aria-hidden="true"></i> {t('suggest.kicker')}
+            </span>
+            <h1 className="suggest-title">{t('suggest.title')}</h1>
+            <p className="suggest-subtitle">{t('suggest.subtitle')}</p>
+          </div>
 
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>
-                    {t('suggest.name')} <span className="text-danger">*</span>
-                  </Form.Label>
-                  <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} required maxLength={190} />
-                </Form.Group>
+          <Row className="justify-content-center">
+            <Col md={10} lg={8} xl={7}>
+              <div className="suggest-apple-card">
+                {success ? (
+                  /* Estado de Confirmación / Éxito */
+                  <div className="suggest-state-card">
+                    <div className="suggest-state-icon-wrapper success">
+                      <i className="fas fa-circle-check" aria-hidden="true"></i>
+                    </div>
+                    <h2 className="suggest-state-title">{t('suggest.success_title')}</h2>
+                    <p className="suggest-state-desc">{t('suggest.success')}</p>
+                    <div className="suggest-state-actions">
+                      <button
+                        type="button"
+                        className="suggest-btn-solid-primary"
+                        onClick={() => setSuccess(false)}
+                      >
+                        <i className="fas fa-plus" aria-hidden="true"></i>
+                        <span>{t('suggest.submit_another')}</span>
+                      </button>
+                      <Link to="/cafes" className="suggest-btn-solid-secondary">
+                        <i className="fas fa-mug-hot" aria-hidden="true"></i>
+                        <span>{t('suggest.view_cafes')}</span>
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  /* Formulario de Sugerencia Apple HIG */
+                  <>
+                    {error && (
+                      <div className="suggest-error-alert" role="alert">
+                        <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                        <span>{error}</span>
+                      </div>
+                    )}
 
-                <Form.Group className="mb-3">
-                  <Form.Label>{t('suggest.city')}</Form.Label>
-                  <Form.Control type="text" name="city" value={formData.city} onChange={handleChange} maxLength={120} />
-                </Form.Group>
+                    <div className="suggest-notice-callout">
+                      <i className="fas fa-circle-info suggest-notice-icon" aria-hidden="true"></i>
+                      <p className="suggest-notice-text">{t('suggest.notice')}</p>
+                    </div>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>{t('suggest.address')}</Form.Label>
-                  <Form.Control type="text" name="address" value={formData.address} onChange={handleChange} maxLength={255} />
-                </Form.Group>
+                    <form onSubmit={handleSubmit} noValidate>
+                      {/* Nombre del Café */}
+                      <div className="suggest-form-group">
+                        <label htmlFor="cafe-name" className="suggest-form-label">
+                          {t('suggest.name')}
+                          <span className="suggest-required-star" aria-label="obligatorio">*</span>
+                        </label>
+                        <div className="suggest-input-wrapper">
+                          <i className="fas fa-store suggest-input-icon" aria-hidden="true"></i>
+                          <input
+                            id="cafe-name"
+                            type="text"
+                            name="name"
+                            className="suggest-form-control"
+                            value={formData.name}
+                            onChange={handleChange}
+                            placeholder={t('suggest.name_placeholder')}
+                            required
+                            maxLength={190}
+                          />
+                        </div>
+                      </div>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>{t('suggest.website')}</Form.Label>
-                  <Form.Control type="url" name="website" value={formData.website} onChange={handleChange} maxLength={255} placeholder="https://" />
-                </Form.Group>
+                      {/* Ciudad y Dirección en 2 Columnas */}
+                      <Row className="g-3">
+                        <Col sm={6}>
+                          <div className="suggest-form-group">
+                            <label htmlFor="cafe-city" className="suggest-form-label">
+                              {t('suggest.city')}
+                            </label>
+                            <div className="suggest-input-wrapper">
+                              <i className="fas fa-city suggest-input-icon" aria-hidden="true"></i>
+                              <input
+                                id="cafe-city"
+                                type="text"
+                                name="city"
+                                className="suggest-form-control"
+                                value={formData.city}
+                                onChange={handleChange}
+                                placeholder={t('suggest.city_placeholder')}
+                                maxLength={120}
+                              />
+                            </div>
+                          </div>
+                        </Col>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>{t('suggest.google_maps')}</Form.Label>
-                  <Form.Control type="url" name="google_maps_url" value={formData.google_maps_url} onChange={handleChange} maxLength={500} placeholder="https://maps.google.com/..." />
-                </Form.Group>
+                        <Col sm={6}>
+                          <div className="suggest-form-group">
+                            <label htmlFor="cafe-address" className="suggest-form-label">
+                              {t('suggest.address')}
+                            </label>
+                            <div className="suggest-input-wrapper">
+                              <i className="fas fa-map-pin suggest-input-icon" aria-hidden="true"></i>
+                              <input
+                                id="cafe-address"
+                                type="text"
+                                name="address"
+                                className="suggest-form-control"
+                                value={formData.address}
+                                onChange={handleChange}
+                                placeholder={t('suggest.address_placeholder')}
+                                maxLength={255}
+                              />
+                            </div>
+                          </div>
+                        </Col>
+                      </Row>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>{t('suggest.notes')}</Form.Label>
-                  <Form.Control as="textarea" rows={3} name="notes" value={formData.notes} onChange={handleChange} maxLength={3000} />
-                </Form.Group>
+                      {/* Sitio Web y Google Maps en 2 Columnas */}
+                      <Row className="g-3">
+                        <Col sm={6}>
+                          <div className="suggest-form-group">
+                            <label htmlFor="cafe-website" className="suggest-form-label">
+                              {t('suggest.website')}
+                            </label>
+                            <div className="suggest-input-wrapper">
+                              <i className="fas fa-globe suggest-input-icon" aria-hidden="true"></i>
+                              <input
+                                id="cafe-website"
+                                type="url"
+                                name="website"
+                                className="suggest-form-control"
+                                value={formData.website}
+                                onChange={handleChange}
+                                placeholder={t('suggest.website_placeholder')}
+                                maxLength={255}
+                              />
+                            </div>
+                          </div>
+                        </Col>
 
-                {/* @ts-ignore */}
-                <altcha-widget challengeurl={(import.meta.env.DEV ? '' : (import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000').replace(/\/$/, '')) + '/api/altcha/challenge'} name="captcha" />
+                        <Col sm={6}>
+                          <div className="suggest-form-group">
+                            <label htmlFor="cafe-maps" className="suggest-form-label">
+                              {t('suggest.google_maps')}
+                            </label>
+                            <div className="suggest-input-wrapper">
+                              <i className="fas fa-map-location-dot suggest-input-icon" aria-hidden="true"></i>
+                              <input
+                                id="cafe-maps"
+                                type="url"
+                                name="google_maps_url"
+                                className="suggest-form-control"
+                                value={formData.google_maps_url}
+                                onChange={handleChange}
+                                placeholder={t('suggest.maps_placeholder')}
+                                maxLength={500}
+                              />
+                            </div>
+                          </div>
+                        </Col>
+                      </Row>
 
-                <Button type="submit" variant="primary" disabled={loading}>
-                  {loading ? t('common.saving') : t('suggest.submit')}
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+                      {/* Notas Adicionales */}
+                      <div className="suggest-form-group">
+                        <label htmlFor="cafe-notes" className="suggest-form-label">
+                          {t('suggest.notes')}
+                        </label>
+                        <div className="suggest-input-wrapper suggest-textarea-wrapper">
+                          <i className="fas fa-comment-dots suggest-input-icon" aria-hidden="true"></i>
+                          <textarea
+                            id="cafe-notes"
+                            name="notes"
+                            rows={4}
+                            className="suggest-form-textarea"
+                            value={formData.notes}
+                            onChange={handleChange}
+                            placeholder={t('suggest.notes_placeholder')}
+                            maxLength={3000}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Widget Altcha Anti-Spam */}
+                      <div className="suggest-altcha-wrapper">
+                        {/* @ts-ignore */}
+                        <altcha-widget
+                          challengeurl={
+                            (import.meta.env.DEV
+                              ? ''
+                              : (import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000').replace(
+                                  /\/$/,
+                                  ''
+                                )) + '/api/altcha/challenge'
+                          }
+                          name="captcha"
+                        />
+                      </div>
+
+                      {/* Botón de Envío 100% Sólido */}
+                      <button
+                        type="submit"
+                        className="suggest-submit-btn"
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <>
+                            <Spinner
+                              as="span"
+                              animation="border"
+                              size="sm"
+                              role="status"
+                              aria-hidden="true"
+                            />
+                            <span>{t('common.saving')}</span>
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-paper-plane" aria-hidden="true"></i>
+                            <span>{t('suggest.submit')}</span>
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  </>
+                )}
+              </div>
+            </Col>
+          </Row>
+        </motion.div>
+      </Container>
+    </div>
   );
 }

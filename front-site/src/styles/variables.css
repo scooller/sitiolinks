@@ -1,0 +1,303 @@
+/* ==========================================================================
+   Design Tokens / Variables (CSS Custom Properties - Sass-like)
+   Uso: var(--nombre-variable) equivalente a $nombre-variable en Sass
+   ========================================================================== */
+
+:root {
+  /* --- Tipografía (Fuentes, Pesos, Interlineado y Tracking) --- */
+  --font-sans: var(--bs-body-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif);
+  --font-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-heavy: 750;
+  --lh-tight: 1.15;
+  --lh-snug: 1.3;
+  --lh-normal: 1.5;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.1em;
+  --tracking-wider: 0.18em;
+
+  /* --- Tamaños de Fuente (Font Sizes) --- */
+  --fs-2xs: 0.58rem;
+  --fs-xs: 0.72rem;
+  --fs-sm: 0.85rem;
+  --fs-base: 1rem;
+  --fs-md: 1.15rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: 2rem;
+  --fs-3xl: 2.5rem;
+  --fs-hero: clamp(2rem, 5vw, 3.25rem);
+
+  /* --- Tamaños de Iconos (Icon Sizes) --- */
+  --icon-xs: 0.58rem;
+  --icon-sm: 0.85rem;
+  --icon-md: 1.15rem;
+  --icon-lg: 1.5rem;
+  --icon-xl: 2.5rem;
+
+  /* --- Marca & Acentos --- */
+  --color-primary: #0071e3;
+  --color-primary-rgb: 0, 113, 227;
+  --color-link: #111827;
+  --color-link-hover: #000000;
+
+  /* --- Paleta Cafes (Warm Coffee Theme) --- */
+  --cafe-primary: #a15c2f;
+  --cafe-primary-rgb: 161, 92, 47;
+  --cafe-secondary: #c19a78;
+  --cafe-dark: #332116;
+  --cafe-text: #765f4d;
+  --cafe-meta: #876f5c;
+  --cafe-header: #4a2d1a;
+  --cafe-rating: #ffd166;
+  --cafe-border-rgb: 101, 66, 39;
+  --cafe-shadow-rgb: 91, 57, 31;
+  --cafe-media-bg: #e8d5c1;
+  --cafe-placeholder-bg: #f3e5d6;
+
+  /* --- Escala de Opacidad (Opacity Tokens) --- */
+  --opacity-0: 0;
+  --opacity-faint: 0.06;
+  --opacity-subtle: 0.12;
+  --opacity-20: 0.2;
+  --opacity-35: 0.35;
+  --opacity-disabled: 0.4;
+  --opacity-pulse-min: 0.45;
+  --opacity-muted: 0.65;
+  --opacity-placeholder: 0.8;
+  --opacity-pulse-max: 0.85;
+  --opacity-backdrop: 0.97;
+  --opacity-solid: 1;
+
+  /* --- Escala de Espaciado Modular --- */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-7: 1.75rem;   /* 28px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+
+  /* --- Dimensiones & Tamaños (Sizes & Touch Targets) --- */
+  --size-touch-min: 44px;       /* Apple HIG mínimo tap target */
+  --size-touch-md: 48px;
+  --size-btn-sm: 32px;
+  --size-btn-md: 40px;
+  --size-btn-lg: 48px;
+  --size-tab-w: 58px;
+  --size-tab-h: 48px;
+  --size-avatar-sm: 36px;
+  --size-avatar-md: 48px;
+  --size-avatar-lg: 88px;
+  --size-arrow-circle: 2.25rem;
+  --container-hero-max: 820px;
+  --container-detail-max: 1180px;
+  --container-heading-max: 680px;
+  --container-search-max: 520px;
+
+  /* Aliases para compatibilidad */
+  --touch-target-min: var(--size-touch-min);
+  --touch-target-md: var(--size-touch-md);
+  --tab-min-w: var(--size-tab-w);
+  --tab-min-h: var(--size-tab-h);
+  --avatar-size-sm: var(--size-avatar-sm);
+  --avatar-size-md: var(--size-avatar-md);
+  --avatar-size-lg: var(--size-avatar-lg);
+
+  /* --- Aspect Ratios (Proporciones) --- */
+  --ratio-square: 1 / 1;
+  --ratio-tile: 5 / 3;
+  --ratio-video: 16 / 9;
+  --ratio-portrait: 3 / 4;
+
+  /* --- Capas & Z-Index --- */
+  --z-behind: -1;
+  --z-base: 1;
+  --z-active: 10;
+  --z-sticky: 1020;
+  --z-navbar: 1030;
+  --z-dropdown: 1040;
+  --z-offcanvas: 1045;
+  --z-modal-backdrop: 1050;
+  --z-modal: 1055;
+  --z-popover: 1070;
+  --z-tooltip: 1080;
+
+  /* --- Radios de Borde (Rounded / Radius Tokens) --- */
+  --rounded-none: 0px;
+  --rounded-xs: 4px;
+  --rounded-sm: 6px;
+  --rounded: 8px;
+  --rounded-md: 10px;
+  --rounded-lg: 14px;
+  --rounded-xl: 18px;
+  --rounded-2xl: 24px;
+  --rounded-3xl: 32px;
+  --rounded-full: 9999px;
+  --rounded-circle: 50%;
+
+  /* Aliases para compatibilidad */
+  --radius-xs: var(--rounded-sm);
+  --radius-sm: var(--rounded);
+  --radius-md: var(--rounded-md);
+  --radius-lg: var(--rounded-lg);
+  --radius-xl: var(--rounded-xl);
+  --radius-2xl: var(--rounded-2xl);
+  --radius-pill: var(--rounded-full);
+
+  /* --- Transiciones & Easing Apple HIG --- */
+  --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 0.16s;
+  --duration-normal: 0.24s;
+  --duration-slow: 0.35s;
+  --transition-fast: var(--duration-fast) ease;
+  --transition-normal: var(--duration-normal) var(--ease-apple);
+
+  /* --- Sombras / Box-Shadow Tokens --- */
+  --shadow-none: none;
+  --shadow-2xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.09), 0 3px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 16px 36px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06);
+  --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.18);
+  --shadow-float: 0 20px 30px -10px rgba(38, 57, 77, 0.8);
+  --shadow-sheet: -10px 0 36px rgba(0, 0, 0, 0.2);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-card-hover: 0 12px 32px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-button: 0 2px 6px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-button-hover: 0 4px 12px rgba(0, 0, 0, 0.09), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-button-active: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-primary-btn: 0 4px 14px rgba(var(--cafe-primary-rgb), 0.35);
+  --shadow-primary-btn-hover: 0 6px 20px rgba(var(--cafe-primary-rgb), 0.48);
+  --shadow-focus-ring: 0 0 0 3px rgba(var(--cafe-primary-rgb), 0.22);
+  --shadow-pill: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  /* --- Efectos de Desenfoque y Liquid Glass --- */
+  --glass-blur-sm: 16px;
+  --glass-blur-md: 24px;
+  --glass-blur-lg: 28px;
+  --glass-blur-xl: 32px;
+  --glass-saturate: 140%;
+  --glass-saturate-high: 150%;
+  --glass-filter-nav: blur(var(--glass-blur-md)) saturate(var(--glass-saturate));
+  --glass-filter-dropdown: blur(var(--glass-blur-lg)) saturate(var(--glass-saturate-high));
+  --glass-filter-sheet: blur(var(--glass-blur-xl)) saturate(var(--glass-saturate));
+
+  /* --- Breakpoints de Referencia --- */
+  --bp-mobile: 575.98px;
+  --bp-tablet: 991.98px;
+  --bp-desktop: 1200px;
+}
+
+/* ==========================================================================
+   Modo Claro (Default / [data-bs-theme="light"])
+   ========================================================================== */
+:root, [data-bs-theme="light"] {
+  /* Tokens de Superficie y Texto (WCAG AA High Contrast) */
+  --text-main: #1d1d1f;
+  --text-muted: #374151;
+  --bs-secondary-color: #374151;
+  --link-color: #111827;
+  --link-hover-color: #000000;
+  --bs-link-color: #111827;
+  --bs-link-hover-color: #000000;
+  --bs-link-color-rgb: 17, 24, 39;
+  --bg-card: #ffffff82;
+  --border-card: #dee2e6;
+  --icon-filter: none;
+
+  /* Tokens Liquid Glass */
+  --apple-glass-bg: rgba(255, 255, 255, 0.78);
+  --apple-glass-border: rgba(0, 0, 0, 0.09);
+  --apple-glass-highlight: rgba(255, 255, 255, 0.8);
+  --apple-glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --apple-glass-text: #1d1d1f;
+  --apple-glass-text-muted: #374151;
+  --apple-glass-dropdown-bg: rgba(255, 255, 255, 0.86);
+
+  /* Tokens Específicos Cafes */
+  --cafe-bg-gradient: linear-gradient(145deg, #fffaf4 0%, #f7efe4 52%, #f1e4d4 100%);
+  --cafe-grid-line: rgba(93, 61, 35, 0.045);
+  --cafe-tile-bg: rgba(255, 255, 255, 0.84);
+  --cafe-panel-bg: rgba(255, 255, 255, 0.7);
+  --cafe-panel-border: rgba(var(--cafe-border-rgb), 0.14);
+  --cafe-title-color: #26160c;
+  --cafe-desc-color: #523b2d;
+  --cafe-meta-color: #5c4535;
+  --cafe-badge-light-bg: #fff8ef;
+  --cafe-badge-light-color: #4a2d1a;
+  --cafe-badge-review-bg: #f3d28a;
+  --cafe-badge-review-color: #3d240f;
+  --cafe-badge-warning-color: #3d240f;
+}
+
+/* ==========================================================================
+   Modo Oscuro ([data-bs-theme="dark"])
+   ========================================================================== */
+[data-bs-theme="dark"] {
+  /* Tokens de Superficie y Texto (WCAG AA High Contrast) */
+  --text-main: #f8f9fa;
+  --text-muted: #cbd5e1;
+  --bs-secondary-color: #cbd5e1;
+  --bg-card: #21252982;
+  --border-card: #495057;
+  --icon-filter: invert(1) grayscale(100%) brightness(200%);
+
+  /* Tokens de Formulario y Links (Neutros sin tonos azules) */
+  --form-bg: #212529;
+  --form-border: #495057;
+  --form-focus-border: #6b7280;
+  --link-color: #f3f4f6;
+  --link-hover-color: #ffffff;
+  --bs-link-color: #f3f4f6;
+  --bs-link-hover-color: #ffffff;
+  --bs-link-color-rgb: 243, 244, 246;
+
+  /* Tokens Liquid Glass */
+  --apple-glass-bg: rgba(26, 26, 28, 0.80);
+  --apple-glass-border: rgba(255, 255, 255, 0.12);
+  --apple-glass-highlight: rgba(255, 255, 255, 0.16);
+  --apple-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --apple-glass-text: #f5f5f7;
+  --apple-glass-text-muted: #cbd5e1;
+  --apple-glass-dropdown-bg: rgba(36, 36, 38, 0.88);
+
+  /* Sombras Modo Oscuro */
+  --shadow-card: 0 8px 32px 0 rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --shadow-card-hover: 0 14px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  --shadow-button: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-button-hover: 0 4px 16px rgba(0, 0, 0, 0.55);
+  --shadow-button-active: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-primary-btn: 0 4px 16px rgba(var(--cafe-primary-rgb), 0.5);
+  --shadow-primary-btn-hover: 0 6px 24px rgba(var(--cafe-primary-rgb), 0.68);
+  --shadow-focus-ring: 0 0 0 3px rgba(var(--cafe-primary-rgb), 0.35);
+  --shadow-pill: 0 2px 8px rgba(0, 0, 0, 0.35);
+
+  /* Tokens Específicos Cafes */
+  --cafe-bg-gradient: linear-gradient(145deg, #201914 0%, #2b211a 52%, #35271e 100%);
+  --cafe-grid-line: rgba(255, 237, 216, 0.035);
+  --cafe-tile-bg: rgba(33, 25, 19, 0.8);
+  --cafe-panel-bg: rgba(33, 25, 19, 0.8);
+  --cafe-panel-border: rgba(255, 237, 216, 0.15);
+  --cafe-title-color: #fff1e2;
+  --cafe-desc-color: #d2bba5;
+  --cafe-meta-color: #d2bba5;
+  --cafe-badge-light-bg: #493527;
+  --cafe-badge-light-color: #ffe9d2;
+  --cafe-badge-review-bg: #76552f;
+  --cafe-badge-review-color: #fff0d8;
+  --cafe-badge-warning-bg: #f0ad4e;
+  --cafe-badge-warning-color: #2d1b0c;
+  --cafe-accordion-active-color: #f0ad7f;
+  --cafe-detail-header-color: #e0c8b0;
+  --cafe-placeholder-bg: #33261d;
+}
