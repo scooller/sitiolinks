@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.0] - 2026-09-12
+
+### Added
+- **LLM SEO & Generative Engine Optimization (GEO)**: Implemented full accessibility for AI crawlers, search LLMs (ChatGPT, Claude, Gemini, Perplexity), and search engine bots.
+- **Official Standard `/llms.txt` and `/llms-full.txt`**: Added root-level Markdown index files defining platform architecture, public entities, café directories, creator profiles, ARCOP privacy rights, and guidance on factual grounding for LLM answers.
+- **AI Crawler Directives in `robots.txt`**: Explicitly permitted all major AI web crawlers (`GPTBot`, `ChatGPT-User`, `OAI-SearchBot`, `ClaudeBot`, `anthropic-ai`, `PerplexityBot`, `Google-Extended`, `Applebot-Extended`, `cohere-ai`, `Bytespider`, `CCBot`) while protecting private administrative routes.
+- **Search Engine Sitemap (`sitemap.xml`)**: Standard XML sitemap containing all public platform routes (`/`, `/explorar`, `/cafes`, `/ranking`, `/sugerir-cafe`, `/faqs`, `/contacto`, `/privacidad-datos`, `/terminos-y-condiciones`).
+- **Structured Data JSON-LD & Rich Metadata (`index.html`)**: Injected Schema.org `WebSite` and `Organization` JSON-LD graphs, alternate links to `/llms.txt`, full Open Graph tags, and Twitter Cards.
+- **Server Cache & MIME Type Optimization (`.htaccess`)**: Configured UTF-8 MIME types and fresh caching rules for text/markdown and XML indexing endpoints on Hostinger / LiteSpeed.
+
 ## [0.22.0] - 2026-09-12
 
 ### Added

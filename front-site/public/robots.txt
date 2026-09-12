@@ -1,3 +1,67 @@
-# https://www.robotstxt.org/robotstxt.html
+# Robots.txt para Link Persons / OnlyModels
+# Permite rastreo general y autoriza explícitamente rastreadores de Inteligencia Artificial (LLMs)
+
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /perfil/editar
+Disallow: /mis-galerias
+Disallow: /nueva-galeria
+Disallow: /tickets
+Disallow: /api/
+
+# OpenAI (ChatGPT / SearchGPT)
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+Disallow: /perfil/editar
+Disallow: /mis-galerias
+Disallow: /nueva-galeria
+Disallow: /tickets
+Disallow: /api/
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+# Anthropic (Claude AI)
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+Disallow: /perfil/editar
+Disallow: /mis-galerias
+Disallow: /nueva-galeria
+Disallow: /tickets
+Disallow: /api/
+
+User-agent: anthropic-ai
+Allow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Allow: /
+
+# Google Gemini & Extended AI
+User-agent: Google-Extended
+Allow: /
+
+# Apple Intelligence
+User-agent: Applebot-Extended
+Allow: /
+
+# Cohere AI
+User-agent: cohere-ai
+Allow: /
+
+# ByteDance AI
+User-agent: Bytespider
+Allow: /
+
+# Common Crawl (utilizado para entrenamiento de modelos abiertos)
+User-agent: CCBot
+Allow: /
+
+# Ubicación de archivos de indexación y contexto LLM
+Sitemap: https://link-persons.com/sitemap.xml

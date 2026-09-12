@@ -1,6 +1,10 @@
 RewriteEngine On
 RewriteBase /
 
+# Tipos MIME para archivos de LLMs y Sitemaps
+AddType text/plain;charset=UTF-8 .txt
+AddType application/xml;charset=UTF-8 .xml
+
 # Cabeceras de control de caché para evitar caché de HTML y Service Worker en Hostinger / LiteSpeed
 <IfModule mod_headers.c>
     # index.html, service worker y manifest NUNCA se cachean (garantiza CSS y JS nuevos en cada subida)
@@ -8,6 +12,11 @@ RewriteBase /
         Header set Cache-Control "no-cache, no-store, must-revalidate"
         Header set Pragma "no-cache"
         Header set Expires 0
+    </FilesMatch>
+
+    # Archivos de LLM SEO, robots y sitemaps (actualización fresca cada 1 hora)
+    <FilesMatch "^(llms\.txt|llms-full\.txt|robots\.txt|sitemap\.xml)$">
+        Header set Cache-Control "public, max-age=3600, must-revalidate"
     </FilesMatch>
 
     # Archivos con hash de Vite (CSS, JS, fuentes, imágenes) tienen caché largo e inmutable
