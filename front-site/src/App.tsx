@@ -13,6 +13,7 @@ const Cafes = React.lazy(() => import('./pages/Cafes.tsx'));
 const CafeDetail = React.lazy(() => import('./pages/CafeDetail.tsx'));
 const Ranking = React.lazy(() => import('./pages/Ranking.tsx'));
 const Contact = React.lazy(() => import('./pages/Contact.tsx'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy.tsx'));
 const Faq = React.lazy(() => import('./pages/Faq.tsx'));
 const Page = React.lazy(() => import('./pages/Page.tsx'));
 const TagPage = React.lazy(() => import('./pages/Tag.tsx'));
@@ -41,6 +42,7 @@ import InstallPWA from './components/InstallPWA.tsx';
 import OfflineIndicator from './components/OfflineIndicator.tsx';
 import LoadingFallback from './components/LoadingFallback.tsx';
 import WarningModal from './components/WarningModal.tsx';
+import { CookieConsentBanner, getCookieConsent } from './components/CookieConsentBanner.tsx';
 
 // Encapsula las rutas con animaciones de montaje/desmontaje.
 const AnimatedRoutes: React.FC<{ transitionType?: string }> = ({ transitionType }) => {
@@ -53,6 +55,9 @@ const AnimatedRoutes: React.FC<{ transitionType?: string }> = ({ transitionType 
       'faqs': 'faqs',
       'terminos-y-condiciones': 'terminos',
       'politica-de-privacidad': 'privacidad',
+      'privacidad-datos': 'privacidad',
+      'derechos-arcop': 'privacidad',
+      'data-privacy': 'privacidad',
       'terms-and-conditions': 'terminos',
       'privacy-policy': 'privacidad',
       'explorar': 'explorar',
@@ -88,10 +93,13 @@ const AnimatedRoutes: React.FC<{ transitionType?: string }> = ({ transitionType 
         <Route path="/verify-email" element={<RouteGuard><AnimatedPage id="verify-email" transitionType={transitionType}><VerifyEmail /></AnimatedPage></RouteGuard>} />
         <Route path="/email-verified" element={<AnimatedPage id="email-verified" transitionType={transitionType}><EmailVerified /></AnimatedPage>} />
         <Route path="/terminos-y-condiciones" element={<AnimatedPage id="terminos" transitionType={transitionType}><Page /></AnimatedPage>} />
-        <Route path="/politica-de-privacidad" element={<AnimatedPage id="privacidad" transitionType={transitionType}><Page /></AnimatedPage>} />
+        <Route path="/politica-de-privacidad" element={<AnimatedPage id="privacidad" transitionType={transitionType}><PrivacyPolicy /></AnimatedPage>} />
+        <Route path="/privacidad-datos" element={<AnimatedPage id="privacidad" transitionType={transitionType}><PrivacyPolicy /></AnimatedPage>} />
+        <Route path="/derechos-arcop" element={<AnimatedPage id="privacidad" transitionType={transitionType}><PrivacyPolicy /></AnimatedPage>} />
         <Route path="/contacto" element={<AnimatedPage id="contacto" transitionType={transitionType}><Contact /></AnimatedPage>} />
         <Route path="/terms-and-conditions" element={<AnimatedPage id="terminos" transitionType={transitionType}><Page /></AnimatedPage>} />
-        <Route path="/privacy-policy" element={<AnimatedPage id="privacidad" transitionType={transitionType}><Page /></AnimatedPage>} />
+        <Route path="/privacy-policy" element={<AnimatedPage id="privacidad" transitionType={transitionType}><PrivacyPolicy /></AnimatedPage>} />
+        <Route path="/data-privacy" element={<AnimatedPage id="privacidad" transitionType={transitionType}><PrivacyPolicy /></AnimatedPage>} />
         <Route path="/contact" element={<AnimatedPage id="contacto" transitionType={transitionType}><Contact /></AnimatedPage>} />
         <Route path="/preguntas-frecuentes" element={<AnimatedPage id="preguntas-frecuentes" transitionType={transitionType}><Faq /></AnimatedPage>} />
         <Route path="/faqs" element={<AnimatedPage id="faqs" transitionType={transitionType}><Faq /></AnimatedPage>} />
@@ -183,9 +191,11 @@ function App() {
           }
         }
 
-        // Inyectar Google Analytics si está configurado
+        // Inyectar Google Analytics si está configurado y el usuario no lo rechazó
         const gaId = settings.google_analytics_id as string | undefined;
-        if (gaId && gaId.trim()) {
+        const cookieConsent = getCookieConsent();
+        const allowAnalytics = cookieConsent ? cookieConsent.analytics : true;
+        if (gaId && gaId.trim() && allowAnalytics) {
           // Google Analytics 4 (gtag.js)
           const script1 = document.createElement('script');
           script1.async = true;
@@ -447,6 +457,7 @@ function App() {
             <WarningModal />
             <Navigation />
             <InstallPWA />
+            <CookieConsentBanner />
             <React.Suspense fallback={<LoadingFallback />}>
               <AnimatedRoutes transitionType={transitionType} />
             </React.Suspense>

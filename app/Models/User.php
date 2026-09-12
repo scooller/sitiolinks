@@ -45,6 +45,10 @@ class User extends Authenticatable implements FilamentUser, HasMedia, MustVerify
         'is_verified',
         'verified_at',
         'warning_modal_dismissed',
+        'privacy_consent',
+        'privacy_consent_at',
+        'privacy_policy_version',
+        'search_indexing_opt_in',
     ];
 
     /**
@@ -76,6 +80,10 @@ class User extends Authenticatable implements FilamentUser, HasMedia, MustVerify
             'is_verified' => 'boolean',
             'verified_at' => 'datetime',
             'warning_modal_dismissed' => 'boolean',
+            'privacy_consent' => 'boolean',
+            'privacy_consent_at' => 'datetime',
+            'privacy_policy_version' => 'string',
+            'search_indexing_opt_in' => 'boolean',
         ];
     }
 

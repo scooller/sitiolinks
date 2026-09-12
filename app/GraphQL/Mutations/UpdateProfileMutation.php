@@ -70,6 +70,18 @@ class UpdateProfileMutation extends Mutation
                 'type' => Type::float(),
                 'description' => 'Opacidad del fondo de la card en el perfil (0.1-1)',
             ],
+            'privacy_consent' => [
+                'type' => Type::boolean(),
+                'description' => 'Consentimiento para tratamiento de datos personales (Ley N° 21.719)',
+            ],
+            'privacy_policy_version' => [
+                'type' => Type::string(),
+                'description' => 'Versión de la política de privacidad aceptada',
+            ],
+            'search_indexing_opt_in' => [
+                'type' => Type::boolean(),
+                'description' => 'Permitir indexación en búsquedas públicas (Derecho de Oposición)',
+            ],
         ];
     }
 
@@ -122,12 +134,23 @@ class UpdateProfileMutation extends Mutation
         }
 
         // Actualizar solo los campos proporcionados
-        $allowedFields = ['name', 'description', 'nationality', 'country', 'city', 'gender', 'birth_date', 'price_from', 'country_block', 'card_bg_color', 'card_bg_opacity'];
+        $allowedFields = ['name', 'description', 'nationality', 'country', 'city', 'gender', 'birth_date', 'price_from', 'country_block', 'card_bg_color', 'card_bg_opacity', 'search_indexing_opt_in'];
         $updateData = [];
 
         foreach ($allowedFields as $field) {
             if (array_key_exists($field, $args)) {
                 $updateData[$field] = $args[$field];
+            }
+        }
+
+        // Tratamiento especial de consentimiento de privacidad con marca temporal (Ley 21.719)
+        if (array_key_exists('privacy_consent', $args)) {
+            $updateData['privacy_consent'] = (bool) $args['privacy_consent'];
+            if ($args['privacy_consent']) {
+                $updateData['privacy_consent_at'] = Carbon::now();
+                $updateData['privacy_policy_version'] = $args['privacy_policy_version'] ?? 'v2026.1';
+            } else {
+                $updateData['privacy_consent_at'] = null;
             }
         }
 

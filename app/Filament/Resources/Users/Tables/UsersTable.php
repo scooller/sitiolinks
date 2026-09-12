@@ -76,6 +76,15 @@ class UsersTable
                     ->trueColor('success')
                     ->falseColor('gray')
                     ->tooltip(fn ($record) => $record->is_verified ? 'Usuario verificado desde '.$record->verified_at?->format('d/m/Y') : 'Usuario no verificado'),
+                IconColumn::make('privacy_consent')
+                    ->label('Privacidad')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-shield-check')
+                    ->falseIcon('heroicon-o-shield-exclamation')
+                    ->trueColor('success')
+                    ->falseColor('warning')
+                    ->tooltip(fn ($record) => $record->privacy_consent ? 'Consentimiento Ley 21.719 otorgado: '.$record->privacy_consent_at?->format('d/m/Y H:i') : 'Sin consentimiento registrado')
+                    ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -1,0 +1,265 @@
+/**
+ * Cookie Consent Banner & Preferences Modal - Apple Liquid Glass HIG
+ * Link Persons (Ley N° 21.719 / CPLT / SERNAC)
+ */
+
+.apple-cookie-banner-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  padding: 1.25rem;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+
+.apple-cookie-banner {
+  pointer-events: auto;
+  max-width: 920px;
+  width: 100%;
+  background: var(--apple-glass-bg, rgba(255, 255, 255, 0.88));
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--apple-glass-border, rgba(0, 0, 0, 0.08));
+  border-radius: var(--rounded-2xl, 24px);
+  box-shadow: var(--shadow-2xl, 0 25px 50px -12px rgba(0, 0, 0, 0.25));
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  color: var(--bs-body-color, #1e293b);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-bs-theme="dark"] .apple-cookie-banner {
+  background: rgba(24, 24, 27, 0.88);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.apple-cookie-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.apple-cookie-icon-plate {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.apple-cookie-text-col {
+  flex: 1;
+}
+
+.apple-cookie-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.015em;
+}
+
+.apple-cookie-desc {
+  font-size: 0.92rem;
+  color: var(--bs-secondary-color, #64748b);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.apple-cookie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--apple-glass-border, rgba(0, 0, 0, 0.06));
+}
+
+[data-bs-theme="dark"] .apple-cookie-actions {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.apple-cookie-btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: var(--shadow-primary-btn, 0 4px 12px rgba(37, 99, 235, 0.3));
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.apple-cookie-btn-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.apple-cookie-btn-secondary {
+  background: var(--apple-glass-dropdown-bg, rgba(0, 0, 0, 0.05));
+  color: var(--bs-body-color, #1e293b);
+  border: 1px solid var(--apple-glass-border, rgba(0, 0, 0, 0.08));
+  padding: 0.65rem 1.15rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+[data-bs-theme="dark"] .apple-cookie-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.apple-cookie-btn-secondary:hover {
+  background: var(--apple-glass-dropdown-bg, rgba(0, 0, 0, 0.09));
+  transform: translateY(-1px);
+}
+
+.apple-cookie-btn-text {
+  background: transparent;
+  color: #2563eb;
+  border: none;
+  padding: 0.65rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 9999px;
+  transition: all 0.2s;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-bs-theme="dark"] .apple-cookie-btn-text {
+  color: #60a5fa;
+}
+
+.apple-cookie-btn-text:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+/* Modal de Preferencias de Cookies */
+.apple-cookie-modal .modal-content {
+  background: var(--apple-glass-bg, rgba(255, 255, 255, 0.95));
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--apple-glass-border, rgba(0, 0, 0, 0.1));
+  border-radius: var(--rounded-2xl, 24px);
+  box-shadow: var(--shadow-2xl);
+  overflow: hidden;
+}
+
+[data-bs-theme="dark"] .apple-cookie-modal .modal-content {
+  background: rgba(24, 24, 27, 0.95);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.apple-cookie-modal-header {
+  padding: 1.5rem 1.75rem 1rem 1.75rem;
+  border-bottom: 1px solid var(--apple-glass-border, rgba(0, 0, 0, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+[data-bs-theme="dark"] .apple-cookie-modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.apple-cookie-group {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--apple-glass-border, rgba(0, 0, 0, 0.06));
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+[data-bs-theme="dark"] .apple-cookie-group {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.apple-cookie-group-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.apple-cookie-badge-always {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #2563eb;
+  text-transform: uppercase;
+}
+
+[data-bs-theme="dark"] .apple-cookie-badge-always {
+  background: rgba(96, 165, 250, 0.18);
+  color: #93c5fd;
+}
+
+.apple-cookie-group-desc {
+  font-size: 0.88rem;
+  color: var(--bs-secondary-color, #64748b);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.apple-cookie-modal-footer {
+  padding: 1.25rem 1.75rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  border-top: none;
+}
+
+@media (max-width: 640px) {
+  .apple-cookie-banner-wrapper {
+    padding: 0.75rem;
+  }
+  .apple-cookie-banner {
+    padding: 1.25rem;
+  }
+  .apple-cookie-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .apple-cookie-btn-primary,
+  .apple-cookie-btn-secondary,
+  .apple-cookie-btn-text {
+    width: 100%;
+  }
+}

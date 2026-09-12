@@ -39,6 +39,7 @@ use App\GraphQL\Mutations\UpdateTicketMutation;
 use App\GraphQL\Queries\CafeDetailQuery;
 use App\GraphQL\Queries\CafesWithReviewsQuery;
 use App\GraphQL\Queries\CountriesQuery;
+use App\GraphQL\Queries\ExportMyDataQuery;
 use App\GraphQL\Queries\FeaturedGalleriesQuery;
 use App\GraphQL\Queries\FollowersQuery;
 use App\GraphQL\Queries\FollowingQuery;
@@ -181,6 +182,7 @@ return [
                 SystemStatsQuery::class, // v2.7.23 Analytics
                 TicketsQuery::class,
                 TicketQuery::class,
+                ExportMyDataQuery::class,
             ],
             'mutation' => [
                 CreateTicketMutation::class,

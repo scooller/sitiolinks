@@ -242,6 +242,38 @@ class UserForm
                     ->columns(2)
                     ->columnSpanFull(),
 
+                Section::make('Protección de Datos & Privacidad (Ley N° 21.719)')
+                    ->description('Registro de consentimiento informado y trazabilidad de derechos ARCOP')
+                    ->schema([
+                        Toggle::make('privacy_consent')
+                            ->label('Consentimiento de Privacidad')
+                            ->helperText('Consentimiento expreso otorgado por el usuario conforme a la Ley N° 21.719')
+                            ->live()
+                            ->afterStateUpdated(function ($state, $set, $get) {
+                                if ($state && ! $get('privacy_consent_at')) {
+                                    $set('privacy_consent_at', now());
+                                } elseif (! $state) {
+                                    $set('privacy_consent_at', null);
+                                }
+                            }),
+
+                        DateTimePicker::make('privacy_consent_at')
+                            ->label('Fecha y Hora de Consentimiento')
+                            ->disabled()
+                            ->dehydrated(),
+
+                        TextInput::make('privacy_policy_version')
+                            ->label('Versión de Política Aceptada')
+                            ->default('v2026.1'),
+
+                        Toggle::make('search_indexing_opt_in')
+                            ->label('Indexación / Visibilidad en Búsquedas')
+                            ->default(true)
+                            ->helperText('Derecho de Oposición: Permite u oculta el perfil de listados públicos'),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
+
                 Section::make('Estadísticas')
                     ->description('Métricas y datos de seguimiento del usuario')
                     ->visible(function ($get) {

@@ -254,6 +254,26 @@ class UserType extends GraphQLType
                 'type' => Type::boolean(),
                 'description' => 'Si el usuario ha descartado el modal de advertencia',
             ],
+            'privacy_consent' => [
+                'type' => Type::boolean(),
+                'description' => 'Consentimiento explícito de tratamiento de datos personales conforme a Ley N° 21.719',
+            ],
+            'privacy_consent_at' => [
+                'type' => Type::string(),
+                'description' => 'Fecha y hora en que se otorgó el consentimiento de privacidad',
+                'selectable' => false,
+                'resolve' => function (User $user) {
+                    return $user->privacy_consent_at?->toIso8601String();
+                },
+            ],
+            'privacy_policy_version' => [
+                'type' => Type::string(),
+                'description' => 'Versión de la política de privacidad aceptada',
+            ],
+            'search_indexing_opt_in' => [
+                'type' => Type::boolean(),
+                'description' => 'Opción de permitir visibilidad / indexación pública (Derecho de Oposición)',
+            ],
         ];
     }
 }

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.0] - 2026-09-12
+
+### Added
+- **Chilean Personal Data Protection Compliance (Ley N° 21.719 & Ley N° 19.628)**: Complete institutional compliance system implementing SERNAC transparency duties, CPLT cookie guidelines, and Digital Government ARCOP rights (Acceso, Rectificación, Cancelación, Oposición, Portabilidad).
+- **Dedicated Privacy & ARCOP Rights Center (`PrivacyPolicy.tsx`, `privacy.css`)**: Comprehensive, modern editorial portal with 4 categorized tabs (*Tratamiento de Datos*, *Derechos ARCOP*, *Política de Cookies CPLT*, and *Canal de Solicitudes*) at `/privacidad-datos`, `/derechos-arcop`, and `/politica-de-privacidad`.
+- **Liquid Glass Cookie Consent Banner & Preferences Modal (`CookieConsentBanner.tsx`, `cookie-banner.css`)**: Floating translucent Apple Liquid Glass banner and modal allowing granular control over Technical (necessary), Preference, and Analytical cookies (Google Analytics gating).
+- **Data Portability Engine (`ExportMyDataQuery.php`, `exportMyData` GraphQL query)**: Real-time structured, interoperable JSON download of user account details, profile metadata, custom links, and photo galleries with timestamps and privacy status.
+- **Direct User Profile Privacy Controls (`EditProfile.tsx`)**: Added dedicated "Protección de Datos & Derechos ARCOP" card in Security tab with explicit consent switch, recorded timestamp badge, right to object (search engine indexing opt-out), direct JSON portability download, and quick link to the ARCOP center.
+- **Dedicated Registration Privacy Consent Checkbox (`Register.tsx`)**: Disaggregated legal terms into separate checkboxes for Terms of Service and ARCOP Privacy Consent (Ley N° 21.719) with strict validation.
+- **Database Schema Migration (`users` table)**: Added `privacy_consent` (boolean), `privacy_consent_at` (timestamp), `privacy_policy_version` (string), and `search_indexing_opt_in` (boolean) fields.
+- **Filament Admin Audit & Management (`UserForm.php`, `UsersTable.php`)**: Integrated Privacy & Data Protection audit section with consent toggle, timestamp, policy version, and table status icon.
+- **Full i18n Localization (`es`, `en`)**: Complete bilingual coverage for `auth`, `privacy`, `cookies`, `profile`, and `nav` namespaces.
+
 ## [0.20.2] - 2026-09-12
 
 ### Added

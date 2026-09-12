@@ -30,6 +30,9 @@ interface FormData {
   country_block: boolean;
   card_bg_color: string;
   card_bg_opacity: number;
+  privacy_consent: boolean;
+  privacy_consent_at: string | null;
+  search_indexing_opt_in: boolean;
 }
 
 interface ProfileLink {
@@ -73,6 +76,9 @@ export default function EditProfile(): ReactElement {
     country_block: false,
     card_bg_color: '',
     card_bg_opacity: 1,
+    privacy_consent: false,
+    privacy_consent_at: null,
+    search_indexing_opt_in: true,
   });
 
   const [links, setLinks] = useState<ProfileLink[]>([]);
@@ -87,6 +93,33 @@ export default function EditProfile(): ReactElement {
   const [deleteEmail, setDeleteEmail] = useState<string>('');
   const [deleting, setDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [exportingData, setExportingData] = useState<boolean>(false);
+
+  const handleExportData = async () => {
+    setExportingData(true);
+    try {
+      const resp = await graphqlRequest<{ exportMyData: string }>({
+        query: `query { exportMyData }`,
+        schema: 'default',
+        authenticated: true,
+      });
+      if (resp?.exportMyData) {
+        const blob = new Blob([resp.exportMyData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `link-persons-portabilidad-${currentUser?.username || 'usuario'}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch {
+      //
+    } finally {
+      setExportingData(false);
+    }
+  };
 
   useEffect(() => {
     if (!currentUser) {
@@ -120,6 +153,9 @@ export default function EditProfile(): ReactElement {
             card_bg_opacity
             avatar_url
             avatar_thumb
+            privacy_consent
+            privacy_consent_at
+            search_indexing_opt_in
             links {
               id
               name
@@ -158,6 +194,9 @@ export default function EditProfile(): ReactElement {
           country_block: (userData as any).country_block || false,
           card_bg_color: (userData as any).card_bg_color || '#ffffff',
           card_bg_opacity: typeof (userData as any).card_bg_opacity === 'number' ? (userData as any).card_bg_opacity : 1,
+          privacy_consent: !!(userData as any).privacy_consent,
+          privacy_consent_at: (userData as any).privacy_consent_at || null,
+          search_indexing_opt_in: (userData as any).search_indexing_opt_in !== false,
         });
 
         setLinks((userData as any).links || []);
@@ -295,7 +334,9 @@ export default function EditProfile(): ReactElement {
           $price_from: Float,
           $country_block: Boolean,
           $card_bg_color: String,
-          $card_bg_opacity: Float
+          $card_bg_opacity: Float,
+          $privacy_consent: Boolean,
+          $search_indexing_opt_in: Boolean
         ) {
           updateProfile(
             name: $name,
@@ -308,11 +349,16 @@ export default function EditProfile(): ReactElement {
             price_from: $price_from,
             country_block: $country_block,
             card_bg_color: $card_bg_color,
-            card_bg_opacity: $card_bg_opacity
+            card_bg_opacity: $card_bg_opacity,
+            privacy_consent: $privacy_consent,
+            search_indexing_opt_in: $search_indexing_opt_in
           ) {
             id
             name
             username
+            privacy_consent
+            privacy_consent_at
+            search_indexing_opt_in
           }
         }
       `;
@@ -324,6 +370,8 @@ export default function EditProfile(): ReactElement {
           price_from: formData.price_from ? parseFloat(formData.price_from) : null,
           card_bg_color: formData.card_bg_color || null,
           card_bg_opacity: typeof formData.card_bg_opacity === 'number' ? formData.card_bg_opacity : 1,
+          privacy_consent: formData.privacy_consent,
+          search_indexing_opt_in: formData.search_indexing_opt_in,
         },
         schema: 'default',
         authenticated: true,
@@ -1199,6 +1247,117 @@ export default function EditProfile(): ReactElement {
               exit={fadeIn.exit}
               transition={{ duration: 0.22, ease: appleEase }}
             >
+              {/* Sección Privacidad & Protección de Datos (Ley N° 21.719) */}
+              <div className="edit-profile-card mb-4">
+                <div className="edit-profile-section-header">
+                  <div className="edit-profile-icon-plate icon-plate-indigo">
+                    <i className="fas fa-shield-halved"></i>
+                  </div>
+                  <div>
+                    <h4>{t('profile.privacy_title', 'Protección de Datos & Derechos ARCOP (Ley N° 21.719)')}</h4>
+                    <p>{t('profile.privacy_subtitle', 'Control sobre el tratamiento de tus datos personales, visibilidad pública y portabilidad.')}</p>
+                  </div>
+                </div>
+
+                {/* Check 1: Consentimiento explícito de tratamiento de datos */}
+                <div className="d-flex align-items-start justify-content-between gap-3 py-3 border-bottom border-secondary border-opacity-10">
+                  <div>
+                    <h6 className="fw-bold mb-1">
+                      {t('profile.privacy_consent_label', 'Consentimiento de Tratamiento de Datos')}
+                    </h6>
+                    <p className="small text-muted mb-1">
+                      {t('profile.privacy_consent_desc', 'Consiento expresamente el tratamiento de mis datos de perfil conforme a la Ley N° 21.719 y la Política de Protección de Datos.')}
+                    </p>
+                    {formData.privacy_consent_at ? (
+                      <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 small">
+                        <i className="fas fa-check-circle me-1"></i>
+                        {t('profile.privacy_consent_registered', 'Consentimiento registrado el')} {new Date(formData.privacy_consent_at).toLocaleDateString()}
+                      </span>
+                    ) : (
+                      <span className="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 small">
+                        <i className="fas fa-triangle-exclamation me-1"></i>
+                        {t('profile.privacy_consent_pending', 'Pendiente de confirmación')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="form-check form-switch fs-4 m-0">
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      className="form-check-input"
+                      checked={formData.privacy_consent}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        privacy_consent: e.target.checked,
+                        privacy_consent_at: e.target.checked ? (prev.privacy_consent_at || new Date().toISOString()) : null
+                      }))}
+                      aria-label="Consentimiento de privacidad"
+                    />
+                  </div>
+                </div>
+
+                {/* Check 2: Indexación y Búsquedas Públicas (Derecho de Oposición) */}
+                <div className="d-flex align-items-start justify-content-between gap-3 py-3 border-bottom border-secondary border-opacity-10">
+                  <div>
+                    <h6 className="fw-bold mb-1">
+                      {t('profile.privacy_indexing_label', 'Visibilidad en Búsquedas & Directorio')}
+                    </h6>
+                    <p className="small text-muted mb-0">
+                      {t('profile.privacy_indexing_desc', 'Derecho de Oposición: Permite que tu perfil sea indexable y aparezca en las búsquedas del explorador de creadores.')}
+                    </p>
+                  </div>
+                  <div className="form-check form-switch fs-4 m-0">
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      className="form-check-input"
+                      checked={formData.search_indexing_opt_in}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        search_indexing_opt_in: e.target.checked
+                      }))}
+                      aria-label="Indexación en búsquedas"
+                    />
+                  </div>
+                </div>
+
+                {/* Herramientas de Portabilidad y Derechos */}
+                <div className="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 pt-3">
+                  <div>
+                    <h6 className="fw-bold mb-1">
+                      {t('profile.privacy_portability_title', 'Portabilidad de Datos Personales (ARCOP)')}
+                    </h6>
+                    <p className="small text-muted mb-0">
+                      {t('profile.privacy_portability_desc', 'Descarga una copia completa y estructurada de tus datos en formato JSON legible por máquina.')}
+                    </p>
+                  </div>
+                  <div className="d-flex align-items-center gap-2">
+                    <Link to="/privacidad-datos" className="apple-btn-glass text-decoration-none">
+                      <i className="fas fa-scale-balanced"></i>
+                      <span>{t('profile.privacy_center_link', 'Centro ARCOP')}</span>
+                    </Link>
+                    <button
+                      type="button"
+                      className="apple-btn-secondary"
+                      onClick={handleExportData}
+                      disabled={exportingData}
+                    >
+                      {exportingData ? (
+                        <>
+                          <Spinner animation="border" size="sm" />
+                          <span>{t('common.generating', 'Generando...')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-download"></i>
+                          <span>{t('profile.privacy_download_btn', 'Descargar JSON')}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <div className="edit-profile-card apple-danger-zone-card">
                 <div className="edit-profile-section-header border-danger border-opacity-25">
                   <div className="edit-profile-icon-plate icon-plate-rose">

@@ -33,6 +33,7 @@ export default function Register(): ReactElement {
   });
   const [altchaPayload, setAltchaPayload] = useState<string>('');
   const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState<boolean>(false);
   const altchaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -79,6 +80,11 @@ export default function Register(): ReactElement {
     }
     if (!acceptedTerms) {
       setError(t('auth.terms_required'));
+      setLoading(false);
+      return;
+    }
+    if (!acceptedPrivacy) {
+      setError(t('auth.privacy_required', 'Debes aceptar la política de tratamiento de datos personales y Derechos ARCOP (Ley N° 21.719).'));
       setLoading(false);
       return;
     }
@@ -344,8 +350,8 @@ export default function Register(): ReactElement {
 
                   <span className="auth-help-text mb-3">{t('auth.password_help')}</span>
 
-                  {/* Checkbox Términos y Condiciones */}
-                  <div className="auth-terms-box">
+                  {/* Checkbox Términos y Condiciones y Privacidad ARCOP (Ley N° 21.719) */}
+                  <div className="auth-terms-box d-flex flex-column gap-2">
                     <Form.Check
                       type="checkbox"
                       id="accept-terms"
@@ -359,6 +365,23 @@ export default function Register(): ReactElement {
                       }
                       checked={acceptedTerms}
                       onChange={e => setAcceptedTerms(e.target.checked)}
+                      required
+                      disabled={loading}
+                    />
+
+                    <Form.Check
+                      type="checkbox"
+                      id="accept-privacy"
+                      label={
+                        <>
+                          {t('auth.privacy_accept', 'Acepto el tratamiento de mis datos personales y los')}{' '}
+                          <Link to="/privacidad-datos" target="_blank">
+                            {t('auth.privacy_link', 'Derechos ARCOP (Ley N° 21.719)')}
+                          </Link>
+                        </>
+                      }
+                      checked={acceptedPrivacy}
+                      onChange={e => setAcceptedPrivacy(e.target.checked)}
                       required
                       disabled={loading}
                     />

@@ -30,6 +30,10 @@ export interface User {
   has_public_profile?: boolean;
   is_verified?: boolean;
   verified_at?: string;
+  privacy_consent?: boolean;
+  privacy_consent_at?: string;
+  privacy_policy_version?: string;
+  search_indexing_opt_in?: boolean;
   tags?: Tag[];
   links?: Link[];
   roles?: Role[] | string[]; // Acepta array de objetos o strings para compatibilidad

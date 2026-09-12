@@ -254,6 +254,7 @@ const Navigation: React.FC = () => {
               <NavDropdown.Divider />
               <NavDropdown.Item as={Link} to="/terminos-y-condiciones">{t('nav.terms')}</NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/politica-de-privacidad">{t('nav.privacy')}</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/privacidad-datos">{t('nav.arcop_rights', 'Derechos ARCOP & Datos')}</NavDropdown.Item>
             </NavDropdown>
           </Nav>
           <Nav className="align-items-center w-100">
@@ -539,6 +540,22 @@ const Navigation: React.FC = () => {
                                   </Link>
                                 )
                               )}
+
+                              <Link
+                                to="/privacidad-datos"
+                                className="apple-offcanvas-row"
+                                onClick={() => setShowUserMenu(false)}
+                              >
+                                <div className="apple-offcanvas-row-left">
+                                  <div className="apple-offcanvas-icon-plate icon-plate-indigo">
+                                    <i className="fas fa-shield-halved"></i>
+                                  </div>
+                                  <span className="apple-offcanvas-row-label">
+                                    {t('nav.arcop_rights', 'Privacidad & ARCOP')}
+                                  </span>
+                                </div>
+                                <i className="fas fa-chevron-right apple-offcanvas-chevron"></i>
+                              </Link>
                             </div>
                           </div>
 
