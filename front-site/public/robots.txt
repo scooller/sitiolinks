@@ -64,4 +64,4 @@ User-agent: CCBot
 Allow: /
 
 # Ubicación de archivos de indexación y contexto LLM
-Sitemap: https://link-persons.com/sitemap.xml
+Sitemap: https://only-models.online/sitemap.xml

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.0] - 2026-09-12
+
+### Added
+- **Dynamic Database Sitemap Controller (`SitemapController.php`)**: Live XML sitemap generator in Laravel (`GET /sitemap.xml`) combining core static routes with dynamic creator handles (`/u/:username`) and active cafes (`/cafes/:slug`), automatically pulling domain from `config('app.frontend_url')` and caching for 1 hour.
+- **Automated Frontend Sitemap Build Script (`generate-sitemap.mjs`)**: Build-step script for Vite that parses `VITE_FRONTEND_URL` and `VITE_BACKEND_URL` from `.env.production` to automatically output production-ready `sitemap.xml`, sync `robots.txt`, and update canonical JSON-LD domains in `index.html`.
+- **Hybrid English/Spanish `llms.txt` & `llms-full.txt`**: Standardized AI grounding documentation with high-density English technical grammar and directives for optimal token efficiency in LLM reasoning engines (GPT-4o, Claude, Perplexity), while preserving exact Spanish routing, domain keywords, and Chilean legal citations (Ley N° 21.719, ARCOP).
+
 ## [0.23.0] - 2026-09-12
 
 ### Added
