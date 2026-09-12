@@ -37,10 +37,24 @@ class EmailLogsTable
                     ->label('Asunto')
                     ->searchable()
                     ->limit(45),
+                TextColumn::make('source_label')
+                    ->label('Origen / Tipo')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Formulario de Contacto' => 'info',
+                        'Ticket de Soporte' => 'warning',
+                        'Sugerencia de Café' => 'amber',
+                        'Notificación de Usuario' => 'purple',
+                        'Verificación de Email' => 'teal',
+                        'Recuperación de Contraseña' => 'rose',
+                        'Campaña' => 'primary',
+                        default => 'gray',
+                    }),
                 TextColumn::make('campaign.name')
                     ->label('Campaña')
-                    ->placeholder('Transaccional / Directo')
-                    ->searchable(),
+                    ->placeholder('N/A')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
