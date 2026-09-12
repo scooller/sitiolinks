@@ -18,6 +18,11 @@ Agents must **actively discover and leverage project skills and workflows** befo
      - `ponytail` (`DietrichGebert/ponytail`): Minimalist engineering and YAGNI principle. Enforce the simplest, shortest solution that works, avoiding speculative abstractions, bloat, and redundant dependencies. Use `ponytail-review` or `ponytail-audit` to detect over-engineering.
      - `caveman` & `caveman-commit`: Ultra-compressed communication, terse code comments, and concise conventional commits.
    - Always read the relevant `SKILL.md` before starting work and apply its heuristics, techniques, and rules without taking shortcuts.
+   - Update `front-site/public/llms.txt` and `front-site/public/llms-full.txt` to include all relevant information about the project, including the project name, description, and any other relevant information.
+   - Run `Graphify` skill if needed after changes
+   - Update `CHANGELOG.md` if needed after changes
+   - Update `README.md` if needed after changes
+   - Update `front-site/package.json` if needed after changes
 
 2. **Project Workflows**:
    - Follow and respect continuous integration workflows in `.github/workflows/` (e.g. `react-best-practices-ci.yml`). Ensure changes satisfy linting, type-checking, and build validation.

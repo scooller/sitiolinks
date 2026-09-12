@@ -129,16 +129,42 @@ El paquete PHP `altcha-org/altcha` ya está en `composer.json`; la configuració
 - Mantener los `use` ordenados y sin duplicados; eliminar imports no usados.
 - Validar con `php artisan test` y revisar que la ruta `/graphql` esté accesible con las políticas/middlewares esperados.
 
+## Motor Nativo de Email & Automatización (Filament v5 / Laravel 12)
+
+Sub-sistema integrado de comunicaciones por correo electrónico sin dependencias externas:
+- **Plantillas Dinámicas (`EmailTemplateResource`)**: Editor enriquecido con placeholders automáticos (`{{ user.name }}`, `{{ user.email }}`, `{{ user.username }}`, `{{ site.name }}`, `{{ action_url }}`).
+- **Campañas Programadas y Recurrentes (`EmailCampaignResource`)**: Segmentación de audiencias (*Todos*, *Creadores*, *VIPs*, *No verificados*, *Inactivos 30+ días*) con envíos automáticos procesados en cola (`ProcessEmailCampaignsCommand`).
+- **Auditoría e Historial de Envíos (`EmailLogResource`)**: Captura transparente de todos los correos del sistema (tickets, notificaciones, contacto, campañas) con modal de vista previa HTML en iframe seguro y reenvío manual en 1 clic.
+- **Envíos Masivos Manuales**: Acción masiva desde la tabla de usuarios (`UsersTable.php`) con selector de casillas y procesamiento en lotes en segundo plano (`SendBulkEmailJob`).
+
+## Optimización para Motores LLM y SEO (GEO)
+
+Ecosistema preparado para la indexación y citación por modelos de Inteligencia Artificial generativa (ChatGPT, Claude, Gemini, Perplexity):
+- **`/llms.txt` y `/llms-full.txt`**: Documentación estándar en Markdown con especificación de rutas públicas, entidades del dominio y contexto de Cafés con Piernas en Chile y Ley N° 21.719 (ARCOP).
+- **Rastreadores IA en `robots.txt`**: Autorización explícita para `GPTBot`, `ClaudeBot`, `PerplexityBot`, `Google-Extended`, `Applebot-Extended`, `cohere-ai`, `Bytespider` y `CCBot`.
+- **Sitemap Dinámico (`/sitemap.xml`)**:
+  - Servido en vivo desde Laravel (`SitemapController`) integrando creadores activos (`/u/:username`) y cafeterías (`/cafes/:slug`) desde base de datos.
+  - Sincronizado en tiempo de compilación frontend mediante `front-site/scripts/generate-sitemap.mjs`.
+
+## Bloqueo por País y Detección Automática de VPNs / Proxies
+
+Privacidad y protección contra acoso local mediante `App\Services\GeoLocationService`:
+- **Anti-Evasión por VPN**: Si un creador activa `country_block = true`, cualquier visitante que intente ingresar usando una VPN, Tor, proxy o IP de datacenter/hosting (AWS, DigitalOcean, Hetzner, Linode, M247, etc.) es **bloqueado automáticamente**.
+- **Bloqueo Geográfico**: Los visitantes residenciales del mismo país del creador son bloqueados de ver su perfil, fotos y galerías.
+- **Acceso Administrativo y Propietario**: El propio creador y los administradores/moderadores siempre tienen acceso irrestricto, incluso conectados a una VPN.
+- **Pruebas en Desarrollo**: Soporta simulación mediante cabeceras HTTP (`X-Test-Country: CL`, `X-Test-VPN: 1`, `X-Test-IP: x.x.x.x`).
+
 ## Módulos del panel (Filament)
 
-Recursos disponibles en `/admin`: **Analytics**, **Cafes** (cafés, sucursales y reseñas), **ContactMessages**, **Galleries**, **Media**, **Pages**, **SiteSettings**, **Tags**, **Tickets**, **Users** y **VipNotifications**.
+Recursos disponibles en `/admin`: **Analytics**, **Cafes** (cafés, sucursales y reseñas), **ContactMessages**, **EmailCampaigns**, **EmailLogs**, **EmailTemplates**, **Galleries**, **Media**, **Pages**, **SiteSettings**, **Tags**, **Tickets**, **Users** y **VipNotifications**.
 
-Comandos de mantenimiento (Media Library):
+Comandos de mantenimiento:
 
 ```bash
 php artisan media:clean-orphans [--dry-run]      # limpiar media huérfana
 php artisan media:regenerate [--watermark-only]  # regenerar conversiones
 php artisan users:fix-country-codes             # normalizar códigos de país
+php artisan emails:process-campaigns            # procesar campañas de email pendientes
 ```
 
 ## Cafés y Sucursales: Imágenes con Media Library

@@ -84,33 +84,25 @@ Notas:
 
 ## Versión
 
-Este paquete: `front-site` versión **0.2.0**.
+Este paquete: `front-site` versión **0.25.0**.
 
 ---
 
-## Imágenes de Cafés y Sucursales
+## Archivos de Indexación y LLM SEO (Generative Engine Optimization)
 
-El frontend consume `image_url` desde GraphQL para cafés y sucursales.
-
-Reglas actuales:
-- `image_url` llega desde backend como URL absoluta contra `APP_URL`.
-- En desarrollo, la URL correcta de media debe ser `http://127.0.0.1:8000/...`, no `http://127.0.0.1:3000/...`.
-- Esto evita que Vite resuelva accidentalmente la imagen contra el host del frontend cuando GraphQL pasa por proxy.
-
-Endpoints esperados:
-- `http://127.0.0.1:8000/cafe-media/{id}`
-- `http://127.0.0.1:8000/branch-media/{id}`
-
-Notas:
-- El componente `CafesWithReviews` usa directamente `cafe.image_url` y `branch.image_url`.
-- La selección de imagen en backend siempre toma la más nueva por `created_at desc` con `id desc` como desempate.
+Los archivos de indexación residen en `public/` y se procesan durante el build:
+- `/llms.txt`: Resumen ejecutivo y arquitectura en Markdown para modelos de IA (ChatGPT, Claude, Perplexity).
+- `/llms-full.txt`: Documentación exhaustiva con especificación de entidades (Creadores, Cafés con Piernas, Ley N° 21.719 ARCOP).
+- `/robots.txt`: Directivas explícitas para rastreadores de IA generativa (`GPTBot`, `ClaudeBot`, `PerplexityBot`, etc.).
+- `/sitemap.xml`: Mapa de URLs canónicas con actualización dinámica.
 
 ## Scripts (Vite)
 
 El proyecto es una SPA con **Vite** (ver `vite.config.ts`), no Create React App.
 
 - `npm run dev` — servidor de desarrollo en `http://127.0.0.1:3000` con proxy a `http://127.0.0.1:8000` (`/graphql`, `/api`, `/storage`, `/gallery-media`, `/sanctum`).
-- `npm run build` — build de producción en `dist/`.
+- `npm run build` — ejecuta `node scripts/generate-sitemap.mjs && vite build`. Lee `VITE_FRONTEND_URL` de `.env.production` y genera el build de producción en `dist/` con URLs canónicas actualizadas.
+- `npm run sitemap` — ejecuta solo el generador de sitemap y robots.
 - `npm run preview` — previsualiza el build en `http://127.0.0.1:4173` con el mismo proxy.
 
 Requiere Node >= 20 (ver `engines` en `package.json`).
