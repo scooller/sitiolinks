@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.1] - 2026-09-12
+
+### Changed
+- **LLM SEO & Semantic Disambiguation for "Cafés con Piernas"**: Updated `/llms.txt`, `/llms-full.txt`, and `index.html` metadata to accurately specify that coffee venues in Link Persons are Chilean *"cafés con piernas"* (traditional urban espresso bars featuring model hostesses) rather than generic specialty coffee shops, providing precise grounding for AI answer engines (ChatGPT, Claude, Perplexity).
+
 ## [0.24.0] - 2026-09-12
 
 ### Added

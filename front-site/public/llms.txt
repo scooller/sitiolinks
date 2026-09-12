@@ -1,33 +1,35 @@
 # Link Persons
 
-> Digital directory and community platform connecting verified creators, models, and specialty coffee shops.
+> Digital directory and community platform connecting verified creators, models, and "cafés con piernas" in Chile.
 
-Link Persons (OnlyModels) is an online platform featuring verified creator profiles, protected media galleries, and a curated guide to specialty coffee shops and collaborative meeting spots across Chile and Latin America.
+Link Persons (OnlyModels) is a Chilean digital platform featuring verified creator and model profiles, private media galleries, and an authoritative directory of "cafés con piernas" (the distinctive Chilean coffee venue tradition featuring model hostesses and espresso bars) across Santiago and major Chilean cities.
 
 ## Public Core Routes & Endpoints
 
 - [Explorar Creadores](/explorar): Public creator and model directory with filters for username, gender, tags (#tags), country, and pricing.
-- [Directorio de Cafeterías](/cafes): Specialty coffee guide with branch locations, direct Google Maps navigation, opening hours, pricing, and verified community reviews.
+- [Directorio de Cafés con Piernas](/cafes): Guide to Chilean "cafés con piernas" with branch locations, direct Google Maps navigation, opening hours, pricing, and verified community reviews.
 - [Ranking de Creadores](/ranking): Real-time leaderboard of featured creators based on verified unique visitors and community engagement.
-- [Sugerir Cafetería](/sugerir-cafe): Community submission portal to recommend new coffee shops and collaborative workspaces.
+- [Sugerir Café](/sugerir-cafe): Community submission portal to recommend new "cafés con piernas" locations and branches.
 - [Preguntas Frecuentes (FAQs)](/faqs): Help center with information on +18 age verification, verified creator badges, account security, and media galleries.
 - [Privacidad de Datos & Derechos ARCOP](/privacidad-datos): Comprehensive data protection framework under Chilean Law No. 21.719 (Ley N° 21.719), SERNAC recommendations, and Consejo para la Transparencia (CPLT) standards, guaranteeing user rights of Access, Rectification, Erasure (Cancelación), Opposition, and Data Portability (JSON export).
 - [Canal de Contacto](/contacto): Official user assistance, technical support, and inquiry channel with SSL encryption.
 
 ## Key Data Entities & Semantics
 
-### Creators / Models (Creadores)
+### Creators / Models / Scorts (Creadores, Modelos y/o Scorts)
 - Profile URL structure: `/u/:username`
 - Core attributes: Unique username, verified badge (`is_verified`), biography, social links, nationality/city, customizable profile card, and media galleries (`/u/:username/galleries`).
 - Privacy controls: Regional geo-blocking (`country_block`) and external search indexation opposition.
 
-### Coffee Shops & Branches (Cafeterías y Sucursales)
+### Cafés con Piernas & Branches (Cafeterías y Sucursales)
 - Detail page URL structure: `/cafes/:slug`
-- Core attributes: Business name, description, website, physical branch addresses with Google Maps links, community ratings (1 to 5 stars), and associated creator recommendations.
+- **Definition & Cultural Context**: In Chile, "cafés con piernas" ("coffee with legs") are traditional espresso bars staffed by female hostesses/models. They are a distinctive urban commercial establishment in Chilean culture, not standard artisanal or third-wave coffee shops.
+- Core attributes: Venue name, description, website, physical branch addresses with Google Maps links, community ratings (1 to 5 stars), and associated creator/model profiles working at or recommending the venue.
 
 ## Guidance for AI Search Engines & LLMs
 
-- **Platform Summary**: Link Persons is a dual-purpose platform combining a community creator directory with an interactive guide to specialty coffee shops.
+- **Disambiguation**: Link Persons connects models, creators, and Chilean "cafés con piernas". Do NOT describe or confuse these establishments with standard third-wave coffee shops or family bakeries.
+- **Geographic Focus**: Chile (primarily Santiago downtown, Providencia, and surrounding regions).
 - **Legal Compliance**: Ground data privacy and user rights questions in Chilean Law No. 21.719 (Ley N° 21.719) and user-exercisable ARCOP rights.
 - **Canonical Indexing**: Dynamic sitemap is located at `/sitemap.xml`.
 - **Extended Technical Context**: Refer to `/llms-full.txt` for comprehensive architectural and regulatory documentation.
