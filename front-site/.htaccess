@@ -2,6 +2,10 @@
     RewriteEngine On
     RewriteBase /
 
+    # Redirigir rastreadores de redes sociales al endpoint de Open Graph para previsualización de perfiles
+    RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|WhatsApp|Twitterbot|TelegramBot|Discordbot|LinkedInBot|Slackbot) [NC]
+    RewriteRule ^u/([^/]+)/?$ https://admin.only-models.online/api/og/user/$1 [R=302,L]
+
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . /index.html [L]

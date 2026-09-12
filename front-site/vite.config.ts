@@ -16,9 +16,9 @@ export default defineConfig(({ mode }) => {
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'logo192.png', 'logo512.png', 'robots.txt'],
       manifest: {
-        short_name: 'OnlyModels',
-        name: 'Only Models - Plataforma de Creadores',
-        description: 'Plataforma para perfiles, galerías y descubrimiento de creadores',
+        short_name: 'LinkPersons',
+        name: 'Link Persons - Creadores, Modelos, Escorts y Contenido Adulto',
+        description: 'Directorio internacional de creadores, modelos, escorts, damas de compañía y venta de contenido para adulto (+18)',
         icons: [
           {
             src: 'favicon.ico',

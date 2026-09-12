@@ -1,65 +1,72 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
-    <meta name="theme-color" content="#0d6efd" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Only Models" />
-    <meta name="description" content="Conecta con modelos y personas, revisa sus Enlaces y Fotos" />
-    <meta name="keywords" content="creadores, perfiles, galerías, contenido, plataforma social" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!-- Preload critical fontawesome stylesheet -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous" />
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
-    <!-- Preconnect to CDN domains -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
-    <!-- Removed duplicate font-awesome links -->
-    <style>
-      /* Critical CSS - Loading spinner */
-      .loading-spinner {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 9999;
-      }
-      .spinner-border {
-        width: 3rem;
-        height: 3rem;
-        border: 0.25em solid currentColor;
-        border-right-color: transparent;
-        border-radius: 50%;
-        animation: spinner-border 0.75s linear infinite;
-      }
-      @keyframes spinner-border {
-        to { transform: rotate(360deg); }
-      }
-    </style>
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>Only Models</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+  <meta name="theme-color" content="#0d6efd" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- SEO & Metadata Primaria -->
+    <title>Link Persons - Creadores, Modelos, Escorts y Venta de Contenido Adulto</title>
+    <meta name="description" content="Directorio y plataforma internacional: modelos y creadores verificados, escorts y damas de compañía, links de venta de contenido para adulto (+18), galerías privadas con desnudos explícitos y guía de cafés con piernas." />
+    <meta name="keywords" content="escorts, damas de compañía, acompañantes, venta de contenido para adulto, links de venta de contenido para adulto, contenido para adultos, galeria con desnudos explicitos, desnudos explicitos, fotos desnudas, modelos eroticas, only models, link persons, creadores de contenido, perfiles verificados adultos, packs de fotos, videos exclusivos, cafes con piernas, adult content creators" />
+    <meta name="author" content="Link Persons" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="rating" content="adult" />
+
+    <!-- LLM SEO (AI Agents & Web Crawlers Standard) -->
+    <link rel="alternate" type="text/markdown" href="/llms.txt" title="LLM Content (llms.txt)" />
+    <link rel="alternate" type="text/markdown" href="/llms-full.txt" title="LLM Full Documentation (llms-full.txt)" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" title="Sitemap" />
+
+    <!-- Open Graph / Redes Sociales & AI Search Grounding -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Link Persons" />
+    <meta property="og:title" content="Link Persons - Creadores, Modelos, Escorts y Venta de Contenido Adulto" />
+    <meta property="og:description" content="Directorio y plataforma internacional: modelos y creadores verificados, escorts y damas de compañía, links de venta de contenido para adulto y galerías privadas con desnudos explícitos." />
+    <meta property="og:locale" content="es" />
+    <meta property="og:url" content="https://only-models.online/" />
+    <meta property="og:image" content="https://only-models.online/logo500.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Link Persons - Creadores, Modelos, Escorts y Venta de Contenido Adulto" />
+    <meta name="twitter:description" content="Directorio internacional de creadores, modelos, escorts, damas de compañía, venta de contenido para adulto (+18) y galerías con desnudos explícitos." />
+    <meta name="twitter:image" content="https://only-models.online/logo500.png" />
+
+    <!-- Datos Estructurados JSON-LD (Schema.org para Google & Motores LLM) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://only-models.online/#website",
+          "url": "https://only-models.online/",
+          "name": "Link Persons",
+          "alternateName": ["OnlyModels", "LinkPersons"],
+          "description": "Directorio y plataforma internacional de creadores, modelos verificadas, escorts y damas de compañía, links de venta de contenido para adulto, galerías con desnudos explícitos y cafés con piernas.",
+          "inLanguage": ["es", "en"],
+          "keywords": "creadores, modelos, escorts, damas de compañía, venta de contenido para adulto, galería con desnudos explícitos, cafés con piernas, adult content creators"
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://only-models.online/#organization",
+          "name": "Link Persons",
+          "url": "https://only-models.online/",
+          "logo": "https://only-models.online/logo500.png"
+        }
+      ]
+    }
+    </script>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
 
@@ -69,5 +76,6 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-  </body>
+</body>
+
 </html>

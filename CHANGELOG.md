@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.1] - 2026-09-12
+
+### Changed
+- **Global & International Scope for SEO & AI Grounding**:
+  - Broadened metadata across `front-site/index.html`, `public/index.html`, `seo.ts`, and `UserProfile.tsx` to position Link Persons as a worldwide/international platform for creators, models, escorts, and adult content (+18), rather than restricting focus solely to Chile.
+  - Positioned the "cafés con piernas" vertical as a specialized cultural directory feature without narrowing the global scope of the creators and models network.
+  - Sychronized global taxonomy in `llms.txt`, `llms-full.txt`, `manifest.json`, `vite.config.ts`, and backend `SiteSettings`.
+
+## [0.26.0] - 2026-09-12
+
+### Added
+- **Dynamic User Profile Meta Tags & Social Sharing Engine**:
+  - Implemented dynamic client-side metadata management (`seo.ts`) in React. When navigating to `/u/:username`, document title, description, keywords, Open Graph (`og:title`, `og:description`, `og:image`, `og:url`, `og:type=profile`), Twitter Cards, and canonical URLs are updated in real-time with the profile user's real display name, bio, and avatar.
+  - Added 1-tap "Compartir" (Share) action button adhering to Apple HIG on user cards (`UserProfile.tsx`), supporting native Web Share API on mobile (WhatsApp, Messages, Instagram) with fallback clipboard copy.
+  - Implemented crawler-friendly Open Graph preview endpoint in Laravel (`OpenGraphController.php` at `/api/og/user/{username}` and `/share/u/{username}`) with automated `.htaccess` User-Agent routing for WhatsApp, Facebook, Twitter, Telegram, Discord, and LinkedIn bots.
+
+## [0.25.2] - 2026-09-12
+
+### Changed
+- **Comprehensive Frontend & LLM SEO Optimization**:
+  - Enriched primary meta titles, meta descriptions, and search keywords in `front-site/index.html` and `front-site/public/index.html` with high-intent Chilean terms: "Escort y damas de compañía", "Links de venta de contenido para adulto", "Galería con desnudos explícitos", and "Cafés con piernas en Chile".
+  - Updated structured schema.org JSON-LD and OpenGraph/Twitter Card metadata for maximum indexing fidelity across Google, Bing, and AI search crawlers.
+  - Deepened semantic grounding in `llms.txt` and `llms-full.txt` with structured discovery pillars, explicit content taxonomy, search intent mapping, and query vectors.
+  - Synchronized default backend `SiteSettings` (title and description) and PWA `manifest.json` / `vite.config.ts` with enhanced branding.
+
 ## [0.25.0] - 2026-09-12
 
 ### Added

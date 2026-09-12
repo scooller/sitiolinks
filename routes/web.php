@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\OpenGraphController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +11,8 @@ Route::get('/', function () {
 });
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/api/og/user/{username}', [OpenGraphController::class, 'user'])->name('og.user');
+Route::get('/share/u/{username}', [OpenGraphController::class, 'user'])->name('share.user');
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();

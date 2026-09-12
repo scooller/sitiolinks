@@ -15,6 +15,7 @@ import OptimizedImage from '../components/OptimizedImage';
 import VerifiedBadge from '../components/VerifiedBadge';
 import LikeButton from '../components/LikeButton';
 import { BACKEND_URL } from '../config/constants';
+import { updatePageMeta, resetPageMeta } from '../lib/seo';
 
 interface FollowNotice {
   variant: 'success' | 'danger' | 'info';
@@ -137,6 +138,39 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
     };
   }, [username]);
 
+  // Actualización dinámica de SEO, título y Open Graph para compartir perfil
+  useEffect(() => {
+    if (!user) return;
+
+    const displayName = user.name ? `${user.name} (@${user.username})` : `@${user.username}`;
+    const pageTitle = `${displayName} - Link Persons`;
+    const pageDesc = user.description
+      ? user.description.slice(0, 160)
+      : `Conoce el perfil oficial de ${displayName} en Link Persons. Enlaces exclusivos, fotos y contenido verificado.`;
+
+    // Resolver avatar absoluto para previsualizaciones sociales y meta tags
+    let avatarUrl = user.avatar_url || (user as any).avatar_webp || (user as any).avatar_thumb || defaultAvatar;
+    if (avatarUrl && !avatarUrl.startsWith('http')) {
+      const backendBase = String((import.meta as any).env?.VITE_BACKEND_URL || BACKEND_URL).replace(/\/$/, '');
+      avatarUrl = `${backendBase}${avatarUrl.startsWith('/') ? '' : '/'}${avatarUrl}`;
+    }
+
+    const canonicalUrl = `${window.location.origin}/u/${user.username}`;
+
+    updatePageMeta({
+      title: pageTitle,
+      description: pageDesc,
+      image: avatarUrl || undefined,
+      url: canonicalUrl,
+      type: 'profile',
+      keywords: `${user.username}, ${user.name || ''}, creador, modelo, escorts, damas de compañia, perfil verificado, link persons, only models`,
+    });
+
+    return () => {
+      resetPageMeta();
+    };
+  }, [user, defaultAvatar]);
+
   // Nota: QRCodeCanvas ya soporta imageSettings; no dibujamos manualmente sobre el canvas
   useEffect(() => {
     return;
@@ -247,6 +281,39 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
       root.unmount();
     } catch { }
     document.body.removeChild(container);
+  };
+
+  const handleShareProfile = async () => {
+    if (!user) return;
+    const displayName = user.name ? `${user.name} (@${user.username})` : `@${user.username}`;
+    const shareUrl = `${window.location.origin}/u/${user.username}`;
+    const shareData = {
+      title: `${displayName} - Link Persons`,
+      text: user.description || `Conoce el perfil de ${displayName} en Link Persons`,
+      url: shareUrl,
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err: any) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setFollowNotice({
+        variant: 'success',
+        text: t('profile.link_copied', '¡Enlace del perfil copiado al portapapeles!'),
+      });
+    } catch {
+      setFollowNotice({
+        variant: 'info',
+        text: shareUrl,
+      });
+    }
   };
 
   const normalizeFA = (icon?: string | null): string | null => {
@@ -954,6 +1021,17 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                     initialLiked={Boolean((user as any).liked_by_user)}
                     className="mb-0"
                   />
+
+                  <Button
+                    variant="secondary"
+                    className="profile-btn-solid profile-btn-secondary"
+                    onClick={handleShareProfile}
+                    title={t('profile.share', 'Compartir perfil')}
+                    aria-label={t('profile.share', 'Compartir perfil')}
+                  >
+                    <i className="fas fa-share-nodes me-1" aria-hidden="true"></i>
+                    <span>{t('profile.share', 'Compartir')}</span>
+                  </Button>
 
                   {currentUser?.username !== user.username && isProfileCreator && (
                     !isAuthenticated ? (

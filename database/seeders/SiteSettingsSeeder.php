@@ -13,8 +13,8 @@ class SiteSettingsSeeder extends Seeder
     public function run(): void
     {
         SiteSettings::create([
-            'site_title' => 'Link Persons',
-            'site_description' => 'Conecta con personas y comparte tus enlaces',
+            'site_title' => 'Link Persons - Creadores, Modelos, Escorts y Venta de Contenido Adulto',
+            'site_description' => 'Directorio y plataforma internacional: modelos y creadores verificados, escorts y damas de compañía, links de venta de contenido para adulto (+18), galerías privadas con desnudos explícitos y guía de cafés con piernas.',
             'avatar_width' => 200,
             'avatar_height' => 200,
             'thumbnail_width' => 368,
