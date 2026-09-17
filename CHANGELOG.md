@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.26.4] - 2026-09-17
 
 ### Added
+- **Filament Log Viewer Plugin (`achyutn/filament-log-viewer`)**:
+  - Integrated `AchyutN\FilamentLogViewer\FilamentLogViewer` plugin in Filament Admin Panel (`AdminPanelProvider.php`).
+  - Added dedicated `/admin/logs` interactive interface to monitor, filter, search, copy, and manage Laravel logs directly from the administration dashboard.
+  - Published and customized `config/filament-log-viewer.php`.
 - **Resilient Offline & Database Fallback Cache (`graphqlRequest.ts`, `CacheNoticeToast.tsx`)**:
   - Implemented automatic local caching for read GraphQL queries.
   - On sporadic database connectivity dropouts (`SQLSTATE[HY000] [2002]` / HTTP 500), frontend falls back to cached data seamlessly without displaying disruptive error modals.

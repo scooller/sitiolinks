@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use AchyutN\FilamentLogViewer\FilamentLogViewer;
 use App\Models\SiteSettings;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -81,9 +82,9 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-            // ->plugins([
-            //     FilamentShieldPlugin::make(),
-            // ])
+            ->plugins([
+                FilamentLogViewer::make(),
+            ])
             ->authMiddleware([
                 Authenticate::class,
             ]);
