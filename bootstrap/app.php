@@ -29,11 +29,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ShareErrorsFromSession::class,
         ]);
 
-        // Exclude API routes from CSRF verification (handled by XSRF-TOKEN)
+        // Exclude stateless public routes from CSRF verification
         $middleware->validateCsrfTokens(except: [
             'api/*',
-            'graphql',
-            'graphql/*',
+            'graphql/public',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

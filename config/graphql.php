@@ -350,9 +350,9 @@ return [
      * for details. Disabled by default.
      */
     'security' => [
-        'query_max_complexity' => null,
-        'query_max_depth' => null,
-        'disable_introspection' => false,
+        'query_max_complexity' => env('GRAPHQL_MAX_COMPLEXITY', 300),
+        'query_max_depth' => env('GRAPHQL_MAX_DEPTH', 10),
+        'disable_introspection' => env('GRAPHQL_DISABLE_INTROSPECTION', false),
     ],
 
     /*

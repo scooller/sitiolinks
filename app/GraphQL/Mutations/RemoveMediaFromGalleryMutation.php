@@ -4,6 +4,7 @@ namespace App\GraphQL\Mutations;
 
 use App\Models\Gallery;
 use App\Models\Media;
+use App\Models\User;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Facades\Log;
 use Rebing\GraphQL\Support\Facades\GraphQL;
@@ -76,20 +77,26 @@ class RemoveMediaFromGalleryMutation extends Mutation
         $gallery->media()->detach($args['media_ids']);
 
         // Luego eliminar cada medio (esto borra archivos físicos y registro de DB)
+        $isAdmin = $user->hasAnyRole(['admin', 'super_admin']);
+
         foreach ($mediaToDelete as $media) {
             // Verificar que el medio no esté asociado a otras galerías
             $otherGalleries = $media->galleries()->where('gallery_id', '!=', $gallery->id)->count();
 
-            if ($otherGalleries === 0) {
+            // Solo eliminar físicamente si pertenece al usuario o si quien ejecuta es admin
+            $isMediaOwner = ($media->model_type === User::class && (int) $media->model_id === (int) $user->id);
+
+            if ($otherGalleries === 0 && ($isMediaOwner || $isAdmin)) {
                 Log::info('RemoveMediaFromGallery: Eliminando medio físicamente', [
                     'media_id' => $media->id,
                     'file_name' => $media->file_name,
                 ]);
                 $media->delete(); // Spatie elimina archivos físicos automáticamente
             } else {
-                Log::info('RemoveMediaFromGallery: Medio compartido con otras galerías, no se elimina', [
+                Log::info('RemoveMediaFromGallery: Medio compartido con otras galerías o no pertenece al usuario, no se elimina físicamente', [
                     'media_id' => $media->id,
                     'other_galleries_count' => $otherGalleries,
+                    'is_owner' => $isMediaOwner,
                 ]);
             }
         }

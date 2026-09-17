@@ -90,52 +90,53 @@ class GalleriesQuery extends Query
         }
 
         // VISIBILIDAD & PERMISOS con SQL para paginar directamente
+        if (! $user) {
+            $query->where('visibility', Gallery::VISIBILITY_PUBLIC)
+                ->where('status', Gallery::STATUS_APPROVED);
+        } elseif (! ($hasAdmin || $hasSuper)) {
+            $query->where(function ($outer) use ($user, $hasModerator) {
+                $outer->where('user_id', $user->id) // propias siempre
+                    ->orWhere(function ($q) use ($hasModerator) { // públicas aprobadas (si moderator también pendientes/rechazadas)
+                        $q->where('visibility', Gallery::VISIBILITY_PUBLIC)
+                            ->where(function ($s) use ($hasModerator) {
+                                if ($hasModerator) {
+                                    $s->whereIn('status', [Gallery::STATUS_APPROVED, Gallery::STATUS_PENDING, Gallery::STATUS_REJECTED]);
+                                } else {
+                                    $s->where('status', Gallery::STATUS_APPROVED);
+                                }
+                            });
+                    })
+                    ->orWhere(function ($q) use ($user) { // privadas permitidas
+                        $q->where('visibility', Gallery::VISIBILITY_PRIVATE)
+                            ->where(function ($inner) use ($user) {
+                                $inner->where('user_id', $user->id)
+                                    ->orWhereExists(function ($sub) use ($user) {
+                                        $sub->selectRaw('1')
+                                            ->from('gallery_allowed_users as gau')
+                                            ->whereColumn('gau.gallery_id', 'galleries.id')
+                                            ->where('gau.user_id', $user->id);
+                                    });
+                            });
+                    })
+                    ->orWhere(function ($q) use ($user) { // seguidores
+                        $q->where('visibility', Gallery::VISIBILITY_FOLLOWERS)
+                            ->where(function ($inner) use ($user) {
+                                $inner->where('user_id', $user->id)
+                                    ->orWhereExists(function ($sub) use ($user) {
+                                        $sub->selectRaw('1')
+                                            ->from('user_follower as uf')
+                                            ->whereColumn('uf.following_id', 'galleries.user_id')
+                                            ->where('uf.follower_id', $user->id);
+                                    });
+                            });
+                    });
+            });
+        }
+        // admin/super: sin restricciones de base
+
+        // Filtro opcional de visibilidad aplicado SOBRE los permisos ya calculados
         if (isset($args['visibility'])) {
             $query->where('visibility', $args['visibility']);
-        } else {
-            if (! $user) {
-                $query->where('visibility', Gallery::VISIBILITY_PUBLIC)
-                    ->where('status', Gallery::STATUS_APPROVED);
-            } elseif (! ($hasAdmin || $hasSuper)) {
-                $query->where(function ($outer) use ($user, $hasModerator) {
-                    $outer->where('user_id', $user->id) // propias siempre
-                        ->orWhere(function ($q) use ($hasModerator) { // públicas aprobadas (si moderator también pendientes/rechazadas)
-                            $q->where('visibility', Gallery::VISIBILITY_PUBLIC)
-                                ->where(function ($s) use ($hasModerator) {
-                                    if ($hasModerator) {
-                                        $s->whereIn('status', [Gallery::STATUS_APPROVED, Gallery::STATUS_PENDING, Gallery::STATUS_REJECTED]);
-                                    } else {
-                                        $s->where('status', Gallery::STATUS_APPROVED);
-                                    }
-                                });
-                        })
-                        ->orWhere(function ($q) use ($user) { // privadas permitidas
-                            $q->where('visibility', Gallery::VISIBILITY_PRIVATE)
-                                ->where(function ($inner) use ($user) {
-                                    $inner->where('user_id', $user->id)
-                                        ->orWhereExists(function ($sub) use ($user) {
-                                            $sub->selectRaw('1')
-                                                ->from('gallery_allowed_users as gau')
-                                                ->whereColumn('gau.gallery_id', 'galleries.id')
-                                                ->where('gau.user_id', $user->id);
-                                        });
-                                });
-                        })
-                        ->orWhere(function ($q) use ($user) { // seguidores
-                            $q->where('visibility', Gallery::VISIBILITY_FOLLOWERS)
-                                ->where(function ($inner) use ($user) {
-                                    $inner->where('user_id', $user->id)
-                                        ->orWhereExists(function ($sub) use ($user) {
-                                            $sub->selectRaw('1')
-                                                ->from('user_follower as uf')
-                                                ->whereColumn('uf.following_id', 'galleries.user_id')
-                                                ->where('uf.follower_id', $user->id);
-                                        });
-                                });
-                        });
-                });
-            }
-            // admin/super: sin restricciones
         }
 
         // Búsqueda por título o descripción

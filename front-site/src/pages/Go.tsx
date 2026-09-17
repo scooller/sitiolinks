@@ -52,8 +52,11 @@ export default function Go(): ReactElement {
         variables: { id, altchaToken: token },
         schema: 'public',
       });
-      if (!data.resolveAdultLink) throw new Error(t('go.error'));
-      window.location.replace(data.resolveAdultLink);
+      const dest = data.resolveAdultLink?.trim();
+      if (!dest || !/^https?:\/\//i.test(dest)) {
+        throw new Error(t('go.error'));
+      }
+      window.location.replace(dest);
     } catch (err: any) {
       setError(err.message || t('go.error'));
       setLoading(false);

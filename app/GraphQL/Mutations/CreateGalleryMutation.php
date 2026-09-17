@@ -56,8 +56,6 @@ class CreateGalleryMutation extends Mutation
         Log::info('GraphQL createGallery auth debug: entering', [
             'auth_check' => Auth::check(),
             'default_guard' => config('auth.defaults.guard'),
-            'session_id' => session()->getId(),
-            'cookies' => request()->cookies->all(),
             'headers_origin' => request()->headers->get('origin'),
             'headers_referer' => request()->headers->get('referer'),
             'route_middleware' => config('graphql.route.middleware'),

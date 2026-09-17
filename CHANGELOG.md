@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.2] - 2026-09-17
+
+### Security
+- **GraphQL BOLA Mitigation (`GalleriesQuery.php`)**: Enforced mandatory status and visibility authorization scoping unconditionally before applying optional `visibility` query argument, preventing unauthorized access to private/unapproved galleries.
+- **Media Ownership Validation & IDOR Defense (`AddMediaToGalleryMutation.php`, `RemoveMediaFromGalleryMutation.php`)**: Enforced strict media ownership verification (`model_type === User::class && model_id === user.id`) preventing users from attaching or deleting third-party media.
+- **CSRF & Session Cookie Hardening (`bootstrap/app.php`, `config/session.php`)**: Enforced CSRF validation on default stateful `/graphql` schema and switched fallback cookie `SameSite` attribute from `none` to `lax`.
+- **Stored XSS Prevention on Links (`CreateLinkMutation.php`, `UpdateLinkMutation.php`, `UpdateLinksMutation.php`, `UserProfile.tsx`, `Go.tsx`)**: Enforced strict `http://` and `https://` protocol validation both backend and frontend, blocking `javascript:` execution.
+- **Plaintext Session Cookie Log Leak Removal (`AuthController.php`, `CreateGalleryMutation.php`)**: Stripped session identifiers, cookie headers, and cookie arrays from application log statements.
+- **Captcha Verification Fix (`config/services.php`)**: Added default `captcha.provider => 'altcha'` configuration to ensure Altcha challenges validate correctly on registration and contact forms.
+- **Authentication Rate Limiting (`routes/api.php`)**: Applied `throttle` middleware to `/api/login` (6/min), `/api/register` (10/min), `/api/altcha/challenge` (30/min), and `/api/email/resend` (5/min).
+- **PII Protection (`UserType.php`)**: Restricted `birth_date` and `privacy_consent_at` resolution exclusively to profile owners and administrators/moderators.
+- **GraphQL DoS Hardening (`config/graphql.php`)**: Configured query max depth (10) and complexity (300) safeguards.
+- **Search Indexing Privacy (`SitemapController.php`)**: Filtered out creators with `search_indexing_opt_in = false` or `country_block = true` from `sitemap.xml`.
+
 ## [0.26.1] - 2026-09-12
 
 ### Changed

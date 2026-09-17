@@ -35,6 +35,10 @@ return [
         ],
     ],
 
+    'captcha' => [
+        'provider' => env('CAPTCHA_PROVIDER', 'altcha'),
+    ],
+
     'altcha' => [
         'enabled' => env('ALTCHA_ENABLED', true),
         'secret' => env('ALTCHA_SECRET'),

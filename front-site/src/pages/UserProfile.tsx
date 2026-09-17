@@ -1151,9 +1151,11 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                         .map((l: UserLink) => {
                           const iconClass = l.icon ? l.icon.replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-') : null;
                           const isAdult = !!l.is_adult;
+                          const isSafe = /^https?:\/\//i.test(String(l.url || '').trim());
+                          const targetHref = isAdult ? `/go/${l.id}` : (isSafe ? l.url : '#');
                           return (
                             <a
-                              href={isAdult ? `/go/${l.id}` : l.url}
+                              href={targetHref}
                               {...(isAdult ? {} : { target: '_blank' })}
                               rel={isAdult ? 'nofollow noopener noreferrer' : 'noreferrer'}
                               key={`${l.name}-${l.url}`}

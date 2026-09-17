@@ -67,10 +67,15 @@ class CreateLinkMutation extends Mutation
             $order = ($max === null ? 0 : ((int) $max) + 1);
         }
 
+        $url = trim((string) $args['url']);
+        if (! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('/^https?:\/\//i', $url)) {
+            throw new UserError('La URL debe ser válida y comenzar con http:// o https://');
+        }
+
         $link = Link::create([
             'user_id' => $targetUser->id,
             'name' => $args['name'],
-            'url' => $args['url'],
+            'url' => $url,
             'icon' => $args['icon'] ?? 'fas-link',
             'is_adult' => (bool) ($args['is_adult'] ?? false),
             'order' => (int) $order,

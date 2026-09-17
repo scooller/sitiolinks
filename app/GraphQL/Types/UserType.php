@@ -140,7 +140,12 @@ class UserType extends GraphQLType
                 'type' => Type::string(),
                 'selectable' => false,
                 'resolve' => function (User $user) {
-                    return $user->birth_date?->toDateString();
+                    $currentUser = auth('web')->user() ?? auth('sanctum')->user();
+                    if ($currentUser && ($currentUser->id === $user->id || $currentUser->hasAnyRole(['super_admin', 'admin', 'moderator']))) {
+                        return $user->birth_date?->toDateString();
+                    }
+
+                    return null;
                 },
             ],
             'price_from' => [
@@ -263,7 +268,12 @@ class UserType extends GraphQLType
                 'description' => 'Fecha y hora en que se otorgó el consentimiento de privacidad',
                 'selectable' => false,
                 'resolve' => function (User $user) {
-                    return $user->privacy_consent_at?->toIso8601String();
+                    $currentUser = auth('web')->user() ?? auth('sanctum')->user();
+                    if ($currentUser && ($currentUser->id === $user->id || $currentUser->hasAnyRole(['super_admin', 'admin', 'moderator']))) {
+                        return $user->privacy_consent_at?->toIso8601String();
+                    }
+
+                    return null;
                 },
             ],
             'privacy_policy_version' => [

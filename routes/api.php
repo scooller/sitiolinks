@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 // Auth Routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:web');
-Route::get('/altcha/challenge', [AltchaController::class, 'challenge']);
+Route::get('/altcha/challenge', [AltchaController::class, 'challenge'])->middleware('throttle:30,1');
 Route::get('/me', [AuthController::class, 'me'])->middleware('auth:web');
-Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])->middleware('auth:web');
+Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])->middleware(['auth:web', 'throttle:5,1']);
 
 // Broadcasting auth
 Broadcast::routes(['middleware' => ['auth:web']]);

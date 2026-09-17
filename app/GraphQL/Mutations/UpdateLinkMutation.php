@@ -60,6 +60,14 @@ class UpdateLinkMutation extends Mutation
             throw new UserError('No autorizado');
         }
 
+        if (array_key_exists('url', $args) && $args['url'] !== null) {
+            $url = trim((string) $args['url']);
+            if (! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('/^https?:\/\//i', $url)) {
+                throw new UserError('La URL debe ser válida y comenzar con http:// o https://');
+            }
+            $args['url'] = $url;
+        }
+
         $update = [];
         foreach (['name', 'url', 'icon', 'is_adult', 'order'] as $field) {
             if (array_key_exists($field, $args) && $args[$field] !== null) {

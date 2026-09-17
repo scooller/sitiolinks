@@ -58,7 +58,13 @@ Link Persons (OnlyModels) is an international Progressive Web Application (PWA) 
   5. **Portabilidad (Portability)**: Instant machine-readable export in standard JSON format containing complete user records.
 - **Formal SLA**: Maximum 15 business days response time for formal privacy tickets.
 
-### 2.6 Cookie & Storage Policy
+### 2.6 Security & Hardening Architecture
+- **CSRF & Session Security**: Default GraphQL operations enforce CSRF protection (`X-XSRF-TOKEN`). Session cookies use `SameSite=Lax` with HTTPS-only transmission.
+- **Authorization & Access Control**: Strict BOLA/IDOR prevention across galleries, media attachments, and ticket resolution. Non-owners cannot enumerate or view private galleries, and media uploads are cryptographically bound to owning user accounts.
+- **Anti-Bot & Rate Limiting**: Proof-of-work Altcha verification on sensitive flows. Tiered rate limiting applied to authentication (`/api/login`, `/api/register`), challenge generation, and public GraphQL endpoints.
+- **Protocol Sanitization & DoS Defense**: Strict URL scheme whitelisting (`http://` / `https://`) blocking `javascript:` XSS vectors. GraphQL query depth (max 10) and complexity (max 300) analysis prevents nested denial-of-service queries.
+
+### 2.7 Cookie & Storage Policy
 - Non-essential cookies and analytics (Google Analytics 4) are strictly opt-in and blocked by default until explicit consent is granted via the Apple HIG translucent banner (`CookieConsentBanner`).
 
 ---

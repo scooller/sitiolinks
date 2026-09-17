@@ -107,11 +107,7 @@ class AuthController extends Controller
 
         Log::info('User logged in', [
             'user_id' => $user->id,
-            'session_id' => $request->session()->getId(),
             'has_session' => Auth::check(),
-            'cookie_names' => array_keys($request->cookies->all()),
-            'cookie_session' => $request->cookies->get(config('session.cookie')),
-            'headers_cookie' => $request->headers->get('cookie'),
         ]);
 
         return response()->json([
@@ -148,10 +144,6 @@ class AuthController extends Controller
         Log::info('Checking auth', [
             'has_user' => $request->user() !== null,
             'auth_check' => Auth::check(),
-            'session_id' => $request->session()->getId(),
-            'cookie_names' => array_keys($request->cookies->all()),
-            'cookie_session' => $request->cookies->get(config('session.cookie')),
-            'headers_cookie' => $request->headers->get('cookie'),
         ]);
 
         $user = $request->user();

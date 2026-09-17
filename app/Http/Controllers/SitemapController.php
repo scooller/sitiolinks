@@ -46,6 +46,14 @@ class SitemapController extends Controller
                 $creators = User::role('creator')
                     ->whereNotNull('username')
                     ->where('username', '!=', '')
+                    ->where(function ($q) {
+                        $q->whereNull('search_indexing_opt_in')
+                          ->orWhere('search_indexing_opt_in', true);
+                    })
+                    ->where(function ($q) {
+                        $q->whereNull('country_block')
+                          ->orWhere('country_block', false);
+                    })
                     ->select(['username', 'updated_at'])
                     ->get();
 

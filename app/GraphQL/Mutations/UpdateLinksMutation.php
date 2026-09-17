@@ -52,10 +52,15 @@ class UpdateLinksMutation extends Mutation
         // Crear los nuevos links
         if (isset($args['links']) && is_array($args['links'])) {
             foreach ($args['links'] as $index => $linkData) {
+                $url = trim((string) ($linkData['url'] ?? ''));
+                if (! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('/^https?:\/\//i', $url)) {
+                    throw new \Exception("La URL \"{$url}\" debe ser válida y comenzar con http:// o https://");
+                }
+
                 Link::create([
                     'user_id' => $currentUser->id,
                     'name' => $linkData['name'] ?? '',
-                    'url' => $linkData['url'] ?? '',
+                    'url' => $url,
                     'icon' => $linkData['icon'] ?? 'fas-link',
                     'is_adult' => (bool) ($linkData['is_adult'] ?? false),
                     'order' => $index,

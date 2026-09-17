@@ -117,6 +117,11 @@ class AddMediaToGalleryMutation extends Mutation
                 continue; // Saltar medios que no existen
             }
 
+            // Verificar que el medio pertenece al usuario (salvo que sea admin)
+            if (! $isAdmin && ($media->model_type !== User::class || (int) $media->model_id !== (int) $user->id)) {
+                throw new UserError("No tienes permiso para adjuntar el archivo #{$mediaId}.");
+            }
+
             // Preparar datos del pivot
             $pivotData = [
                 'order' => $maxOrder + $index + 1,
