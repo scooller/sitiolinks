@@ -29,6 +29,9 @@
     "app": {
         "title": "..."
     },
+    "cache": {
+        "served_from_cache_msg": "Mostrando datos guardados en caché"
+    },
     "nav": {
         "home": "Inicio",
         "explore": "Explorar",

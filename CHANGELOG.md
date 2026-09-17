@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.4] - 2026-09-17
+
+### Added
+- **Resilient Offline & Database Fallback Cache (`graphqlRequest.ts`, `CacheNoticeToast.tsx`)**:
+  - Implemented automatic local caching for read GraphQL queries.
+  - On sporadic database connectivity dropouts (`SQLSTATE[HY000] [2002]` / HTTP 500), frontend falls back to cached data seamlessly without displaying disruptive error modals.
+  - Added subtle Apple HIG Liquid Glass floating toast (`CacheNoticeToast`) notifying users that cached data is being displayed.
+
 ## [0.26.3] - 2026-09-17
 
 ### Fixed

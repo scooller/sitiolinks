@@ -40,6 +40,7 @@ import { graphqlRequest } from './lib/graphql/graphqlRequest';
 import { queries } from './lib/graphql/queries';
 import InstallPWA from './components/InstallPWA.tsx';
 import OfflineIndicator from './components/OfflineIndicator.tsx';
+import CacheNoticeToast from './components/CacheNoticeToast.tsx';
 import LoadingFallback from './components/LoadingFallback.tsx';
 import WarningModal from './components/WarningModal.tsx';
 import { CookieConsentBanner, getCookieConsent } from './components/CookieConsentBanner.tsx';
@@ -454,6 +455,7 @@ function App() {
         <Router>
           <div className="App">
             <OfflineIndicator />
+            <CacheNoticeToast />
             <WarningModal />
             <Navigation />
             <InstallPWA />

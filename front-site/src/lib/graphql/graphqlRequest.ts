@@ -18,12 +18,69 @@ export async function ensureCsrfCookie(): Promise<void> {
   csrfEnsured = true;
 }
 
+// Generate deterministic cache key for query and variables
+function getGqlCacheKey(schema: string, query: string, variables: Record<string, any>): string {
+  const normalized = `${schema}|${query.replace(/\s+/g, ' ').trim()}|${JSON.stringify(variables)}`;
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i++) {
+    hash = ((hash << 5) - hash) + normalized.charCodeAt(i);
+    hash |= 0;
+  }
+  return `lp_gql_${schema}_${Math.abs(hash).toString(36)}`;
+}
+
+let lastCacheToastTime = 0;
+function notifyServedFromCache(schema: string) {
+  const now = Date.now();
+  if (now - lastCacheToastTime > 6000) {
+    lastCacheToastTime = now;
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('graphql:served-from-cache', {
+          detail: { schema, timestamp: now },
+        })
+      );
+    }
+  }
+}
+
+function getFromCache<T>(cacheKey: string): T | null {
+  try {
+    const raw = localStorage.getItem(cacheKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.data !== undefined) {
+      return parsed.data as T;
+    }
+  } catch {
+    // Ignore storage parse errors
+  }
+  return null;
+}
+
+function saveToCache(cacheKey: string, data: any): void {
+  try {
+    localStorage.setItem(
+      cacheKey,
+      JSON.stringify({
+        data,
+        timestamp: Date.now(),
+      })
+    );
+  } catch {
+    // Ignore storage quota errors
+  }
+}
+
 export async function graphqlRequest<T = any>({ 
   query, 
   variables = {}, 
   schema = 'public', 
   authenticated = false 
 }: GraphQLRequestOptions): Promise<T> {
+  const isMutation = query.trim().startsWith('mutation');
+  const cacheKey = !isMutation ? getGqlCacheKey(schema, query, variables) : null;
+
   // Determine path fragment según el schema
   let path: string;
   if (schema === 'default') {
@@ -71,7 +128,21 @@ export async function graphqlRequest<T = any>({
     credentials: 'include', // Always include credentials for session persistence
   };
 
-  const res = await fetch(url, options);
+  let res: Response;
+  try {
+    res = await fetch(url, options);
+  } catch (networkErr: any) {
+    // Fallback to cache on complete network / server drop
+    if (cacheKey) {
+      const cached = getFromCache<T>(cacheKey);
+      if (cached) {
+        console.warn('⚡ Network failed. Served from local cache:', cacheKey);
+        notifyServedFromCache(schema);
+        return cached;
+      }
+    }
+    throw networkErr;
+  }
   
   console.log('🟢 GraphQL Response Status:', {
     status: res.status,
@@ -80,13 +151,21 @@ export async function graphqlRequest<T = any>({
     url
   });
 
-  // Handle HTTP-level errors (e.g., 401 from middleware)
+  // Handle HTTP-level errors (e.g. 500 Server Error)
   if (!res.ok) {
+    if (cacheKey && res.status >= 500) {
+      const cached = getFromCache<T>(cacheKey);
+      if (cached) {
+        console.warn(`⚡ HTTP ${res.status} error. Served from local cache:`, cacheKey);
+        notifyServedFromCache(schema);
+        return cached;
+      }
+    }
+
     let message = `HTTP ${res.status}`;
     try {
       const data = await res.json();
       console.error('❌ HTTP Error Response:', data);
-      // Laravel typically returns { message: 'Unauthenticated.' }
       if (data?.message) message = data.message;
     } catch {
       try {
@@ -108,6 +187,27 @@ export async function graphqlRequest<T = any>({
   });
   
   if (json.errors) {
+    const isDbOrServerError = json.errors.some((err: any) => {
+      const msg = (err.message || '').toLowerCase();
+      return (
+        msg.includes('sqlstate') ||
+        msg.includes('operation not permitted') ||
+        msg.includes('server error') ||
+        msg.includes('connection refused') ||
+        msg.includes('connection timed out') ||
+        msg.includes('base table or view not found')
+      );
+    });
+
+    if (cacheKey && isDbOrServerError) {
+      const cached = getFromCache<T>(cacheKey);
+      if (cached) {
+        console.warn('⚡ Database error encountered. Fallback to local cache:', cacheKey);
+        notifyServedFromCache(schema);
+        return cached;
+      }
+    }
+
     const msg = json.errors.map((e) => e.message).join('; ');
     console.error('❌ GraphQL Errors COMPLETO:', JSON.stringify(json.errors, null, 2));
     console.error('❌ Mensaje de error:', msg);
@@ -128,5 +228,9 @@ export async function graphqlRequest<T = any>({
   }
   
   console.log('✅ GraphQL Request Success');
+  if (cacheKey && json.data) {
+    saveToCache(cacheKey, json.data);
+  }
   return json.data as T;
 }
+
