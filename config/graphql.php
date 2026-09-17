@@ -342,7 +342,7 @@ return [
      *
      * The default handler will pass exceptions to laravel Error Handling mechanism
      */
-    'errors_handler' => fn(array $errors, callable $formatter): array => array_map($formatter, $errors),
+    'errors_handler' => [GraphQL::class, 'handleErrors'],
 
     /*
      * Options to limit the query complexity and depth. See the doc
