@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - On sporadic database connectivity dropouts (`SQLSTATE[HY000] [2002]` / HTTP 500), frontend falls back to cached data seamlessly without displaying disruptive error modals.
   - Added subtle Apple HIG Liquid Glass floating toast (`CacheNoticeToast`) notifying users that cached data is being displayed.
 
+### Changed
+- **Repository Hygiene (`.gitignore`, `bootstrap/cache/.gitignore`)**: Ignored environment-specific cached manifest files (`packages.php`, `services.php`, `config.php`, `routes-*.php`) in `bootstrap/cache/` to prevent cross-environment conflicts.
+
 ## [0.26.3] - 2026-09-17
 
 ### Fixed
