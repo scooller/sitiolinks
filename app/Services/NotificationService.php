@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\Events\NotificationCreated;
+use App\Mail\UserRoleChangedMail;
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
@@ -156,5 +159,37 @@ class NotificationService
             ->where('type', Notification::TYPE_VIP_USER_MESSAGE)
             ->whereNull('read_at')
             ->count();
+    }
+
+    /**
+     * Notificar al usuario sobre el cambio de su tipo de cuenta/rol.
+     */
+    public static function notifyRoleChanged(User $user, string $newRole, ?string $oldRole = null): Notification
+    {
+        $roleLabels = UserRoleChangedMail::ROLE_LABELS;
+        $newLabel = $roleLabels[$newRole] ?? ucfirst($newRole);
+
+        $notification = self::create(
+            user: $user,
+            type: Notification::TYPE_SYSTEM,
+            title: 'Nivel de cuenta actualizado',
+            message: "Tu cuenta ha sido actualizada al nivel: {$newLabel}.",
+            data: [
+                'type' => 'role_changed',
+                'new_role' => $newRole,
+                'old_role' => $oldRole,
+            ],
+            url: "/u/{$user->username}"
+        );
+
+        if (! empty($user->email)) {
+            try {
+                Mail::to($user->email)->send(new UserRoleChangedMail($user, $newRole, $oldRole));
+            } catch (\Throwable $e) {
+                Log::error('Error enviando email de cambio de rol: '.$e->getMessage());
+            }
+        }
+
+        return $notification;
     }
 }

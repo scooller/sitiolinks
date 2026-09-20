@@ -67,6 +67,19 @@ class UserForm
                     ->rule('lowercase')
                     ->unique(table: 'users', column: 'username', ignoreRecord: true)
                     ->live(debounce: 500)
+                    ->suffixAction(
+                        Action::make('viewPublicProfile')
+                            ->label('Ver perfil')
+                            ->icon('heroicon-o-arrow-top-right-on-square')
+                            ->tooltip('Ver perfil público en el sitio')
+                            ->url(function ($record) {
+                                $baseUrl = rtrim((string) (config('app.frontend_url') ?: env('FRONTEND_URL', 'http://127.0.0.1:3000')), '/');
+
+                                return $record?->username ? "{$baseUrl}/u/{$record->username}" : null;
+                            })
+                            ->openUrlInNewTab()
+                            ->visible(fn ($record) => filled($record?->username))
+                    )
                     ->validationMessages([
                         'unique' => 'Este nombre de usuario ya está en uso.',
                         'alpha_dash' => 'Solo letras, números, guiones y guiones bajos.',
@@ -102,6 +115,19 @@ class UserForm
 
                 Section::make('Perfil público')
                     ->description('Datos visibles en el perfil del usuario')
+                    ->headerActions([
+                        Action::make('openProfile')
+                            ->label('Ver Perfil Público')
+                            ->icon('heroicon-o-arrow-top-right-on-square')
+                            ->color('info')
+                            ->url(function ($record) {
+                                $baseUrl = rtrim((string) (config('app.frontend_url') ?: env('FRONTEND_URL', 'http://127.0.0.1:3000')), '/');
+
+                                return $record?->username ? "{$baseUrl}/u/{$record->username}" : null;
+                            })
+                            ->openUrlInNewTab()
+                            ->visible(fn ($record) => filled($record?->username)),
+                    ])
                     ->visible(function ($get) {
                         $roleIds = $get('roles') ?? [];
                         if (empty($roleIds)) {

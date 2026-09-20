@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.5] - 2026-09-20
+
+### Added
+- **Selector rápido de tipo de usuario en Filament (`UsersTable.php`)**:
+  - Incorporado `SelectColumn` interactivo en la tabla de usuarios (`/admin/users`) para cambiar el rol/tipo de usuario (`user`, `vip`, `creator`, `moderator`, `admin`, `super_admin`) en tiempo real con sincronización Spatie Permissions y purga de caché GraphQL.
+  - **Notificación por Correo Electrónico (`UserRoleChangedMail`, `user-role-changed.blade.php`)**: Envío automático de correo con plantilla HTML responsiva alertando al usuario sobre su nuevo nivel y destacando los beneficios correspondientes (VIP, Creador, etc.).
+  - **Notificación Interna del Sistema (`NotificationService::notifyRoleChanged`)**: Registro de notificación in-app para el usuario destinatario.
+- **Acceso directo al Perfil Público de Usuario en Filament**:
+  - En la tabla de usuarios (`UsersTable.php`), la columna `username` y la acción de registro `Ver Perfil` abren directamente `/u/{username}` en el frontend SPA en una pestaña nueva.
+  - En el formulario de edición de usuario (`EditUser.php` y `UserForm.php`), añadidos botones de acción directa en la cabecera, junto al campo `username` y en la sección `Perfil público`.
+### Fixed
+- **Botón "Ver Sitio" en Filament (`AdminPanelProvider.php`)**: Corregido el enlace para redirigir a `config('app.frontend_url')` (o fallback `http://127.0.0.1:3000`) en lugar de apuntar a la ruta raíz `/` del backend.
+
 ## [0.26.4] - 2026-09-17
 
 ### Added

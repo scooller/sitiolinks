@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Users\Tables;
 use App\Jobs\SendBulkEmailJob;
 use App\Models\EmailTemplate;
 use App\Models\SiteSettings;
+use App\Services\GraphQLCache;
+use App\Services\NotificationService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -17,6 +19,7 @@ use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -43,7 +46,10 @@ class UsersTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('username')
-                    ->searchable(),
+                    ->searchable()
+                    ->url(fn ($record) => $record->username ? rtrim((string) (config('app.frontend_url') ?: env('FRONTEND_URL', 'http://127.0.0.1:3000')), '/')."/u/{$record->username}" : null)
+                    ->openUrlInNewTab()
+                    ->tooltip('Ver perfil público'),
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
@@ -61,6 +67,37 @@ class UsersTable
                     ->prefix('$')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                SelectColumn::make('role')
+                    ->label('Tipo de Usuario')
+                    ->options([
+                        'user' => 'Normal / Usuario',
+                        'vip' => 'VIP',
+                        'creator' => 'Creador / Modelo',
+                        'moderator' => 'Moderador',
+                        'admin' => 'Administrador',
+                        'super_admin' => 'Super Admin',
+                    ])
+                    ->selectablePlaceholder(false)
+                    ->getStateUsing(fn ($record) => $record->roles->first()?->name ?? 'user')
+                    ->updateStateUsing(function ($record, $state) {
+                        $oldRole = $record->roles->first()?->name ?? 'user';
+                        if ($oldRole === $state) {
+                            return $state;
+                        }
+
+                        $record->syncRoles([$state]);
+                        GraphQLCache::flushFor('users');
+
+                        NotificationService::notifyRoleChanged($record, $state, $oldRole);
+
+                        Notification::make()
+                            ->title('Tipo de usuario actualizado')
+                            ->body("El usuario @{$record->username} ahora es '{$state}'. Se envió notificación por correo.")
+                            ->success()
+                            ->send();
+
+                        return $state;
+                    }),
                 BadgeColumn::make('roles.name')
                     ->label('Roles')
                     ->separator(', ')
@@ -69,7 +106,8 @@ class UsersTable
                         'primary' => 'creator',
                         'warning' => 'moderator',
                         'danger' => 'admin',
-                    ]),
+                    ])
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('email_verified_at')
                     ->label('Email')
                     ->boolean()
@@ -106,6 +144,18 @@ class UsersTable
                 //
             ])
             ->recordActions([
+                Action::make('viewProfile')
+                    ->label('Ver Perfil')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('info')
+                    ->tooltip('Ver perfil público en el sitio')
+                    ->url(function ($record) {
+                        $baseUrl = rtrim((string) (config('app.frontend_url') ?: env('FRONTEND_URL', 'http://127.0.0.1:3000')), '/');
+
+                        return $record->username ? "{$baseUrl}/u/{$record->username}" : null;
+                    })
+                    ->openUrlInNewTab()
+                    ->visible(fn ($record) => filled($record->username)),
                 EditAction::make(),
                 Action::make('resetPassword')
                     ->label('Reset Password')

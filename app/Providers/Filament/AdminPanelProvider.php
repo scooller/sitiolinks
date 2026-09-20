@@ -57,7 +57,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
                 function () {
-                    $url = env('FRONTEND_URL', '/');
+                    $url = config('app.frontend_url') ?: env('FRONTEND_URL', 'http://127.0.0.1:3000');
 
                     return Blade::render('<x-filament::button tag="a" href="'.$url.'" target="_blank" icon="heroicon-o-globe-alt">Ver Sitio</x-filament::button>');
                 }
