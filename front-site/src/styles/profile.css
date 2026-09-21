@@ -222,21 +222,192 @@
 .profile-tag-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   padding: 4px 10px;
   border-radius: var(--rounded-md);
   font-size: var(--fs-xs);
   font-weight: var(--fw-medium);
   text-decoration: none;
-  background: rgba(var(--color-primary-rgb, 0, 113, 227), 0.08);
-  color: var(--color-primary, #0071e3);
-  transition: background-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+  border: 1px solid transparent;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .profile-tag-pill:hover {
-  background: var(--color-primary, #0071e3);
-  color: #ffffff;
   transform: translateY(-1px);
+}
+
+/* Primary (Azul) */
+.profile-tag-primary {
+  background: rgba(0, 113, 227, 0.08);
+  color: #0071e3;
+  border-color: rgba(0, 113, 227, 0.2);
+}
+.profile-tag-primary:hover {
+  background: #0071e3;
+  color: #ffffff;
+  border-color: #0071e3;
+}
+[data-bs-theme="dark"] .profile-tag-primary {
+  background: rgba(41, 151, 255, 0.16);
+  color: #2997ff;
+  border-color: rgba(41, 151, 255, 0.28);
+}
+[data-bs-theme="dark"] .profile-tag-primary:hover {
+  background: #0071e3;
+  color: #ffffff;
+  border-color: #0071e3;
+}
+
+/* Secondary (Gris) */
+.profile-tag-secondary {
+  background: rgba(108, 117, 125, 0.1);
+  color: #495057;
+  border-color: rgba(108, 117, 125, 0.2);
+}
+.profile-tag-secondary:hover {
+  background: #6c757d;
+  color: #ffffff;
+  border-color: #6c757d;
+}
+[data-bs-theme="dark"] .profile-tag-secondary {
+  background: rgba(173, 181, 189, 0.14);
+  color: #dee2e6;
+  border-color: rgba(173, 181, 189, 0.25);
+}
+[data-bs-theme="dark"] .profile-tag-secondary:hover {
+  background: #6c757d;
+  color: #ffffff;
+  border-color: #6c757d;
+}
+
+/* Success (Verde) */
+.profile-tag-success {
+  background: rgba(40, 167, 69, 0.1);
+  color: #198754;
+  border-color: rgba(40, 167, 69, 0.2);
+}
+.profile-tag-success:hover {
+  background: #28a745;
+  color: #ffffff;
+  border-color: #28a745;
+}
+[data-bs-theme="dark"] .profile-tag-success {
+  background: rgba(52, 199, 89, 0.16);
+  color: #34c759;
+  border-color: rgba(52, 199, 89, 0.28);
+}
+[data-bs-theme="dark"] .profile-tag-success:hover {
+  background: #28a745;
+  color: #ffffff;
+  border-color: #28a745;
+}
+
+/* Danger (Rojo) */
+.profile-tag-danger {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border-color: rgba(220, 53, 69, 0.2);
+}
+.profile-tag-danger:hover {
+  background: #dc3545;
+  color: #ffffff;
+  border-color: #dc3545;
+}
+[data-bs-theme="dark"] .profile-tag-danger {
+  background: rgba(255, 69, 58, 0.16);
+  color: #ff453a;
+  border-color: rgba(255, 69, 58, 0.28);
+}
+[data-bs-theme="dark"] .profile-tag-danger:hover {
+  background: #dc3545;
+  color: #ffffff;
+  border-color: #dc3545;
+}
+
+/* Warning (Amarillo/Naranja) */
+.profile-tag-warning {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+  border-color: rgba(217, 119, 6, 0.24);
+}
+.profile-tag-warning:hover {
+  background: #d97706;
+  color: #ffffff;
+  border-color: #d97706;
+}
+[data-bs-theme="dark"] .profile-tag-warning {
+  background: rgba(255, 159, 10, 0.16);
+  color: #ff9f0a;
+  border-color: rgba(255, 159, 10, 0.28);
+}
+[data-bs-theme="dark"] .profile-tag-warning:hover {
+  background: #d97706;
+  color: #ffffff;
+  border-color: #d97706;
+}
+
+/* Info (Cyan) */
+.profile-tag-info {
+  background: rgba(13, 202, 240, 0.1);
+  color: #0891b2;
+  border-color: rgba(13, 202, 240, 0.22);
+}
+.profile-tag-info:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+[data-bs-theme="dark"] .profile-tag-info {
+  background: rgba(100, 210, 255, 0.16);
+  color: #64d2ff;
+  border-color: rgba(100, 210, 255, 0.28);
+}
+[data-bs-theme="dark"] .profile-tag-info:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+/* Light */
+.profile-tag-light {
+  background: rgba(0, 0, 0, 0.05);
+  color: #374151;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.profile-tag-light:hover {
+  background: rgba(0, 0, 0, 0.12);
+  color: #111827;
+}
+[data-bs-theme="dark"] .profile-tag-light {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+[data-bs-theme="dark"] .profile-tag-light:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* Dark */
+.profile-tag-dark {
+  background: rgba(33, 37, 41, 0.08);
+  color: #212529;
+  border-color: rgba(33, 37, 41, 0.18);
+}
+.profile-tag-dark:hover {
+  background: #212529;
+  color: #ffffff;
+  border-color: #212529;
+}
+[data-bs-theme="dark"] .profile-tag-dark {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+[data-bs-theme="dark"] .profile-tag-dark:hover {
+  background: #ffffff;
+  color: #111827;
+  border-color: #ffffff;
 }
 
 /* Enlaces Externos / Redes Sociales */
@@ -399,6 +570,61 @@
   color: var(--text-main);
   font-weight: var(--fw-semibold);
   text-align: right;
+}
+
+/* Botón de información para Tooltip en detalles de perfil (Desktop/Tablet) */
+.profile-info-tooltip-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-left: var(--space-1, 4px);
+  color: var(--text-muted);
+  opacity: 0.65;
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: opacity 0.16s cubic-bezier(0.16, 1, 0.3, 1), color 0.16s cubic-bezier(0.16, 1, 0.3, 1), transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-info-tooltip-btn:hover,
+.profile-info-tooltip-btn:focus-visible {
+  opacity: 1;
+  color: var(--color-primary, #0d6efd);
+  transform: scale(1.15);
+  outline: none;
+}
+
+/* Aclaración en Mobile con acabado Apple Liquid Glass sutil */
+.profile-price-callout-mobile {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2, 8px);
+  padding: 8px 12px;
+  margin: 4px 12px 10px;
+  background: rgba(13, 110, 253, 0.07);
+  border: 1px solid rgba(13, 110, 253, 0.18);
+  border-radius: var(--rounded-md, 8px);
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.profile-price-callout-mobile i {
+  color: var(--color-primary, #0d6efd);
+  font-size: 0.8rem;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+[data-bs-theme="dark"] .profile-price-callout-mobile {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.22);
+}
+
+[data-bs-theme="dark"] .profile-price-callout-mobile i {
+  color: #38bdf8;
 }
 
 /* Sección Código QR */

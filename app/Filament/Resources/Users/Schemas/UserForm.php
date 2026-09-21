@@ -212,7 +212,7 @@ class UserForm
                             ->nullable(),
                         TextInput::make('card_bg_opacity')
                             ->label('Opacidad de la card (0.1 a 1)')
-                            ->type('number')
+                            ->numeric()
                             ->minValue(0.1)
                             ->maxValue(1)
                             ->step(0.01)

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.6] - 2026-09-20
+
+### Changed
+- **Preservación de colores de etiquetas de perfil (`UserProfile.tsx`, `profile.css`, `queries.ts`)**:
+  - Las etiquetas (`profile-tags`) en el perfil público ahora reflejan fielmente la paleta de colores asignada desde el backend (`primary`, `secondary`, `success`, `danger`, `warning`, `info`, `light`, `dark` o código HEX personalizado) con soporte translúcido para temas claro y oscuro según Apple HIG.
+
+### Fixed
+- **Validación de Opacidad de Card en Filament (`UserForm.php`)**:
+  - Configurado `->numeric()` en `card_bg_opacity` para evitar que Laravel aplique regla de longitud de string sobre valores decimales (0.1 a 1.0).
+
 ## [0.26.5] - 2026-09-20
 
 ### Added
@@ -19,8 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Incorporadas más de 770 ciudades y capitales provinciales para 23 países (Ecuador, República Dominicana, México, Argentina, Colombia, Chile, Venezuela, Perú, Bolivia, Paraguay, Uruguay, Costa Rica, Panamá, Guatemala, Honduras, El Salvador, Nicaragua, Cuba, Puerto Rico, Brasil, España, Estados Unidos y Canadá) disponibles de inmediato tanto en el backend Filament como en el frontend SPA.
 ### Changed
 - **Flexibilidad de campos de perfil (`UserForm.php`, `EditProfile.tsx`)**: Los campos `descripción`, `nacionalidad`, `país` y `ciudad` ahora son completamente opcionales (nullable) tanto en el panel Filament como en la edición de perfil del frontend, sin afectar relaciones ni tablas vinculadas.
-- **Aclaración de precio referencial en perfil (`UserProfile.tsx`, `EditProfile.tsx`)**: Agregado asterisco `*` y mensaje explicativo indicando que el precio es referencial y puede variar según el perfil y la moneda local (USD, CLP, COP, MXN, etc.).
+- **Aclaración de precio referencial responsive Apple Design (`UserProfile.tsx`, `profile.css`)**: Integrado botón icono interactivo con tooltip flotante en Desktop/Tablet e indicador callout compacto con acabado translúcido en Mobile.
 ### Fixed
+- **Validación de Opacidad de Card en Filament (`UserForm.php`)**: Corregido campo `card_bg_opacity` añadiendo `->numeric()` para que las reglas `minValue(0.1)` y `maxValue(1)` validen rango numérico en lugar de longitud de caracteres de texto.
 - **Botón "Ver Sitio" en Filament (`AdminPanelProvider.php`)**: Corregido el enlace para redirigir a `config('app.frontend_url')` (o fallback `http://127.0.0.1:3000`) en lugar de apuntar a la ruta raíz `/` del backend.
 
 ## [0.26.4] - 2026-09-17

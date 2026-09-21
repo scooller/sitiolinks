@@ -1125,8 +1125,27 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                         const iconClass = t.icon ? t.icon.replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-') : null;
                         const slug = String(t.name).trim().toLowerCase().replace(/\s+/g, '-');
                         const label = i18n.language === 'en' && t.name_en ? t.name_en : t.name;
+                        const rawColor = String(t.color || 'primary').trim().toLowerCase();
+                        const isNamedColor = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark'].includes(rawColor);
+                        const isHexOrRgb = rawColor.startsWith('#') || rawColor.startsWith('rgb');
+
+                        const customStyle = isHexOrRgb
+                          ? {
+                              backgroundColor: rawColor.startsWith('#') && rawColor.length === 7 ? `${rawColor}18` : rawColor,
+                              borderColor: rawColor.startsWith('#') && rawColor.length === 7 ? `${rawColor}38` : undefined,
+                              color: rawColor,
+                            }
+                          : undefined;
+
+                        const colorClass = isNamedColor ? `profile-tag-${rawColor}` : 'profile-tag-primary';
+
                         return (
-                          <Link key={String(t.id)} to={`/t/${slug}`} className="profile-tag-pill">
+                          <Link
+                            key={String(t.id)}
+                            to={`/t/${slug}`}
+                            className={`profile-tag-pill ${colorClass}`}
+                            style={customStyle}
+                          >
                             {iconClass && <i className={`${iconClass}`} aria-hidden="true"></i>}
                             <span>{label}</span>
                           </Link>
@@ -1290,14 +1309,29 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                             <div className="profile-detail-row">
                               <span className="profile-detail-label">
                                 <i className="fas fa-tag me-1 text-success" aria-hidden="true"></i>
-                                {t('profile.price_from_label')} *
+                                {t('profile.price_from_label')}
+                                <OverlayTrigger
+                                  placement="top"
+                                  overlay={
+                                    <Tooltip id="price-disclaimer-tooltip">
+                                      {t('profile.price_from_disclaimer')}
+                                    </Tooltip>
+                                  }
+                                >
+                                  <button
+                                    type="button"
+                                    className="profile-info-tooltip-btn d-none d-md-inline-flex"
+                                    aria-label={t('profile.price_from_disclaimer')}
+                                  >
+                                    <i className="fas fa-circle-info" aria-hidden="true"></i>
+                                  </button>
+                                </OverlayTrigger>
                               </span>
                               <span className="profile-detail-value text-success fw-bold">{priceStr}</span>
                             </div>
-                            <div className="profile-price-disclaimer pt-1 pb-2">
-                              <small className="text-muted d-block" style={{ fontSize: '0.78rem', lineHeight: '1.35' }}>
-                                * {t('profile.price_from_disclaimer')}
-                              </small>
+                            <div className="profile-price-callout-mobile d-md-none">
+                              <i className="fas fa-circle-info" aria-hidden="true"></i>
+                              <span>{t('profile.price_from_disclaimer')}</span>
                             </div>
                           </>
                         )}

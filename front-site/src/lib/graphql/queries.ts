@@ -144,7 +144,7 @@ export const queries = {
         verified_at
         roles { name }
         galleries_count
-        tags { id name color icon weight is_fixed }
+        tags { id name name_en color icon weight is_fixed }
         links { id name url icon order is_adult }
       }
     }
