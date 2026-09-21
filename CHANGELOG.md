@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Acceso directo al Perfil Público de Usuario en Filament**:
   - En la tabla de usuarios (`UsersTable.php`), la columna `username` y la acción de registro `Ver Perfil` abren directamente `/u/{username}` en el frontend SPA en una pestaña nueva.
   - En el formulario de edición de usuario (`EditUser.php` y `UserForm.php`), añadidos botones de acción directa en la cabecera, junto al campo `username` y en la sección `Perfil público`.
+### Changed
+- **Flexibilidad de campos de perfil (`UserForm.php`, `EditProfile.tsx`)**: Los campos `descripción`, `nacionalidad`, `país` y `ciudad` ahora son completamente opcionales (nullable) tanto en el panel Filament como en la edición de perfil del frontend, sin afectar relaciones ni tablas vinculadas.
 ### Fixed
 - **Botón "Ver Sitio" en Filament (`AdminPanelProvider.php`)**: Corregido el enlace para redirigir a `config('app.frontend_url')` (o fallback `http://127.0.0.1:3000`) en lugar de apuntar a la ruta raíz `/` del backend.
 

@@ -727,7 +727,7 @@ export default function EditProfile(): ReactElement {
 
                 <div className="mb-3">
                   <label className="apple-label">
-                    {t('profile.description')} <span className="text-danger">*</span>
+                    {t('profile.description')}
                   </label>
                   <textarea
                     name="description"
@@ -735,7 +735,6 @@ export default function EditProfile(): ReactElement {
                     rows={4}
                     value={formData.description}
                     onChange={handleChange}
-                    required
                   ></textarea>
                 </div>
 
@@ -788,14 +787,13 @@ export default function EditProfile(): ReactElement {
                 <Row className="g-3 mb-3">
                   <Col md={6}>
                     <label className="apple-label">
-                      {t('profile.nationality')} <span className="text-danger">*</span>
+                      {t('profile.nationality')}
                     </label>
                     <select
                       name="nationality"
                       className="apple-select"
                       value={formData.nationality}
                       onChange={handleChange}
-                      required
                     >
                       <option value="">{t('common.select')}</option>
                       {Object.entries(countries).map(([code, countryName]) => (
@@ -808,14 +806,13 @@ export default function EditProfile(): ReactElement {
 
                   <Col md={6}>
                     <label className="apple-label">
-                      {t('profile.country')} <span className="text-danger">*</span>
+                      {t('profile.country')}
                     </label>
                     <select
                       name="country"
                       className="apple-select"
                       value={formData.country}
                       onChange={handleChange}
-                      required
                     >
                       <option value="">{t('common.select')}</option>
                       {Object.entries(countries).map(([code, countryName]) => (
@@ -828,14 +825,13 @@ export default function EditProfile(): ReactElement {
 
                   <Col md={12}>
                     <label className="apple-label">
-                      {t('profile.city')} <span className="text-danger">*</span>
+                      {t('profile.city')}
                     </label>
                     <select
                       name="city"
                       className="apple-select"
                       value={formData.city}
                       onChange={handleChange}
-                      required
                       disabled={!formData.country}
                     >
                       <option value="">{t('common.select')}</option>

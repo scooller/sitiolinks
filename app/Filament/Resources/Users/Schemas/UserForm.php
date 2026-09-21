@@ -146,7 +146,7 @@ class UserForm
                             ->searchable()
                             ->preload()
                             ->native(false)
-                            ->required()
+                            ->nullable()
                             ->afterStateHydrated(function ($component, $state) {
                                 $list = self::countryOptions();
                                 // Si el estado guardado es un nombre, convertirlo a código
@@ -165,7 +165,7 @@ class UserForm
                             ->preload()
                             ->native(false)
                             ->live()
-                            ->required()
+                            ->nullable()
                             ->afterStateHydrated(function ($component, $state) {
                                 // Si el estado guardado es nombre, mapear a código para mostrarlo
                                 $list = self::countryOptions();
@@ -187,7 +187,7 @@ class UserForm
                             ->searchable()
                             ->preload()
                             ->native(false)
-                            ->required()
+                            ->nullable()
                             ->disabled(fn($get) => blank($get('country')))
                             ->hint('Selecciona primero el país'),
                         Select::make('gender')
@@ -204,7 +204,7 @@ class UserForm
                         Textarea::make('description')
                             ->label('Descripción')
                             ->rows(4)
-                            ->required()
+                            ->nullable()
                             ->columnSpanFull(),
                         ColorPicker::make('card_bg_color')
                             ->label('Color de fondo de la card')
