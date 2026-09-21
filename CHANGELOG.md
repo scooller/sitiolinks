@@ -15,8 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Acceso directo al Perfil Público de Usuario en Filament**:
   - En la tabla de usuarios (`UsersTable.php`), la columna `username` y la acción de registro `Ver Perfil` abren directamente `/u/{username}` en el frontend SPA en una pestaña nueva.
   - En el formulario de edición de usuario (`EditUser.php` y `UserForm.php`), añadidos botones de acción directa en la cabecera, junto al campo `username` y en la sección `Perfil público`.
+- **Catálogo Expandido de Ciudades de LATAM y Países Hispanohablantes (`cities_by_country_es.json`)**:
+  - Incorporadas más de 770 ciudades y capitales provinciales para 23 países (Ecuador, República Dominicana, México, Argentina, Colombia, Chile, Venezuela, Perú, Bolivia, Paraguay, Uruguay, Costa Rica, Panamá, Guatemala, Honduras, El Salvador, Nicaragua, Cuba, Puerto Rico, Brasil, España, Estados Unidos y Canadá) disponibles de inmediato tanto en el backend Filament como en el frontend SPA.
 ### Changed
 - **Flexibilidad de campos de perfil (`UserForm.php`, `EditProfile.tsx`)**: Los campos `descripción`, `nacionalidad`, `país` y `ciudad` ahora son completamente opcionales (nullable) tanto en el panel Filament como en la edición de perfil del frontend, sin afectar relaciones ni tablas vinculadas.
+- **Aclaración de precio referencial en perfil (`UserProfile.tsx`, `EditProfile.tsx`)**: Agregado asterisco `*` y mensaje explicativo indicando que el precio es referencial y puede variar según el perfil y la moneda local (USD, CLP, COP, MXN, etc.).
 ### Fixed
 - **Botón "Ver Sitio" en Filament (`AdminPanelProvider.php`)**: Corregido el enlace para redirigir a `config('app.frontend_url')` (o fallback `http://127.0.0.1:3000`) en lugar de apuntar a la ruta raíz `/` del backend.
 

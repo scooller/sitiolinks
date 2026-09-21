@@ -888,7 +888,9 @@ export default function EditProfile(): ReactElement {
                       $
                     </span>
                   </div>
-                  <div className="apple-form-hint">{t('profile.price_from_help')}</div>
+                  <div className="apple-form-hint">
+                    {t('profile.price_from_help')} — {t('profile.price_from_disclaimer')}
+                  </div>
                 </div>
 
                 <div className="apple-switch-wrapper">

@@ -252,6 +252,7 @@
         "city": "Ciudad",
         "birth_date": "Fecha de nacimiento",
         "price_from_label": "Precio desde",
+        "price_from_disclaimer": "El precio es referencial y puede variar según cada perfil y moneda (USD, CLP, COP, MXN, etc.).",
         "country_block_active": "Bloqueo por país activado",
         "download_qr_tooltip": "Descarga Codigo QR",
         "qr_code_title": "Código QR del Perfil",

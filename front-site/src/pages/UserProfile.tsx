@@ -1286,13 +1286,20 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                           </div>
                         )}
                         {priceStr && (
-                          <div className="profile-detail-row">
-                            <span className="profile-detail-label">
-                              <i className="fas fa-tag me-1 text-success" aria-hidden="true"></i>
-                              {t('profile.price_from_label')}
-                            </span>
-                            <span className="profile-detail-value text-success fw-bold">{priceStr}</span>
-                          </div>
+                          <>
+                            <div className="profile-detail-row">
+                              <span className="profile-detail-label">
+                                <i className="fas fa-tag me-1 text-success" aria-hidden="true"></i>
+                                {t('profile.price_from_label')} *
+                              </span>
+                              <span className="profile-detail-value text-success fw-bold">{priceStr}</span>
+                            </div>
+                            <div className="profile-price-disclaimer pt-1 pb-2">
+                              <small className="text-muted d-block" style={{ fontSize: '0.78rem', lineHeight: '1.35' }}>
+                                * {t('profile.price_from_disclaimer')}
+                              </small>
+                            </div>
+                          </>
                         )}
                       </div>
 
