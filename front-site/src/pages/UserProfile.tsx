@@ -37,6 +37,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
   const [user, setUser] = useState<User | null>(null);
   const [defaultAvatar, setDefaultAvatar] = useState<string>('');
   const [siteLogo, setSiteLogo] = useState<string>('');
+  const [siteTitle, setSiteTitle] = useState<string>('');
   const [qrLogoSize, setQrLogoSize] = useState<number>(48);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -106,6 +107,10 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
 
         const defA = settings?.siteSettings?.default_avatar_url;
         if (defA) setDefaultAvatar(defA);
+        const titleRaw = settings?.siteSettings?.site_title;
+        if (titleRaw && !titleRaw.toLowerCase().includes('link persons')) {
+          setSiteTitle(titleRaw);
+        }
         const logoRaw = settings?.siteSettings?.logo_url || (settings?.siteSettings as any)?.logo;
         if (logoRaw) {
           try {
@@ -142,11 +147,12 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
   useEffect(() => {
     if (!user) return;
 
+    const resolvedSiteName = siteTitle || (typeof document !== 'undefined' && document.title && !document.title.toLowerCase().includes('link persons') ? document.title.split(' - ').pop()?.trim() : '') || 'Only Models';
     const displayName = user.name ? `${user.name} (@${user.username})` : `@${user.username}`;
-    const pageTitle = `${displayName} - Link Persons`;
+    const pageTitle = `${displayName} - ${resolvedSiteName}`;
     const pageDesc = user.description
       ? user.description.slice(0, 160)
-      : `Conoce el perfil oficial de ${displayName} en Link Persons. Enlaces exclusivos, fotos y contenido verificado.`;
+      : `Conoce el perfil oficial de ${displayName} en ${resolvedSiteName}. Enlaces exclusivos, fotos y contenido verificado.`;
 
     // Resolver avatar absoluto para previsualizaciones sociales y meta tags (avatar de usuario -> logo del sitio -> defaultAvatar -> logo500)
     let avatarUrl = user.avatar_url || (user as any).avatar_webp || (user as any).avatar_thumb;
@@ -173,13 +179,14 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
       image: avatarUrl || undefined,
       url: canonicalUrl,
       type: 'profile',
-      keywords: `${user.username}, ${user.name || ''}, creador, modelo, escorts, damas de compañia, perfil verificado, link persons, only models`,
+      siteName: resolvedSiteName,
+      keywords: `${user.username}, ${user.name || ''}, creador, modelo, escorts, damas de compañia, perfil verificado, only models, fotos exclusivas`,
     });
 
     return () => {
       resetPageMeta();
     };
-  }, [user, defaultAvatar, siteLogo]);
+  }, [user, defaultAvatar, siteLogo, siteTitle]);
 
   // Nota: QRCodeCanvas ya soporta imageSettings; no dibujamos manualmente sobre el canvas
   useEffect(() => {
@@ -337,11 +344,12 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
 
   const handleShareProfile = async () => {
     if (!user) return;
+    const resolvedSiteName = siteTitle || (typeof document !== 'undefined' && document.title && !document.title.toLowerCase().includes('link persons') ? document.title.split(' - ').pop()?.trim() : '') || 'Only Models';
     const displayName = user.name ? `${user.name} (@${user.username})` : `@${user.username}`;
     const shareUrl = `${window.location.origin}/u/${user.username}`;
     const shareData = {
-      title: `${displayName} - Link Persons`,
-      text: user.description || `Conoce el perfil de ${displayName} en Link Persons`,
+      title: `${displayName} - ${resolvedSiteName}`,
+      text: user.description || `Conoce el perfil de ${displayName} en ${resolvedSiteName}`,
       url: shareUrl,
     };
 

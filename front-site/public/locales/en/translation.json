@@ -571,7 +571,7 @@
     },
     "pwa": {
         "install_title": "Install App",
-        "install_body": "Install Link Persons on your device for quick access and improved experience.",
+        "install_body": "Install the app on your device for quick access and improved experience.",
         "install_cta": "Install",
         "not_now": "Not now"
     },

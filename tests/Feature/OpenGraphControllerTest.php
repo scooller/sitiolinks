@@ -22,7 +22,7 @@ class OpenGraphControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'text/html; charset=UTF-8');
-        $response->assertSee("Valentina Rojas (@{$user->username}) - Link Persons", false);
+        $response->assertSee("Valentina Rojas (@{$user->username})", false);
         $response->assertSee('Modelo y creadora de contenido en Santiago Centro.', false);
         $response->assertSee('property="og:title"', false);
         $response->assertSee('property="og:image"', false);
@@ -34,6 +34,6 @@ class OpenGraphControllerTest extends TestCase
         $response = $this->get('/api/og/user/nonexistent_user_999999');
 
         $response->assertStatus(404);
-        $response->assertSee('Perfil no encontrado - Link Persons', false);
+        $response->assertSee('Perfil no encontrado', false);
     }
 }

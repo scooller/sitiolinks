@@ -15,16 +15,23 @@ class OpenGraphController extends Controller
         $frontendUrl = rtrim((string) (config('app.frontend_url') ?: env('FRONTEND_URL', 'https://only-models.online')), '/');
         $profileUrl = $frontendUrl . '/u/' . urlencode($username);
 
+        $siteSettings = \App\Models\SiteSettings::first();
+        $siteName = $siteSettings?->site_title ?: config('app.name', 'Only Models');
+        if (trim($siteName) === '' || strcasecmp($siteName, 'Link Persons') === 0 || strcasecmp($siteName, 'laravel') === 0) {
+            $siteName = 'Only Models';
+        }
+
         $user = User::where('username', $username)->first();
 
         if (!$user) {
             return response(
                 $this->renderHtml(
-                    title: 'Perfil no encontrado - Link Persons',
+                    title: "Perfil no encontrado - {$siteName}",
                     description: 'Directorio internacional de creadores, modelos, escorts y damas de compañía.',
                     imageUrl: $frontendUrl . '/logo500.png',
                     canonicalUrl: $profileUrl,
-                    fallbackUrl: $frontendUrl
+                    fallbackUrl: $frontendUrl,
+                    siteName: $siteName
                 ),
                 404,
                 ['Content-Type' => 'text/html; charset=UTF-8']
@@ -32,10 +39,10 @@ class OpenGraphController extends Controller
         }
 
         $displayName = $user->name ? "{$user->name} (@{$user->username})" : "@{$user->username}";
-        $title = "{$displayName} - Link Persons";
+        $title = "{$displayName} - {$siteName}";
         $description = $user->description
             ? mb_substr($user->description, 0, 160)
-            : "Conoce el perfil oficial de {$displayName} en Link Persons. Enlaces exclusivos, fotos y contenido verificado.";
+            : "Conoce el perfil oficial de {$displayName} en {$siteName}. Enlaces exclusivos, fotos y contenido verificado.";
 
         // Obtener avatar absoluto del usuario, o como fallback el logo del sitio
         $avatarUrl = null;
@@ -47,8 +54,7 @@ class OpenGraphController extends Controller
 
         if (!$avatarUrl) {
             try {
-                $settings = \App\Models\SiteSettings::first();
-                $avatarUrl = $settings?->getFirstMediaUrl('logo') ?: $settings?->getFirstMediaUrl('default_avatar');
+                $avatarUrl = $siteSettings?->getFirstMediaUrl('logo') ?: $siteSettings?->getFirstMediaUrl('default_avatar');
             } catch (\Throwable) {
                 $avatarUrl = null;
             }
@@ -64,7 +70,8 @@ class OpenGraphController extends Controller
             imageUrl: $avatarUrl,
             canonicalUrl: $profileUrl,
             fallbackUrl: $profileUrl,
-            username: $user->username
+            username: $user->username,
+            siteName: $siteName
         );
 
         return response($html, 200, [
@@ -73,13 +80,14 @@ class OpenGraphController extends Controller
         ]);
     }
 
-    private function renderHtml(string $title, string $description, string $imageUrl, string $canonicalUrl, string $fallbackUrl, ?string $username = null): string
+    private function renderHtml(string $title, string $description, string $imageUrl, string $canonicalUrl, string $fallbackUrl, ?string $username = null, string $siteName = 'Only Models'): string
     {
         $safeTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
         $safeDesc = htmlspecialchars($description, ENT_QUOTES, 'UTF-8');
         $safeImg = htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8');
         $safeUrl = htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8');
         $safeFallback = htmlspecialchars($fallbackUrl, ENT_QUOTES, 'UTF-8');
+        $safeSiteName = htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8');
 
         $profileUsernameTag = $username ? "<meta property=\"profile:username\" content=\"" . htmlspecialchars($username, ENT_QUOTES, 'UTF-8') . "\" />\n    " : '';
 
@@ -93,7 +101,7 @@ class OpenGraphController extends Controller
     <link rel="canonical" href="{$safeUrl}" />
 
     <!-- Open Graph -->
-    <meta property="og:site_name" content="Link Persons" />
+    <meta property="og:site_name" content="{$safeSiteName}" />
     <meta property="og:type" content="profile" />
     <meta property="og:title" content="{$safeTitle}" />
     <meta property="og:description" content="{$safeDesc}" />

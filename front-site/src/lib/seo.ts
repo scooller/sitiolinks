@@ -6,16 +6,18 @@ interface MetaTagsConfig {
   type?: string;
   keywords?: string;
   author?: string;
+  siteName?: string;
 }
 
 const DEFAULT_META: MetaTagsConfig = {
-  title: 'Link Persons - Creadores, Modelos, Escorts y Venta de Contenido Adulto',
+  title: 'Only Models - Creadores, Modelos, Escorts y Venta de Contenido Adulto',
   description: 'Directorio y plataforma internacional: modelos y creadores verificados, escorts y damas de compañía, links de venta de contenido para adulto (+18), galerías privadas con desnudos explícitos y guía de cafés con piernas.',
   image: 'https://only-models.online/logo500.png',
   url: 'https://only-models.online/',
   type: 'website',
-  keywords: 'escorts, damas de compañía, acompañantes, venta de contenido para adulto, links de venta de contenido para adulto, contenido para adultos, galeria con desnudos explicitos, desnudos explicitos, fotos desnudas, modelos eroticas, only models, link persons, creadores de contenido, perfiles verificados adultos, packs de fotos, videos exclusivos, cafes con piernas, adult content creators',
-  author: 'Link Persons',
+  keywords: 'escorts, damas de compañía, acompañantes, venta de contenido para adulto, links de venta de contenido para adulto, contenido para adultos, galeria con desnudos explicitos, desnudos explicitos, fotos desnudas, modelos eroticas, only models, only-models, creadores de contenido, perfiles verificados adultos, packs de fotos, videos exclusivos, cafes con piernas, adult content creators',
+  author: 'Only Models',
+  siteName: 'Only Models',
 };
 
 function updateOrCreateMeta(attrName: 'name' | 'property', attrValue: string, content: string) {
@@ -39,13 +41,14 @@ function updateOrCreateLink(rel: string, href: string) {
 }
 
 export function updatePageMeta(config: MetaTagsConfig) {
+  const siteName = config.siteName || (typeof document !== 'undefined' && document.title ? document.title.split(' - ').pop()?.trim() : '') || DEFAULT_META.siteName!;
   const title = config.title || DEFAULT_META.title!;
   const description = config.description || DEFAULT_META.description!;
   const image = config.image || DEFAULT_META.image!;
   const url = config.url || (typeof window !== 'undefined' ? window.location.href : DEFAULT_META.url!);
   const type = config.type || 'website';
   const keywords = config.keywords || DEFAULT_META.keywords!;
-  const author = config.author || DEFAULT_META.author!;
+  const author = config.author || siteName || DEFAULT_META.author!;
 
   if (typeof document === 'undefined') return;
 
@@ -63,7 +66,7 @@ export function updatePageMeta(config: MetaTagsConfig) {
   updateOrCreateMeta('property', 'og:image', image);
   updateOrCreateMeta('property', 'og:url', url);
   updateOrCreateMeta('property', 'og:type', type);
-  updateOrCreateMeta('property', 'og:site_name', 'Link Persons');
+  updateOrCreateMeta('property', 'og:site_name', siteName);
   updateOrCreateMeta('property', 'og:locale', 'es');
 
   // 4. Twitter Cards

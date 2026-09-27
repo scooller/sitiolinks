@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Generada imagen de alta resolución (1024x1024 px) en formato JPEG con fondo blanco sólido y márgenes uniformes (~56px) para compartir en redes y mensajería sin pérdida de escaneabilidad.
 - **Previsualización de Imagen al Compartir Enlace de Perfil (`UserProfile.tsx`, `OpenGraphController.php`)**:
   - Configurada jerarquía de imagen de previsualización (Open Graph / Twitter Cards / crawler preview): avatar de usuario como prioridad principal, logo del sitio (`SiteSettings`) como fallback inmediato, avatar por defecto o logo institucional (`logo500.png`).
+- **Normalización de Marca y Títulos Dinámicos SEO (`seo.ts`, `UserProfile.tsx`, `OpenGraphController.php`, `index.html`, `manifest.json`)**:
+  - Eliminado el nombre interno del repositorio ("Link Persons") de títulos de página, metadatos Open Graph, Twitter Cards y etiquetas JSON-LD.
+  - La plataforma ahora utiliza siempre de forma dinámica el título real del sitio configurado en el panel administrativo (`SiteSettings::site_title`) con fallback al dominio real instalado (`Only Models`).
 
 ## [0.26.6] - 2026-09-20
 
