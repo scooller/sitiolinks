@@ -15,6 +15,8 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import type { User, Tag } from '../types';
 import { useTranslation } from 'react-i18next';
+import LinkEditorModal, { type ProfileLinkItem } from '../components/LinkEditorModal';
+import { SOCIAL_PLATFORMS, detectSocialPlatform, getPlatformById } from '../lib/socialLinks';
 
 registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType, FilePondPluginFileValidateSize);
 
@@ -82,6 +84,9 @@ export default function EditProfile(): ReactElement {
   });
 
   const [links, setLinks] = useState<ProfileLink[]>([]);
+  const [showLinkModal, setShowLinkModal] = useState<boolean>(false);
+  const [editingLinkIndex, setEditingLinkIndex] = useState<number | null>(null);
+  const [selectedLinkForEdit, setSelectedLinkForEdit] = useState<ProfileLinkItem | null>(null);
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [avatarFiles, setAvatarFiles] = useState<FilePondFile[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState<boolean>(false);
@@ -278,14 +283,49 @@ export default function EditProfile(): ReactElement {
     }));
   };
 
-  const handleLinkChange = (index: number, field: keyof ProfileLink, value: string | boolean) => {
-    const newLinks = [...links];
-    newLinks[index] = { ...newLinks[index], [field]: value };
-    setLinks(newLinks);
+  const openAddLink = (presetPlatformId?: string) => {
+    setEditingLinkIndex(null);
+    if (presetPlatformId) {
+      const plat = getPlatformById(presetPlatformId);
+      setSelectedLinkForEdit({
+        name: plat.name,
+        url: '',
+        icon: plat.icon,
+        is_adult: !!plat.isAdultDefault,
+      });
+    } else {
+      setSelectedLinkForEdit(null);
+    }
+    setShowLinkModal(true);
   };
 
-  const addLink = () => {
-    setLinks([...links, { name: '', url: '', icon: 'fas-link', is_adult: false }]);
+  const openEditLink = (index: number) => {
+    setEditingLinkIndex(index);
+    setSelectedLinkForEdit(links[index]);
+    setShowLinkModal(true);
+  };
+
+  const handleSaveLink = (linkItem: ProfileLinkItem) => {
+    if (editingLinkIndex !== null && editingLinkIndex >= 0 && editingLinkIndex < links.length) {
+      const updated = [...links];
+      updated[editingLinkIndex] = {
+        ...updated[editingLinkIndex],
+        ...linkItem,
+      };
+      setLinks(updated);
+    } else {
+      setLinks([...links, { ...linkItem, order: links.length }]);
+    }
+  };
+
+  const moveLink = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= links.length) return;
+    const newLinks = [...links];
+    const temp = newLinks[index];
+    newLinks[index] = newLinks[targetIndex];
+    newLinks[targetIndex] = temp;
+    setLinks(newLinks.map((item, idx) => ({ ...item, order: idx })));
   };
 
   const removeLink = (index: number) => {
@@ -1043,107 +1083,136 @@ export default function EditProfile(): ReactElement {
                     <i className="fas fa-link"></i>
                   </div>
                   <div className="flex-grow-1">
-                    <h4>{t('profile.custom_links')}</h4>
-                    <p>{t('profile.link_name_placeholder')}</p>
+                    <h4>{t('profile.custom_links', 'Enlaces Directos')}</h4>
+                    <p>{t('profile.links_intro_help', 'Agrega tus redes sociales, mensajería y páginas para tu perfil público.')}</p>
                   </div>
                   <button
                     type="button"
-                    className="apple-btn-glass"
-                    onClick={addLink}
-                    style={{ minHeight: '40px', padding: '0.4rem 0.9rem' }}
+                    className="apple-btn-primary"
+                    onClick={() => openAddLink()}
+                    style={{ minHeight: '40px', padding: '0.4rem 1.1rem' }}
                   >
-                    <i className="fas fa-plus"></i>
-                    <span>{t('profile.add_link')}</span>
+                    <i className="fas fa-plus me-1"></i>
+                    <span>{t('profile.add_link', 'Agregar Enlace')}</span>
                   </button>
+                </div>
+
+                {/* Acceso rápido a plataformas populares */}
+                <div className="mb-3">
+                  <div className="apple-label mb-2" style={{ fontSize: '0.78rem' }}>
+                    {t('profile.quick_add_label', 'Añadir rápidamente:')}
+                  </div>
+                  <div className="apple-quick-add-group">
+                    {SOCIAL_PLATFORMS.filter((p) => p.id !== 'custom').slice(0, 8).map((plat) => {
+                      const iconClass = plat.icon.replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-');
+                      return (
+                        <button
+                          key={plat.id}
+                          type="button"
+                          className="apple-quick-add-pill"
+                          onClick={() => openAddLink(plat.id)}
+                        >
+                          <i className={iconClass} style={{ color: plat.color }}></i>
+                          <span>{plat.name}</span>
+                        </button>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      className="apple-quick-add-pill"
+                      onClick={() => openAddLink('custom')}
+                    >
+                      <i className="fas fa-globe text-primary"></i>
+                      <span>{t('common.other', 'Otro...')}</span>
+                    </button>
+                  </div>
                 </div>
 
                 {links.length === 0 ? (
                   <div className="text-center py-5 text-muted">
                     <i className="fas fa-link-slash fa-2x mb-2 opacity-50"></i>
-                    <p className="mb-3">{t('profile.custom_links')}</p>
-                    <button type="button" className="apple-btn-primary" onClick={addLink}>
+                    <p className="mb-3">{t('profile.no_links_yet', 'Aún no has agregado enlaces a tu perfil.')}</p>
+                    <button type="button" className="apple-btn-primary" onClick={() => openAddLink()}>
                       <i className="fas fa-plus me-1"></i>
-                      {t('profile.add_link')}
+                      {t('profile.add_first_link', 'Agregar mi primer enlace')}
                     </button>
                   </div>
                 ) : (
-                  links.map((link, index) => (
-                    <div key={index} className="apple-link-card">
-                      <Row className="g-2 align-items-center">
-                        <Col md={4}>
-                          <label className="apple-label">{t('common.name')}</label>
-                          <input
-                            type="text"
-                            className="apple-input"
-                            value={link.name}
-                            onChange={(e) => handleLinkChange(index, 'name', e.target.value)}
-                            placeholder={t('profile.link_name_placeholder')}
-                          />
-                        </Col>
+                  <div className="apple-links-list">
+                    {links.map((link, index) => {
+                      const detected = detectSocialPlatform(link.url || '');
+                      const platform = getPlatformById(detected.platform.id);
+                      const iconClass = (link.icon || platform.icon).replace(/^(fas|fab|far|fal|fa)-/, '$1 fa-');
+                      const brandColor = platform.color || 'var(--color-primary)';
 
-                        <Col md={5}>
-                          <label className="apple-label">{t('common.url')}</label>
-                          <input
-                            type="url"
-                            className="apple-input"
-                            value={link.url}
-                            onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
-                            placeholder={t('profile.link_url_placeholder')}
-                          />
-                        </Col>
-
-                        <Col md={2}>
-                          <label className="apple-label">{t('common.icon')}</label>
-                          <select
-                            className="apple-select"
-                            value={link.icon}
-                            onChange={(e) => handleLinkChange(index, 'icon', e.target.value)}
+                      return (
+                        <div key={index} className="apple-link-row-item">
+                          {/* Ícono de Plataforma */}
+                          <div
+                            className="apple-link-row-icon shadow-sm"
+                            style={{ background: brandColor }}
                           >
-                            <option value="fas-link">Link</option>
-                            <option value="fas-globe">Web</option>
-                            <option value="fab-facebook">Facebook</option>
-                            <option value="fab-instagram">Instagram</option>
-                            <option value="fab-twitter">Twitter / X</option>
-                            <option value="fab-youtube">YouTube</option>
-                            <option value="fab-tiktok">TikTok</option>
-                          </select>
-                        </Col>
-
-                        <Col md={1} className="d-flex justify-content-end align-items-end pt-3 pt-md-0">
-                          <button
-                            type="button"
-                            className="apple-btn-danger-icon"
-                            onClick={() => removeLink(index)}
-                            title={t('common.delete')}
-                            aria-label={t('common.delete')}
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        </Col>
-
-                        <Col md={12} className="mt-2">
-                          <div className="form-check d-flex align-items-center gap-2">
-                            <input
-                              className="form-check-input m-0"
-                              type="checkbox"
-                              id={`adult_link_${index}`}
-                              checked={!!link.is_adult}
-                              onChange={(e) => handleLinkChange(index, 'is_adult', e.target.checked)}
-                              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                            />
-                            <label
-                              className="form-check-label small text-muted"
-                              htmlFor={`adult_link_${index}`}
-                              style={{ cursor: 'pointer' }}
-                            >
-                              <i className="fas fa-triangle-exclamation text-warning me-1"></i>
-                              {t('profile.link_is_adult')}
-                            </label>
+                            <i className={iconClass}></i>
                           </div>
-                        </Col>
-                      </Row>
-                    </div>
-                  ))
+
+                          {/* Contenido / Título & URL */}
+                          <div className="apple-link-row-content">
+                            <div className="apple-link-row-title">
+                              <span>{link.name || platform.name}</span>
+                              {link.is_adult && (
+                                <span className="profile-link-badge-18">+18</span>
+                              )}
+                            </div>
+                            <div className="apple-link-row-url" title={link.url}>
+                              {link.url}
+                            </div>
+                          </div>
+
+                          {/* Acciones (Subir, Bajar, Editar, Eliminar) */}
+                          <div className="apple-link-row-actions">
+                            <button
+                              type="button"
+                              className="apple-action-btn-icon"
+                              onClick={() => moveLink(index, 'up')}
+                              disabled={index === 0}
+                              title={t('common.move_up', 'Subir')}
+                              aria-label={t('common.move_up', 'Subir')}
+                            >
+                              <i className="fas fa-chevron-up"></i>
+                            </button>
+                            <button
+                              type="button"
+                              className="apple-action-btn-icon"
+                              onClick={() => moveLink(index, 'down')}
+                              disabled={index === links.length - 1}
+                              title={t('common.move_down', 'Bajar')}
+                              aria-label={t('common.move_down', 'Bajar')}
+                            >
+                              <i className="fas fa-chevron-down"></i>
+                            </button>
+                            <button
+                              type="button"
+                              className="apple-action-btn-icon"
+                              onClick={() => openEditLink(index)}
+                              title={t('common.edit', 'Editar')}
+                              aria-label={t('common.edit', 'Editar')}
+                            >
+                              <i className="fas fa-pen"></i>
+                            </button>
+                            <button
+                              type="button"
+                              className="apple-action-btn-icon apple-action-btn-danger"
+                              onClick={() => removeLink(index)}
+                              title={t('common.delete', 'Eliminar')}
+                              aria-label={t('common.delete', 'Eliminar')}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -1478,6 +1547,15 @@ export default function EditProfile(): ReactElement {
           </button>
         </Modal.Footer>
       </Modal>
+
+      {/* Modal Editor de Enlaces Apple HIG */}
+      <LinkEditorModal
+        show={showLinkModal}
+        onHide={() => setShowLinkModal(false)}
+        onSave={handleSaveLink}
+        initialLink={selectedLinkForEdit}
+      />
     </div>
   );
 }
+

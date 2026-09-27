@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.9] - 2026-09-27
+
+### Added
+- **Gestión Inteligente de Enlaces Sociales y de Perfil Apple HIG (`LinkEditorModal.tsx`, `socialLinks.ts`, `EditProfile.tsx`, `edit-profile.css`)**:
+  - Catálogo de plataformas enriquecido con soporte específico para WhatsApp, Telegram, Instagram, X (Twitter), TikTok, Discord, Snapchat, Signal, YouTube, Facebook, OnlyFans, Twitch, Spotify y Enlaces Personalizados.
+  - **Entrada simplificada de identificadores**: Prefijos visuales fijos (`wa.me/`, `t.me/`, `@`, etc.) donde el creador solo debe escribir su nombre de usuario o número telefónico.
+  - **Detección y extracción automática de URLs pegadas**: Si el usuario pega un enlace completo externo en el campo, el modal detecta la plataforma, conmuta al preset correspondiente y extrae el identificador automáticamente.
+  - **Rejilla táctil de plataformas (Touch Targets ≥ 44pt)** con paletas de color de marca y estados activos con feedback visual.
+  - **Píldoras de acceso rápido** en la pestaña de enlaces para crear links de las redes más populares con 1 solo toque.
+  - **Listado moderno de enlaces en tarjeta Apple HIG** con ordenamiento interactivo (subir / bajar posición), edición modal in-situ y borrado directo.
+  - Switch nativo de contenido para adultos (+18) con marcado inteligente por defecto en redes adultas.
+  - Previsualización en vivo dentro del modal idéntica a la tarjeta final del perfil público.
+
 ## [0.26.8] - 2026-09-27
 
 ### Added
