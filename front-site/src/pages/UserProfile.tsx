@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Container, Row, Col, Card, Nav, Badge, Button, Spinner, Alert, OverlayTrigger, Tooltip, ListGroup, Modal, Form, InputGroup, Pagination } from 'react-bootstrap';
+import { Container, Row, Col, Card, Nav, Badge, Button, Spinner, Alert, OverlayTrigger, Tooltip, ListGroup, Modal, Form, InputGroup, Pagination, Dropdown, ButtonGroup } from 'react-bootstrap';
 import { motion } from 'motion/react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +39,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
   const [siteLogo, setSiteLogo] = useState<string>('');
   const [siteTitle, setSiteTitle] = useState<string>('');
   const [qrLogoSize, setQrLogoSize] = useState<number>(48);
+  const [downloadingQr, setDownloadingQr] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [following, setFollowing] = useState<boolean>(false);
@@ -221,126 +222,382 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
     return () => { cancelled = true; };
   }, [siteLogo]);
 
-  const handleDownloadQr = async () => {
-    if (!user) return;
-    const profileUrl = `${window.location.origin}/u/${user.username}`;
-    const TOTAL_SIZE = 1024;
-    const MARGIN = 56;
-    const QR_INNER_SIZE = TOTAL_SIZE - MARGIN * 2;
-    const frac = qrLogoSize / QR_DISPLAY_SIZE;
-    const logoDlSize = Math.max(32, Math.round(QR_INNER_SIZE * frac));
-    const logoSrc = logoDataUrl || siteLogo;
-
-    let loadedLogoImg: HTMLImageElement | null = null;
-    if (logoSrc) {
-      try {
-        const img = new Image();
-        if (!logoSrc.startsWith('data:')) img.crossOrigin = 'anonymous';
-        img.src = logoSrc;
-        await new Promise<void>((resolve, reject) => {
-          if (img.complete) return resolve();
-          img.onload = () => resolve();
-          img.onerror = () => reject();
-        });
-        loadedLogoImg = img;
-      } catch {
-        // Continue if logo fails to preload
-      }
+  const drawRoundedRect = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number,
+    fill?: string,
+    stroke?: string,
+    strokeW?: number
+  ) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    if (fill) {
+      ctx.fillStyle = fill;
+      ctx.fill();
     }
+    if (stroke && strokeW) {
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = strokeW;
+      ctx.stroke();
+    }
+    ctx.restore();
+  };
 
-    const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.left = '-9999px';
-    container.style.top = '-9999px';
-    document.body.appendChild(container);
-    const root = createRoot(container);
+  const drawCircularAvatar = (
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    cx: number,
+    cy: number,
+    r: number,
+    borderCol: string = '#0d6efd',
+    borderW: number = 4
+  ) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
+    ctx.restore();
 
-    root.render(
-      <QRCodeCanvas
-        value={profileUrl}
-        size={QR_INNER_SIZE}
-        level="H"
-        includeMargin={false}
-        imageSettings={
-          logoSrc
-            ? {
-                src: logoSrc,
-                width: logoDlSize,
-                height: logoDlSize,
-                excavate: true,
-              }
-            : undefined
+    if (borderW > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2, true);
+      ctx.strokeStyle = borderCol;
+      ctx.lineWidth = borderW;
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
+
+  const handleDownloadQr = async (format: 'classic' | 'story' | 'feed' = 'story') => {
+    if (!user) return;
+    setDownloadingQr(true);
+
+    try {
+      const profileUrl = `${window.location.origin}/u/${user.username}`;
+      const resolvedSiteName = siteTitle || (typeof document !== 'undefined' && document.title && !document.title.toLowerCase().includes('link persons') ? document.title.split(' - ').pop()?.trim() : '') || 'Only Models';
+      const displayName = user.name ? `${user.name}` : `@${user.username}`;
+      const location = [user.city, user.country].filter(Boolean).join(', ');
+      const priceStr = user.price_from ? `Tarifa aprox: $${Number(user.price_from).toLocaleString()}${user.price_currency ? ' ' + user.price_currency : ''}/hr` : '';
+
+      let W = 1024;
+      let H = 1024;
+      let qrInnerSize = 600;
+
+      if (format === 'story') {
+        W = 1080;
+        H = 1920;
+        qrInnerSize = 600;
+      } else if (format === 'feed') {
+        W = 1080;
+        H = 1080;
+        qrInnerSize = 520;
+      } else {
+        W = 1024;
+        H = 1024;
+        qrInnerSize = 912;
+      }
+
+      const frac = qrLogoSize / QR_DISPLAY_SIZE;
+      const logoDlSize = Math.max(36, Math.round(qrInnerSize * frac));
+      const logoSrc = logoDataUrl || siteLogo;
+
+      // 1. Preload Logo
+      let loadedLogoImg: HTMLImageElement | null = null;
+      if (logoSrc) {
+        try {
+          const img = new Image();
+          if (!logoSrc.startsWith('data:')) img.crossOrigin = 'anonymous';
+          img.src = logoSrc;
+          await new Promise<void>((resolve, reject) => {
+            if (img.complete) return resolve();
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+          });
+          loadedLogoImg = img;
+        } catch {}
+      }
+
+      // 2. Preload Avatar
+      let loadedAvatarImg: HTMLImageElement | null = null;
+      let avatarSrc = user.avatar_url || (user as any).avatar_webp || (user as any).avatar_thumb || defaultAvatar;
+      if (avatarSrc) {
+        if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('data:')) {
+          const backendBase = String((import.meta as any).env?.VITE_BACKEND_URL || BACKEND_URL).replace(/\/$/, '');
+          avatarSrc = `${backendBase}${avatarSrc.startsWith('/') ? '' : '/'}${avatarSrc}`;
         }
-      />
-    );
+        try {
+          const img = new Image();
+          if (!avatarSrc.startsWith('data:')) img.crossOrigin = 'anonymous';
+          img.src = avatarSrc;
+          await new Promise<void>((resolve, reject) => {
+            if (img.complete) return resolve();
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+          });
+          loadedAvatarImg = img;
+        } catch {}
+      }
 
-    let downloaded = false;
-    for (let i = 0; i < 8 && !downloaded; i++) {
-      await new Promise((r) => setTimeout(r, 60));
-      try {
-        const offCanvas = container.querySelector('canvas') as HTMLCanvasElement | null;
-        if (!offCanvas) continue;
+      // 3. Render offscreen QR Code
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '-9999px';
+      document.body.appendChild(container);
+      const root = createRoot(container);
 
-        const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = TOTAL_SIZE;
-        exportCanvas.height = TOTAL_SIZE;
-        const ctx = exportCanvas.getContext('2d');
-        if (!ctx) continue;
+      root.render(
+        <QRCodeCanvas
+          value={profileUrl}
+          size={qrInnerSize}
+          level="H"
+          includeMargin={false}
+          imageSettings={
+            logoSrc
+              ? {
+                  src: logoSrc,
+                  width: logoDlSize,
+                  height: logoDlSize,
+                  excavate: true,
+                }
+              : undefined
+          }
+        />
+      );
 
-        // Solid white background for clean JPG export with margins
+      let offCanvas: HTMLCanvasElement | null = null;
+      for (let i = 0; i < 8 && !offCanvas; i++) {
+        await new Promise((r) => setTimeout(r, 60));
+        offCanvas = container.querySelector('canvas') as HTMLCanvasElement | null;
+      }
+      if (!offCanvas) {
+        offCanvas = qrCanvasRef.current;
+      }
+
+      // 4. Composite final Canvas
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = W;
+      exportCanvas.height = H;
+      const ctx = exportCanvas.getContext('2d');
+      if (!ctx) throw new Error('No canvas context');
+
+      if (format === 'classic') {
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, TOTAL_SIZE, TOTAL_SIZE);
-
-        // Center QR code with generous margins
-        ctx.drawImage(offCanvas, MARGIN, MARGIN, QR_INNER_SIZE, QR_INNER_SIZE);
-
+        ctx.fillRect(0, 0, W, H);
+        const margin = 56;
+        if (offCanvas) {
+          ctx.drawImage(offCanvas, margin, margin, qrInnerSize, qrInnerSize);
+        }
         if (loadedLogoImg) {
-          const lx = Math.round((TOTAL_SIZE - logoDlSize) / 2);
-          const ly = Math.round((TOTAL_SIZE - logoDlSize) / 2);
+          const lx = Math.round((W - logoDlSize) / 2);
+          const ly = Math.round((H - logoDlSize) / 2);
+          ctx.drawImage(loadedLogoImg, lx, ly, logoDlSize, logoDlSize);
+        }
+      } else if (format === 'story') {
+        // Story 9:16 (1080 x 1920)
+        // Background Avatar Blur
+        if (loadedAvatarImg) {
+          ctx.save();
+          if ('filter' in ctx) {
+            ctx.filter = 'blur(45px) brightness(0.65)';
+            ctx.drawImage(loadedAvatarImg, -50, -50, W + 100, H + 100);
+            ctx.filter = 'none';
+          } else {
+            ctx.drawImage(loadedAvatarImg, 0, 0, W, H);
+          }
+          ctx.restore();
+        } else {
+          const grad = ctx.createLinearGradient(0, 0, 0, H);
+          grad.addColorStop(0, '#1e1b4b');
+          grad.addColorStop(1, '#0f172a');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, W, H);
+        }
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(0, 0, W, H);
+
+        // Top Branding Pill
+        const pillW = 420;
+        const pillH = 50;
+        const pillX = (W - pillW) / 2;
+        const pillY = 120;
+        drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 25, 'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.3)', 1.5);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 22px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${resolvedSiteName.toUpperCase()} · (+18)`, W / 2, pillY + pillH / 2);
+
+        // Central White Card
+        const cardW = 900;
+        const cardH = 1420;
+        const cardX = (W - cardW) / 2;
+        const cardY = 220;
+        drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 48, '#FFFFFF');
+
+        // Card Avatar
+        const avatarR = 80;
+        const avatarCY = cardY + 120;
+        if (loadedAvatarImg) {
+          drawCircularAvatar(ctx, loadedAvatarImg, W / 2, avatarCY, avatarR, '#0d6efd', 6);
+        }
+
+        // Display Name & @username
+        ctx.fillStyle = '#111827';
+        ctx.font = 'bold 44px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(displayName, W / 2, avatarCY + 115);
+
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '600 30px system-ui, -apple-system, sans-serif';
+        ctx.fillText(`@${user.username}`, W / 2, avatarCY + 160);
+
+        if (location || priceStr) {
+          const detailTxt = [location, priceStr].filter(Boolean).join(' · ');
+          ctx.fillStyle = '#0d6efd';
+          ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+          ctx.fillText(detailTxt, W / 2, avatarCY + 205);
+        }
+
+        // QR Code
+        const qrX = (W - qrInnerSize) / 2;
+        const qrY = cardY + 390;
+        if (offCanvas) {
+          ctx.drawImage(offCanvas, qrX, qrY, qrInnerSize, qrInnerSize);
+        }
+        if (loadedLogoImg) {
+          const lx = Math.round((W - logoDlSize) / 2);
+          const ly = Math.round(qrY + (qrInnerSize - logoDlSize) / 2);
           ctx.drawImage(loadedLogoImg, lx, ly, logoDlSize, logoDlSize);
         }
 
-        const a = document.createElement('a');
-        a.href = exportCanvas.toDataURL('image/jpeg', 0.95);
-        a.download = `qr-${user.username}.jpg`;
-        a.click();
-        downloaded = true;
-      } catch {
-        downloaded = false;
-      }
-    }
+        // Footer Text
+        ctx.fillStyle = '#1f2937';
+        ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
+        ctx.fillText('Escanea para ver redes, fotos y tarifas', W / 2, cardY + 1120);
 
-    if (!downloaded) {
-      const visible = qrCanvasRef.current;
-      if (visible) {
-        try {
-          const exportCanvas = document.createElement('canvas');
-          exportCanvas.width = TOTAL_SIZE;
-          exportCanvas.height = TOTAL_SIZE;
-          const ctx = exportCanvas.getContext('2d');
-          if (ctx) {
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, TOTAL_SIZE, TOTAL_SIZE);
-            ctx.drawImage(visible, MARGIN, MARGIN, QR_INNER_SIZE, QR_INNER_SIZE);
-            if (loadedLogoImg) {
-              const lx = Math.round((TOTAL_SIZE - logoDlSize) / 2);
-              const ly = Math.round((TOTAL_SIZE - logoDlSize) / 2);
-              ctx.drawImage(loadedLogoImg, lx, ly, logoDlSize, logoDlSize);
-            }
-            const a = document.createElement('a');
-            a.href = exportCanvas.toDataURL('image/jpeg', 0.95);
-            a.download = `qr-${user.username}.jpg`;
-            a.click();
+        ctx.fillStyle = '#0d6efd';
+        ctx.font = '600 26px system-ui, -apple-system, sans-serif';
+        ctx.fillText(profileUrl.replace(/^https?:\/\//, ''), W / 2, cardY + 1170);
+
+        const badgePillW = 380;
+        const badgePillH = 46;
+        const badgePillX = (W - badgePillW) / 2;
+        const badgePillY = cardY + 1225;
+        drawRoundedRect(ctx, badgePillX, badgePillY, badgePillW, badgePillH, 23, '#f3f4f6');
+        ctx.fillStyle = '#4b5563';
+        ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
+        ctx.fillText('🔞 MAYORES DE 18 AÑOS', W / 2, badgePillY + badgePillH / 2);
+
+        // Subtitle
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.font = '500 24px system-ui, -apple-system, sans-serif';
+        ctx.fillText(`Encuéntrame en ${resolvedSiteName}`, W / 2, 1720);
+
+      } else if (format === 'feed') {
+        // Feed 1:1 (1080 x 1080)
+        if (loadedAvatarImg) {
+          ctx.save();
+          if ('filter' in ctx) {
+            ctx.filter = 'blur(40px) brightness(0.65)';
+            ctx.drawImage(loadedAvatarImg, -40, -40, W + 80, H + 80);
+            ctx.filter = 'none';
+          } else {
+            ctx.drawImage(loadedAvatarImg, 0, 0, W, H);
           }
-        } catch { }
-      }
-    }
+          ctx.restore();
+        } else {
+          ctx.fillStyle = '#1e1b4b';
+          ctx.fillRect(0, 0, W, H);
+        }
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(0, 0, W, H);
 
-    try {
-      root.unmount();
-    } catch { }
-    if (container.parentNode) {
-      document.body.removeChild(container);
+        // Central White Card
+        const cardW = 940;
+        const cardH = 940;
+        const cardX = (W - cardW) / 2;
+        const cardY = (H - cardH) / 2;
+        drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 44, '#FFFFFF');
+
+        // Header Avatar + Name
+        const avatarR = 55;
+        const avatarCX = cardX + 90;
+        const avatarCY = cardY + 90;
+        if (loadedAvatarImg) {
+          drawCircularAvatar(ctx, loadedAvatarImg, avatarCX, avatarCY, avatarR, '#0d6efd', 4);
+        }
+
+        ctx.fillStyle = '#111827';
+        ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(displayName, cardX + 165, cardY + 80);
+
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '600 26px system-ui, -apple-system, sans-serif';
+        ctx.fillText(`@${user.username}${location ? ' · ' + location : ''}`, cardX + 165, cardY + 118);
+
+        // QR Code
+        const qrX = (W - qrInnerSize) / 2;
+        const qrY = cardY + 160;
+        if (offCanvas) {
+          ctx.drawImage(offCanvas, qrX, qrY, qrInnerSize, qrInnerSize);
+        }
+        if (loadedLogoImg) {
+          const lx = Math.round((W - logoDlSize) / 2);
+          const ly = Math.round(qrY + (qrInnerSize - logoDlSize) / 2);
+          ctx.drawImage(loadedLogoImg, lx, ly, logoDlSize, logoDlSize);
+        }
+
+        // Footer
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#1f2937';
+        ctx.font = 'bold 26px system-ui, -apple-system, sans-serif';
+        ctx.fillText('Escanea para ver redes oficiales y fotos (+18)', W / 2, cardY + 775);
+
+        ctx.fillStyle = '#0d6efd';
+        ctx.font = '600 24px system-ui, -apple-system, sans-serif';
+        ctx.fillText(profileUrl.replace(/^https?:\/\//, ''), W / 2, cardY + 820);
+
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '500 20px system-ui, -apple-system, sans-serif';
+        ctx.fillText(`${resolvedSiteName} · Perfil Verificado`, W / 2, cardY + 865);
+      }
+
+      const a = document.createElement('a');
+      a.href = exportCanvas.toDataURL('image/jpeg', 0.95);
+      a.download = `qr-${user.username}-${format}.jpg`;
+      a.click();
+
+      try {
+        root.unmount();
+      } catch {}
+      if (container.parentNode) {
+        document.body.removeChild(container);
+      }
+    } catch (e) {
+      console.error('Error generando tarjeta QR:', e);
+    } finally {
+      setDownloadingQr(false);
     }
   };
 
@@ -1419,17 +1676,49 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                             imageSettings={(logoDataUrl || siteLogo) ? { src: logoDataUrl || siteLogo, width: qrLogoSize, height: qrLogoSize, excavate: true } : undefined}
                           />
                         </div>
-                        <div className="mb-3">
-                          <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-qr">{t('profile.download_qr_tooltip')}</Tooltip>}>
+                        <div className="mb-3 d-flex justify-content-center">
+                          <Dropdown as={ButtonGroup}>
                             <Button
                               variant="secondary"
-                              className="profile-btn-solid profile-btn-secondary"
-                              onClick={handleDownloadQr}
+                              className="profile-btn-solid profile-btn-secondary d-inline-flex align-items-center"
+                              onClick={() => handleDownloadQr('story')}
+                              disabled={downloadingQr}
                             >
-                              <i className="fas fa-download me-2" aria-hidden="true"></i>
-                              {t('profile.download_qr')}
+                              {downloadingQr ? (
+                                <>
+                                  <Spinner animation="border" size="sm" className="me-2" />
+                                  {t('common.generating', 'Generando...')}
+                                </>
+                              ) : (
+                                <>
+                                  <i className="fas fa-share-nodes me-2" aria-hidden="true"></i>
+                                  {t('profile.download_qr_story', 'Tarjeta Historia (9:16)')}
+                                </>
+                              )}
                             </Button>
-                          </OverlayTrigger>
+                            <Dropdown.Toggle
+                              split
+                              variant="secondary"
+                              className="profile-btn-solid profile-btn-secondary"
+                              id="dropdown-qr-download"
+                              disabled={downloadingQr}
+                            />
+                            <Dropdown.Menu className="shadow-lg border-0 rounded-3 py-2">
+                              <Dropdown.Item onClick={() => handleDownloadQr('story')} className="py-2">
+                                <i className="fas fa-mobile-screen me-2 text-primary"></i>
+                                {t('profile.qr_story_opt', 'Tarjeta Historia / Reels (9:16)')}
+                              </Dropdown.Item>
+                              <Dropdown.Item onClick={() => handleDownloadQr('feed')} className="py-2">
+                                <i className="fas fa-square me-2 text-success"></i>
+                                {t('profile.qr_feed_opt', 'Tarjeta Feed / Post (1:1)')}
+                              </Dropdown.Item>
+                              <Dropdown.Divider />
+                              <Dropdown.Item onClick={() => handleDownloadQr('classic')} className="py-2 text-muted">
+                                <i className="fas fa-qrcode me-2"></i>
+                                {t('profile.qr_classic_opt', 'Solo Código QR (1024x1024)')}
+                              </Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
                         </div>
                         <p className="small mb-0">
                           <a href={profileUrl} className="profile-qr-link" target="_blank" rel="noreferrer">

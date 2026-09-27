@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.8] - 2026-09-27
+
+### Added
+- **Tarjetas QR Listas para Compartir en Redes Sociales (`UserProfile.tsx`)**:
+  - Incorporado generador multi-formato en el perfil público:
+    - **Tarjeta Historia / Reels (9:16 - 1080x1920 px)**: Fondo de avatar con efecto blur ambiental y oscurecido, tarjeta central Liquid Glass con avatar circular, badge verificado, nombre `@username`, QR de alta definición con logo del sitio, URL del perfil y advertencia de mayoría de edad (`+18 Solo Adultos`).
+    - **Tarjeta Cuadrada / Feed (1:1 - 1080x1080 px)**: Formato optimizado para posts y chats con fondo blur y tarjeta central estilizada.
+    - **Código QR Clásico (1:1 - 1024x1024 px)**: Código QR limpio de alta resolución con logo del sitio y márgenes uniformes.
+  - Selector desplegable (`Dropdown.ButtonGroup`) con estado de generación y feedback visual.
+
 ## [0.26.7] - 2026-09-27
 
 ### Fixed
