@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.11] - 2026-09-27
+
+### Added
+- **Asistente de Perfil Completo para Creadores Apple HIG (`ProfileCompletenessCard.tsx`, `profileCompleteness.ts`, `UserProfile.tsx`, `EditProfile.tsx`)**:
+  - Motor de cálculo de completitud de perfil (0 a 100%) basado en: foto de avatar, biografía, redes sociales / WhatsApp, galerías publicadas, etiquetas y tarifa/ubicación.
+  - **Tarjeta interactiva en Perfil Público (`UserProfile.tsx`)**: Visible exclusivamente para el creador autenticado al visitar su propio perfil, con barra de progreso fluida y accesos directos a las secciones pendientes.
+  - **Asistente interactivo en Editar Perfil (`EditProfile.tsx`)**: Barra de progreso y chips de tareas pendientes con conmutación instantánea de pestañas al hacer clic.
+  - Ocultamiento automático al alcanzar el 100% y opción de colapsar/expandir en cualquier momento.
+
 ## [0.26.10] - 2026-09-27
 
 ### Added

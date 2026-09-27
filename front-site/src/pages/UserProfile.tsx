@@ -16,6 +16,8 @@ import VerifiedBadge from '../components/VerifiedBadge';
 import LikeButton from '../components/LikeButton';
 import { BACKEND_URL } from '../config/constants';
 import { updatePageMeta, resetPageMeta } from '../lib/seo';
+import ProfileCompletenessCard from '../components/ProfileCompletenessCard';
+import { calculateProfileCompleteness } from '../lib/profileCompleteness';
 
 interface FollowNotice {
   variant: 'success' | 'danger' | 'info';
@@ -935,6 +937,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
     : [];
   const isAdminOrModeratorViewer = viewerRoles.includes('admin') || viewerRoles.includes('super_admin') || viewerRoles.includes('moderator');
   const isOwnProfile = Boolean(currentUser && user && (currentUser as any).id === (user as any).id);
+  const completeness = isOwnProfile && isProfileCreator ? calculateProfileCompleteness(user, defaultAvatar) : null;
 
   const parseHex = (hex?: string | null): string | null => {
     if (!hex) return null;
@@ -1209,6 +1212,10 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
         initial={containerVariants.hidden}
         animate={containerVariants.visible}
       >
+        {completeness && (
+          <ProfileCompletenessCard completeness={completeness} />
+        )}
+
         <Row>
           <Col
             md={4}

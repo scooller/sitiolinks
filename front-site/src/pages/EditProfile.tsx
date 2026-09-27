@@ -18,6 +18,8 @@ import type { User, Tag } from '../types';
 import { useTranslation } from 'react-i18next';
 import LinkEditorModal, { type ProfileLinkItem } from '../components/LinkEditorModal';
 import { SOCIAL_PLATFORMS, detectSocialPlatform, getPlatformById } from '../lib/socialLinks';
+import ProfileCompletenessCard from '../components/ProfileCompletenessCard';
+import { calculateProfileCompleteness } from '../lib/profileCompleteness';
 
 registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType, FilePondPluginFileValidateSize);
 
@@ -578,6 +580,19 @@ export default function EditProfile(): ReactElement {
     (currentUser as any).roles?.includes('admin') ||
     (currentUser as any).roles?.includes('super_admin');
 
+  // Asistente de completitud de perfil para creadores
+  const completeness = useMemo(() => {
+    if (!isCreator || !currentUser) return null;
+    const mockUser: any = {
+      ...currentUser,
+      ...formData,
+      avatar_url: currentAvatarUrl,
+      links,
+      tags: selectedTagIds.map((id) => ({ id })),
+    };
+    return calculateProfileCompleteness(mockUser);
+  }, [isCreator, currentUser, formData, currentAvatarUrl, links, selectedTagIds]);
+
   // Cálculo de luminancia para live preview de card
   const previewBgColor = formData.card_bg_color || '#ffffff';
   const previewOpacity = typeof formData.card_bg_opacity === 'number' ? formData.card_bg_opacity : 1;
@@ -663,6 +678,14 @@ export default function EditProfile(): ReactElement {
             <span>{t('profile.request_creator_btn', 'Solicitar Perfil de Creador')}</span>
           </button>
         </div>
+      )}
+
+      {/* Tarjeta de completitud de perfil Apple HIG */}
+      {isCreator && completeness && (
+        <ProfileCompletenessCard
+          completeness={completeness}
+          onSelectTab={setActiveTab}
+        />
       )}
 
       {/* 2. Apple Segmented Control Navigation */}
