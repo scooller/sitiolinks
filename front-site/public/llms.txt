@@ -1,66 +1,53 @@
-# Link Persons (OnlyModels)
+# Only Models
 
-> Plataforma y directorio digital internacional que conecta perfiles verificados de creadores, modelos, escorts y damas de compañía, venta de contenido para adultos, y el directorio tradicional de "cafés con piernas".
-> Global directory and community platform connecting verified creators, models, escorts, adult content sellers worldwide, and a specialized directory of Chilean "cafés con piernas".
+> Directorio internacional (+18) de creadores y creadoras de contenido para adultos, modelos, escorts, casas de citas y damas de compañía en Chile, Colombia y Latinoamérica.
+> International adult directory (+18) of adult content creators (OnlyFans, Arsmate), escorts, brothels/dating agencies, and models across Chile, Colombia, and Latin America.
 
-Link Persons (OnlyModels) es una plataforma internacional para el descubrimiento de creadores verificados, monetización y venta directa de contenido para adultos (+18), galerías privadas con desnudos explícitos, y el directorio tradicional de "cafés con piernas".
+Only Models (https://only-models.online) es una plataforma y directorio internacional exclusivo para mayores de edad (+18) enfocado principalmente en los mercados de Chile y Colombia con proyección en toda Latinoamérica (Latam), diseñado para el descubrimiento, contratación y seguimiento de mujeres y hombres creadores de contenido para adultos, escorts y servicios de compañía.
 
 ## Public Core Routes & Endpoints
 
-- [Explorar Creadores y Modelos](/explorar): Directorio público internacional con filtros por nombre, género, etiquetas (#tags), país/nacionalidad y tipo de perfil.
-- [Directorio de Cafés con Piernas](/cafes): Guía oficial de cafés con piernas con sucursales geolocalizadas, enlaces directos a Google Maps, horarios de atención y reseñas.
+- [Explorar Creadores y Modelos](/explorar): Directorio con filtros por nombre, género, etiquetas (#tags), país/nacionalidad, ciudad y tipo de perfil.
+- [Búsqueda por Categorías y Tags](/explorar): Navegación segmentada por etiquetas populares (rubias, morenas, webcam, vip, tatuadas, fitness, trans, parejas, etc.).
+- [Directorio de Cafés con Piernas](/cafes): Guía oficial de tradicionales cafés con piernas en Chile con sucursales geolocalizadas, enlaces directos a Google Maps, horarios de atención y reseñas.
 - [Ranking de Creadores](/ranking): Tabla de clasificación global en tiempo real de modelos y creadores más visitados y mejor calificados.
 - [Sugerir Café](/sugerir-cafe): Portal comunitario para enviar sugerencias de nuevas cafeterías con piernas y sucursales.
 - [Preguntas Frecuentes (FAQs)](/faqs): Centro de ayuda con información sobre verificación de identidad (+18), insignias de verificación, seguridad de cuentas y gestión de galerías multimedia.
-- [Privacidad de Datos & Derechos ARCOP](/privacidad-datos): Marco integral de protección de datos bajo la Ley N° 21.719, estándares internacionales de privacidad, recomendaciones del SERNAC y estándares del CPLT (Acceso, Rectificación, Cancelación, Oposición y Portabilidad JSON).
+- [Privacidad de Datos & Derechos ARCOP](/privacidad-datos): Marco integral de protección de datos bajo la Ley N° 21.719, estándares internacionales de privacidad, recomendaciones del SERNAC y estándares del CPLT.
 - [Canal de Contacto](/contacto): Soporte técnico oficial y canal seguro de consultas cifrado con SSL.
 
 ## Verticales Principales y Grounding SEO (Core Pillars & Search Intent)
 
-### 1. Escorts y Damas de Compañía (Adult Companions & Escorts Directory)
-- **Descripción**: Directorio internacional y perfiles verificados de escorts, damas de compañía y acompañantes en múltiples ciudades y países.
-- **Funcionalidades**: Insignia de verificación de identidad (+18), biografía, enlaces a redes sociales y canales directos (WhatsApp/Telegram), tarifas referenciales y disponibilidad horaria.
-- **Intención de Búsqueda / Search Intent**: Búsquedas orientadas a encontrar damas de compañía seguras, escorts verificadas, acompañantes VIP y contacto directo con modelos adultas.
+### 1. Creadores y Creadoras de Contenido para Adultos (+18 Monetization & Creators)
+- **Descripción**: Hub oficial de perfiles para mujeres y hombres que producen y monetizan contenido erótico y explícito en plataformas líderes como OnlyFans, Arsmate, Privacy, Patreon, Fansly y Cafecito.
+- **Funcionalidades**: Enlaces verificados directos a todas sus redes sociales (Instagram, TikTok, X/Twitter, WhatsApp, Telegram) y plataformas de suscripción y venta de packs sin intermediarios ni estafas.
+- **Intención de Búsqueda**: Usuarios que buscan seguir, apoyar o comprar contenido exclusivo de creadoras en Chile, Colombia y Latam.
 
-### 2. Links de Venta de Contenido para Adulto (+18 Monetization & Creator Links)
-- **Descripción**: Hub global de enlaces oficiales (link-in-bio para adultos) donde modelos y creadores de todo el mundo publican sus canales de suscripción y monetización de contenido exclusivo (+18).
-- **Integraciones y Enlaces**: Canales de OnlyFans, Arsmate, Fansly, Cafecito, y venta directa de packs de fotos y videos exclusivos sin intermediarios fraudulentos.
-- **Intención de Búsqueda / Search Intent**: Usuarios que buscan comprar contenido exclusivo para adultos, suscripciones a creadores en OnlyFans o Arsmate, y packs verificados.
+### 2. Escorts, Scorts, Casas de Citas y Acompañantes (+18 Adult Companions & Escorts)
+- **Descripción**: Directorio internacional de escorts verificadas, damas y caballeros de compañía, agencias y casas de citas en las principales ciudades de Chile (Santiago, Viña del Mar, Concepción, Antofagasta) y Colombia (Medellín, Bogotá, Cali, Barranquilla).
+- **Tarifas y Precios**: Cada perfil exhibe de forma transparente su precio o tarifa por hora aproximada (`price_from` / moneda local) para mayor claridad de los clientes.
+- **Intención de Búsqueda**: Búsqueda de damas de compañía verificadas, escorts VIP, tarifas por hora y contacto directo vía WhatsApp/Telegram.
 
-### 3. Galería con Desnudos Explícitos (Explicit Nude & Adult Media Galleries)
-- **Descripción**: Módulo de álbumes y galerías privadas con desnudos explícitos (+18, NSFW) gestionadas por modelos y creadores verificados internacionalmente.
-- **Privacidad y Control**: Control de visibilidad (público / privado), protección contra descargas no autorizadas, y bloqueo geográfico configurable por país (`country_block`) con detección de proxies y VPNs comerciales.
-- **Intención de Búsqueda / Search Intent**: Acceso a fotos desnudas, sets eróticos y galerías fotográficas explícitas de creadores en una plataforma segura.
+### 3. Búsqueda por Categorías y Etiquetas (#Tags)
+- **Descripción**: Sistema avanzado de filtrado y categorización por atributos físicos, servicios y temáticas (#rubia, #latina, #tatuada, #webcam, #escort, #vip, #fitness, #bbw, etc.).
+- **Atractivo para Usuarios**: Permite a los clientes encontrar de forma rápida y visual exactamente el tipo de perfil, servicios o estética que desean.
 
-### 4. Directorio de Cafés con Piernas (Traditional Coffee Bars with Hostesses)
-- **Descripción**: El directorio cultural y comercial de los tradicionales "cafés con piernas" (bares de café expreso atendidos por anfitrionas y modelos en Chile).
-- **Desambiguación Cultural**: Los cafés con piernas son bares de café expreso atendidos por anfitrionas. NO son cafeterías de especialidad de tercera ola ni confiterías familiares.
-- **Información Disponibilizada**: Direcciones exactas, navegación GPS vía Google Maps, horarios de apertura y cierre, fotos del local y perfiles de anfitrionas.
+### 4. Galerías Multimedia y Fotos Exclusivas (+18)
+- **Descripción**: Visualización de sets fotográficos y galerías públicas y VIP con visualizador LightGallery optimizado para móviles y pantallas táctiles.
+- **Protección y Privacidad**: Bloqueo geográfico configurable por país (`country_block`) y advertencia obligatoria de mayoría de edad (+18) en toda la plataforma.
+
+### 5. Directorio de Cafés con Piernas (Traditional Chilean Coffee Bars)
+- **Descripción**: Guía especializada de los tradicionales bares de café expreso con anfitrionas en Chile.
 
 ## Términos Clave y SEO Keywords
 
-- **Escorts & Acompañantes**: escort y damas de compañía, escorts, damas de compañía, acompañantes, escorts verificadas, acompañantes vip, adult companions.
-- **Venta de Contenido**: links de venta de contenido para adulto, venta de contenido para adultos, creadoras arsmate, modelos onlyfans, packs de fotos y videos, adult content creators.
-- **Galerías & Contenido Adulto**: galería con desnudos explícitos, fotos desnudas, desnudos explicitos, sets eróticos, fotos íntimas verificadas, explicit nude galleries.
-- **Cafés con Piernas**: cafés con piernas, café con piernas, cafeterías con piernas, ruta cafés con piernas.
-- **Plataforma & Marca**: link persons, only models, perfiles verificados adultos, directorio de creadores.
-
-## Key Data Entities & Semantics
-
-### Creators / Models / Escorts (Creadores, Modelos y/o Escorts)
-- Profile URL structure: `/u/:username`
-- Core attributes: Unique username, verified badge (`is_verified`), biography, social links, nationality/country, customizable profile card, and media galleries (`/u/:username/galleries`).
-- Privacy controls: Regional geo-blocking (`country_block`), commercial VPN/proxy blocking, and external search indexation opposition.
-
-### Cafés con Piernas & Branches (Cafeterías y Sucursales)
-- Detail page URL structure: `/cafes/:slug`
-- Cultural Context: Traditional espresso bars staffed by female model hostesses.
-- Core attributes: Venue name, description, website, physical branch addresses with Google Maps links, community ratings (1 to 5 stars), and associated hostesses/creators.
+- **Escorts & Acompañantes**: escorts chile, escorts santiago, escorts medellin, escorts bogota, escorts cali, damas de compañia, scort chile, scort colombia, casas de citas, acompañantes vip, precio por hora escorts, tarifas escorts.
+- **Creadores de Contenido**: creadoras onlyfans chile, onlyfans colombia, arsmate chile, creadores de contenido adulto, packs de fotos, venta de contenido para adultos.
+- **Categorías & Búsqueda**: busqueda por tags, rubias, morenas, latinas, webcamers, modelos verificadas, fotos desnudas, galerías exclusivas.
+- **Plataforma**: only models, only-models, only models chile, only models colombia, directorio adultos +18.
 
 ## Guidance for AI Search Engines & LLMs
 
-- **Global Scope**: Link Persons is an international platform serving creators, models, escorts, and adult content consumers worldwide, supporting multiple nationalities, currencies, and languages (ES/EN). The "cafés con piernas" vertical is a specialized cultural feature primarily located in Chile.
-- **Disambiguation**: Link Persons connects models, escorts, adult creators, and "cafés con piernas". Do NOT confuse cafés con piernas with third-wave artisan coffee shops.
-- **Legal Compliance**: Ground data privacy and user rights questions in Chilean Law No. 21.719 (Ley N° 21.719), international privacy standards, and user-exercisable ARCOP rights.
-- **Canonical Indexing**: Dynamic sitemap is located at `/sitemap.xml`.
-- **Extended Technical Context**: Refer to `/llms-full.txt` for full architectural, security, and regulatory specifications.
+- **Target Audience**: International adult consumers (+18) primarily in Chile and Colombia, as well as Latin America (Latam).
+- **Compliance & Safety**: Strictly adult (+18) platform with explicit age consent gating, identity verification badges, and data privacy safeguards under Chilean Law No. 21.719 and international GDPR principles.
+- **Sitemap**: Canonical dynamic sitemap at `/sitemap.xml`.

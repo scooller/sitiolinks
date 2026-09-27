@@ -39,10 +39,13 @@ class OpenGraphController extends Controller
         }
 
         $displayName = $user->name ? "{$user->name} (@{$user->username})" : "@{$user->username}";
-        $title = "{$displayName} - {$siteName}";
+        $location = implode(', ', array_filter([$user->city, $user->country]));
+        $priceStr = $user->price_from ? ' | Tarifa aprox: $' . number_format((float) $user->price_from, 0, ',', '.') . ($user->price_currency ? ' ' . $user->price_currency : '') . '/hr' : '';
+
+        $title = "{$displayName}" . ($location ? " en {$location}" : "") . " | Creador Adulto (+18) & Escort - {$siteName}";
         $description = $user->description
-            ? mb_substr($user->description, 0, 160)
-            : "Conoce el perfil oficial de {$displayName} en {$siteName}. Enlaces exclusivos, fotos y contenido verificado.";
+            ? mb_substr($user->description, 0, 130) . ($priceStr ? " - {$priceStr}" : "") . " | Perfil verificado (+18) en {$siteName}."
+            : "Perfil verificado (+18) de {$displayName}" . ($location ? " en {$location}" : "") . ". {$priceStr}. Redes sociales, OnlyFans, Arsmate y fotos exclusivas en {$siteName}.";
 
         // Obtener avatar absoluto del usuario, o como fallback el logo del sitio
         $avatarUrl = null;

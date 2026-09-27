@@ -149,10 +149,12 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
 
     const resolvedSiteName = siteTitle || (typeof document !== 'undefined' && document.title && !document.title.toLowerCase().includes('link persons') ? document.title.split(' - ').pop()?.trim() : '') || 'Only Models';
     const displayName = user.name ? `${user.name} (@${user.username})` : `@${user.username}`;
-    const pageTitle = `${displayName} - ${resolvedSiteName}`;
+    const locationInfo = [user.city, user.country].filter(Boolean).join(', ');
+    const priceInfo = user.price_from ? `Tarifa aprox: $${Number(user.price_from).toLocaleString()}${user.price_currency ? ' ' + user.price_currency : ''}/hr` : '';
+    const pageTitle = `${displayName}${locationInfo ? ` en ${locationInfo}` : ''} | Creador Adulto (+18) & Escort - ${resolvedSiteName}`;
     const pageDesc = user.description
-      ? user.description.slice(0, 160)
-      : `Conoce el perfil oficial de ${displayName} en ${resolvedSiteName}. Enlaces exclusivos, fotos y contenido verificado.`;
+      ? `${user.description.slice(0, 130)}${priceInfo ? ` | ${priceInfo}` : ''} - Perfil verificado (+18) con redes y fotos en ${resolvedSiteName}.`
+      : `Perfil verificado (+18) de ${displayName}${locationInfo ? ` en ${locationInfo}` : ''}. ${priceInfo ? priceInfo + '. ' : ''}Descubre sus redes oficiales, OnlyFans, Arsmate, galerías y tarifas en ${resolvedSiteName}.`;
 
     // Resolver avatar absoluto para previsualizaciones sociales y meta tags (avatar de usuario -> logo del sitio -> defaultAvatar -> logo500)
     let avatarUrl = user.avatar_url || (user as any).avatar_webp || (user as any).avatar_thumb;
@@ -180,7 +182,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
       url: canonicalUrl,
       type: 'profile',
       siteName: resolvedSiteName,
-      keywords: `${user.username}, ${user.name || ''}, creador, modelo, escorts, damas de compañia, perfil verificado, only models, fotos exclusivas`,
+      keywords: `${user.username}, ${user.name || ''}, creador adulto, onlyfans chile, onlyfans colombia, arsmate, escorts, scort, damas de compañia, acompañantes, casas de citas, fotos exclusivas, ${locationInfo ? locationInfo + ', ' : ''}precio por hora, tarifas escorts, chile, colombia, latam, only models`,
     });
 
     return () => {

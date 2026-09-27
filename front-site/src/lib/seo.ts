@@ -10,12 +10,12 @@ interface MetaTagsConfig {
 }
 
 const DEFAULT_META: MetaTagsConfig = {
-  title: 'Only Models - Creadores, Modelos, Escorts y Venta de Contenido Adulto',
-  description: 'Directorio y plataforma internacional: modelos y creadores verificados, escorts y damas de compañía, links de venta de contenido para adulto (+18), galerías privadas con desnudos explícitos y guía de cafés con piernas.',
+  title: 'Only Models - Directorio de Creadores Adultos (+18), Escorts y Modelos en Chile, Colombia y Latam',
+  description: 'Directorio internacional (+18) de mujeres y hombres creadores de contenido para adultos (OnlyFans, Arsmate), escorts, damas de compañía y casas de citas en Chile, Colombia y Latinoamérica. Búsqueda por categorías, tags, tarifas por hora, redes sociales oficiales y fotos exclusivas.',
   image: 'https://only-models.online/logo500.png',
   url: 'https://only-models.online/',
   type: 'website',
-  keywords: 'escorts, damas de compañía, acompañantes, venta de contenido para adulto, links de venta de contenido para adulto, contenido para adultos, galeria con desnudos explicitos, desnudos explicitos, fotos desnudas, modelos eroticas, only models, only-models, creadores de contenido, perfiles verificados adultos, packs de fotos, videos exclusivos, cafes con piernas, adult content creators',
+  keywords: 'directorio de creadores adultos, creadoras onlyfans chile, creadoras onlyfans colombia, arsmate chile, escorts chile, escorts santiago, escorts medellin, escorts bogota, escorts cali, damas de compañia, scort chile, scort colombia, casas de citas, acompañantes vip, modelos adultas, precio por hora escorts, tarifas escorts, venta de contenido adulto, fotos desnudas, busqueda por tags, only models, only-models',
   author: 'Only Models',
   siteName: 'Only Models',
 };
