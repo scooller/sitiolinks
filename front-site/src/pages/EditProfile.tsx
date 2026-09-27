@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { fadeIn, appleEase } from '../lib/animations';
 import { useAuth } from '../contexts/AuthContext';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
+import { mutations } from '../lib/graphql/mutations';
 import { getCountryFlag } from '../lib/countryUtils';
 import { FilePond, registerPlugin } from 'react-filepond';
 import type { FilePondFile } from 'filepond';
@@ -87,6 +88,11 @@ export default function EditProfile(): ReactElement {
   const [showLinkModal, setShowLinkModal] = useState<boolean>(false);
   const [editingLinkIndex, setEditingLinkIndex] = useState<number | null>(null);
   const [selectedLinkForEdit, setSelectedLinkForEdit] = useState<ProfileLinkItem | null>(null);
+  const [showCreatorRequestModal, setShowCreatorRequestModal] = useState<boolean>(false);
+  const [creatorRequestNotes, setCreatorRequestNotes] = useState<string>('');
+  const [creatorRequestSending, setCreatorRequestSending] = useState<boolean>(false);
+  const [creatorRequestSuccess, setCreatorRequestSuccess] = useState<boolean>(false);
+  const [creatorRequestError, setCreatorRequestError] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [avatarFiles, setAvatarFiles] = useState<FilePondFile[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState<boolean>(false);
@@ -332,6 +338,37 @@ export default function EditProfile(): ReactElement {
     setLinks(links.filter((_, i) => i !== index));
   };
 
+  const handleSendCreatorRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreatorRequestSending(true);
+    setCreatorRequestError(null);
+
+    try {
+      const description = `El usuario ${currentUser?.name || ''} (@${currentUser?.username || ''}) ha solicitado la activación de su perfil como Creador(a) desde su panel de perfil.\n\n` +
+        `Email: ${currentUser?.email || ''}\n` +
+        `Mensaje / Detalles adicionales: ${creatorRequestNotes.trim() || 'Sin notas adicionales'}\n\n` +
+        `Revisar y cambiar su rol a 'creator' en la tabla de Usuarios de Filament si cumple con los requisitos.`;
+
+      await graphqlRequest({
+        query: mutations.createTicket,
+        variables: {
+          subject: `Solicitud de Perfil Creador(a) - @${currentUser?.username || 'usuario'}`,
+          description,
+          category: 'cuenta',
+          priority: 'alta',
+        },
+        schema: 'default',
+        authenticated: true,
+      });
+
+      setCreatorRequestSuccess(true);
+    } catch (err: any) {
+      setCreatorRequestError(err?.message || t('profile.creator_request_error', 'Error al enviar la solicitud. Por favor intenta de nuevo.'));
+    } finally {
+      setCreatorRequestSending(false);
+    }
+  };
+
   const handleDeleteProfile = async () => {
     setDeleting(true);
     setDeleteError(null);
@@ -569,6 +606,64 @@ export default function EditProfile(): ReactElement {
           <span className="badge rounded-pill bg-secondary bg-opacity-25 text-body">@{currentUser.username}</span>
         </p>
       </div>
+
+      {/* Banner de Solicitud de Creador para usuarios con rol estándar */}
+      {!isCreator && (
+        <div
+          className="apple-creator-banner mb-4 p-3 p-md-4 rounded-4"
+          style={{
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(236, 72, 153, 0.12))',
+            border: '1px solid rgba(139, 92, 246, 0.28)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+          }}
+        >
+          <div className="d-flex align-items-center gap-3">
+            <div
+              className="d-flex align-items-center justify-content-center text-white flex-shrink-0"
+              style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '13px',
+                background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+                boxShadow: '0 4px 14px rgba(139, 92, 246, 0.35)',
+              }}
+            >
+              <i className="fas fa-wand-magic-sparkles fs-5"></i>
+            </div>
+            <div>
+              <h5 className="fw-bold mb-1" style={{ color: 'var(--color-text)', fontSize: '1.05rem' }}>
+                {t('profile.become_creator_title', '¿Quieres ser Creador(a) de Contenido?')}
+              </h5>
+              <p className="text-muted small mb-0" style={{ maxWidth: '540px' }}>
+                {t('profile.become_creator_desc', 'Publica tus propias galerías, enlaces directos y redes sociales para que tu audiencia te encuentre. Envía tu solicitud al administrador.')}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="apple-btn-primary"
+            onClick={() => {
+              setCreatorRequestSuccess(false);
+              setCreatorRequestError(null);
+              setShowCreatorRequestModal(true);
+            }}
+            style={{
+              background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+              border: 'none',
+              minHeight: '44px',
+              padding: '0.55rem 1.4rem',
+              boxShadow: '0 4px 14px rgba(139, 92, 246, 0.3)',
+            }}
+          >
+            <i className="fas fa-paper-plane me-1"></i>
+            <span>{t('profile.request_creator_btn', 'Solicitar Perfil de Creador')}</span>
+          </button>
+        </div>
+      )}
 
       {/* 2. Apple Segmented Control Navigation */}
       <nav className="edit-profile-segmented" aria-label="Secciones de perfil">
@@ -1555,6 +1650,149 @@ export default function EditProfile(): ReactElement {
         onSave={handleSaveLink}
         initialLink={selectedLinkForEdit}
       />
+
+      {/* Modal de Solicitud de Creador Apple HIG */}
+      <Modal
+        show={showCreatorRequestModal}
+        onHide={() => setShowCreatorRequestModal(false)}
+        centered
+        contentClassName="apple-glass-modal rounded-4 border-0 shadow-lg overflow-hidden"
+      >
+        <form onSubmit={handleSendCreatorRequest}>
+          <div className="p-4 pb-3 border-bottom border-secondary border-opacity-10 d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center gap-3">
+              <div
+                className="d-flex align-items-center justify-content-center text-white"
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+                  boxShadow: '0 4px 12px rgba(139, 92, 246, 0.35)',
+                }}
+              >
+                <i className="fas fa-wand-magic-sparkles fs-5"></i>
+              </div>
+              <div>
+                <h5 className="modal-title fw-bold mb-0" style={{ fontSize: '1.15rem' }}>
+                  {t('profile.request_creator_modal_title', 'Solicitar Perfil de Creador(a)')}
+                </h5>
+                <p className="text-muted small mb-0">
+                  {t('profile.request_creator_modal_sub', 'Revisión y activación por el equipo administrativo')}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={() => setShowCreatorRequestModal(false)}
+              aria-label={t('common.close', 'Cerrar')}
+            ></button>
+          </div>
+
+          <div className="p-4">
+            {creatorRequestSuccess ? (
+              <div className="text-center py-4">
+                <div
+                  className="mx-auto mb-3 d-flex align-items-center justify-content-center text-success"
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    background: 'rgba(52, 199, 89, 0.15)',
+                  }}
+                >
+                  <i className="fas fa-check fs-2"></i>
+                </div>
+                <h5 className="fw-bold mb-2">{t('profile.creator_request_sent_title', '¡Solicitud enviada con éxito!')}</h5>
+                <p className="text-muted small mb-0">
+                  {t('profile.creator_request_sent_desc', 'Se ha generado un ticket de solicitud para el administrador. Se te notificará una vez activado tu perfil de creador.')}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="alert alert-info rounded-3 py-2 px-3 small mb-3 d-flex align-items-center gap-2">
+                  <i className="fas fa-circle-info fs-5 flex-shrink-0"></i>
+                  <div>
+                    {t('profile.creator_request_info_note', 'Al activar tu rol podrás publicar galerías, configurar redes sociales y personalizar tu tarjeta de perfil público.')}
+                  </div>
+                </div>
+
+                {creatorRequestError && (
+                  <div className="alert alert-danger rounded-3 py-2 px-3 small mb-3">
+                    {creatorRequestError}
+                  </div>
+                )}
+
+                <div className="mb-3">
+                  <label className="apple-label">
+                    {t('profile.creator_notes_label', 'Detalles o enlaces adicionales (opcional)')}
+                  </label>
+                  <textarea
+                    className="apple-input apple-textarea"
+                    rows={4}
+                    value={creatorRequestNotes}
+                    onChange={(e) => setCreatorRequestNotes(e.target.value)}
+                    placeholder={t('profile.creator_notes_placeholder', 'Cuéntanos qué tipo de contenido publicarás, tus redes principales o cualquier detalle relevante...')}
+                    disabled={creatorRequestSending}
+                  />
+                  <div className="apple-form-hint">
+                    {t('profile.creator_notes_hint', 'Esta información se enviará al equipo de administración.')}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end gap-2">
+            {creatorRequestSuccess ? (
+              <button
+                type="button"
+                className="apple-btn-primary"
+                onClick={() => setShowCreatorRequestModal(false)}
+                style={{ minHeight: '42px', padding: '0.5rem 1.4rem' }}
+              >
+                {t('common.understood', 'Entendido')}
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="apple-btn-glass"
+                  onClick={() => setShowCreatorRequestModal(false)}
+                  disabled={creatorRequestSending}
+                  style={{ minHeight: '42px', padding: '0.5rem 1.25rem' }}
+                >
+                  {t('common.cancel', 'Cancelar')}
+                </button>
+                <button
+                  type="submit"
+                  className="apple-btn-primary"
+                  disabled={creatorRequestSending}
+                  style={{
+                    minHeight: '42px',
+                    padding: '0.5rem 1.5rem',
+                    background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+                    border: 'none',
+                  }}
+                >
+                  {creatorRequestSending ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-1" />
+                      <span>{t('common.sending', 'Enviando...')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-paper-plane me-1"></i>
+                      <span>{t('profile.send_request', 'Enviar Solicitud')}</span>
+                    </>
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 export const mutations = {
   createTicket: `
-    mutation CreateTicket($user_id: Int!, $subject: String!, $description: String!, $category: String!, $priority: String!) {
+    mutation CreateTicket($user_id: Int, $subject: String!, $description: String!, $category: String!, $priority: String!) {
       createTicket(user_id: $user_id, subject: $subject, description: $description, category: $category, priority: $priority) {
         id
         subject

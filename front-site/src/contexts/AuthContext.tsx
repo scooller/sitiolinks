@@ -153,7 +153,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         password_confirmation: string,
         birth_date: string,
         gender: string,
-        captcha?: string
+        captcha?: string,
+        request_creator?: boolean
     ): Promise<User> => {
         try {
             // Get CSRF cookie first
@@ -187,6 +188,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     birth_date,
                     gender,
                     captcha,
+                    request_creator,
                 }),
             });
 

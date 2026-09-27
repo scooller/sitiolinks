@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ticket;
 use App\Models\User;
 use App\Support\Captcha;
 use Illuminate\Http\Request;
@@ -59,6 +60,25 @@ class AuthController extends Controller
 
         // Assign default 'user' role
         $user->assignRole('user');
+
+        // Check if user requested creator role during registration
+        if ($request->boolean('request_creator')) {
+            try {
+                Ticket::create([
+                    'user_id' => $user->id,
+                    'category' => Ticket::CATEGORY_ACCOUNT,
+                    'priority' => Ticket::PRIORITY_HIGH,
+                    'status' => Ticket::STATUS_OPEN,
+                    'subject' => "Solicitud de Perfil Creador(a) - @{$user->username}",
+                    'description' => "El usuario {$user->name} (@{$user->username}) ha solicitado la activación del rol de Creador(a) de contenido durante su registro inicial en la plataforma.\n\nEmail: {$user->email}\nFecha de nacimiento: {$user->birth_date}\nGénero: {$user->gender}\n\nRevisar perfil y cambiar rol a 'creator' en la tabla de Usuarios si cumple con los requisitos.",
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Error al crear ticket de solicitud de creador en registro', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         // Send email verification notification
         $user->sendEmailVerificationNotification();

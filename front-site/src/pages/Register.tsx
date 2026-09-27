@@ -34,6 +34,7 @@ export default function Register(): ReactElement {
   const [altchaPayload, setAltchaPayload] = useState<string>('');
   const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState<boolean>(false);
+  const [requestCreator, setRequestCreator] = useState<boolean>(false);
   const altchaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -102,7 +103,8 @@ export default function Register(): ReactElement {
         formData.password_confirmation,
         formData.birth_date,
         formData.gender,
-        captchaToken as any
+        captchaToken as any,
+        requestCreator
       );
       navigate('/verify-email');
     } catch (err: any) {
@@ -349,6 +351,54 @@ export default function Register(): ReactElement {
                   </Row>
 
                   <span className="auth-help-text mb-3">{t('auth.password_help')}</span>
+
+                  {/* Switch Solicitar Perfil de Creador */}
+                  <div
+                    className="apple-switch-wrapper mb-3 p-3"
+                    style={{
+                      borderRadius: '14px',
+                      background: 'rgba(120, 120, 128, 0.08)',
+                      border: '1px solid var(--apple-glass-border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '1rem',
+                    }}
+                  >
+                    <div className="d-flex align-items-center gap-3">
+                      <div
+                        className="d-flex align-items-center justify-content-center text-white flex-shrink-0"
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '11px',
+                          background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+                          boxShadow: '0 3px 10px rgba(139, 92, 246, 0.3)',
+                        }}
+                      >
+                        <i className="fas fa-wand-magic-sparkles"></i>
+                      </div>
+                      <div>
+                        <div className="fw-bold" style={{ fontSize: '0.92rem', color: 'var(--color-text)' }}>
+                          {t('auth.request_creator_title', 'Quiero ser Creador(a) de Contenido')}
+                        </div>
+                        <div className="text-muted small" style={{ fontSize: '0.78rem' }}>
+                          {t('auth.request_creator_help', 'Genera una solicitud para publicar galerías y enlaces. El administrador la revisará para dar el visto bueno.')}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="form-check form-switch m-0">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="request_creator_switch"
+                        checked={requestCreator}
+                        onChange={(e) => setRequestCreator(e.target.checked)}
+                        style={{ width: '2.5rem', height: '1.4rem', cursor: 'pointer' }}
+                      />
+                    </div>
+                  </div>
 
                   {/* Checkbox Términos y Condiciones y Privacidad ARCOP (Ley N° 21.719) */}
                   <div className="auth-terms-box d-flex flex-column gap-2">

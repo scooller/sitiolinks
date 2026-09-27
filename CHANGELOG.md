@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.10] - 2026-09-27
+
+### Added
+- **Flujo de Solicitud de Rol Creador(a) y Notificación Administrativa por Ticket (`Register.tsx`, `EditProfile.tsx`, `AuthController.php`, `mutations.ts`, `AuthContext.tsx`)**:
+  - **Switch en el Registro de Nuevos Usuarios (`Register.tsx`, `AuthController.php`)**:
+    - Agregado switch visual Apple HIG *"Quiero ser Creador(a) de Contenido"*.
+    - Al registrarse con el switch activado, el backend genera automáticamente un ticket de soporte interno (`Ticket::CATEGORY_ACCOUNT`, prioridad alta) con los datos del usuario para revisión del admin.
+  - **Banner y Modal de Solicitud en Editar Perfil (`EditProfile.tsx`)**:
+    - Si el usuario logueado tiene rol estándar (`!isCreator`), se presenta un banner editorial Liquid Glass con botón *"Solicitar Perfil de Creador"*.
+    - Modal interactivo para ingresar notas opcionales o enlaces de muestra, enviando la solicitud vía GraphQL al sistema de tickets interno.
+    - El administrador puede revisar el ticket y cambiar el rol a `creator` directamente desde la tabla de Usuarios en Filament con 1 clic y notificación por correo.
+
 ## [0.26.9] - 2026-09-27
 
 ### Added
