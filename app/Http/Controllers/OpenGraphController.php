@@ -37,12 +37,21 @@ class OpenGraphController extends Controller
             ? mb_substr($user->description, 0, 160)
             : "Conoce el perfil oficial de {$displayName} en Link Persons. Enlaces exclusivos, fotos y contenido verificado.";
 
-        // Obtener avatar absoluto del usuario
+        // Obtener avatar absoluto del usuario, o como fallback el logo del sitio
         $avatarUrl = null;
         try {
             $avatarUrl = $user->getFirstMediaUrl('avatar') ?: $user->getFirstMediaUrl('avatar', 'thumb');
         } catch (\Throwable) {
             $avatarUrl = null;
+        }
+
+        if (!$avatarUrl) {
+            try {
+                $settings = \App\Models\SiteSettings::first();
+                $avatarUrl = $settings?->getFirstMediaUrl('logo') ?: $settings?->getFirstMediaUrl('default_avatar');
+            } catch (\Throwable) {
+                $avatarUrl = null;
+            }
         }
 
         if (!$avatarUrl) {

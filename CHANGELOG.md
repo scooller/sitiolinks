@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.7] - 2026-09-27
+
+### Fixed
+- **Descarga de Código QR de Perfil con Logo y Márgenes (`UserProfile.tsx`)**:
+  - Corregida la exportación del código QR en el perfil de usuario para incrustar y excavar el logo del sitio de forma nítida.
+  - Generada imagen de alta resolución (1024x1024 px) en formato JPEG con fondo blanco sólido y márgenes uniformes (~56px) para compartir en redes y mensajería sin pérdida de escaneabilidad.
+- **Previsualización de Imagen al Compartir Enlace de Perfil (`UserProfile.tsx`, `OpenGraphController.php`)**:
+  - Configurada jerarquía de imagen de previsualización (Open Graph / Twitter Cards / crawler preview): avatar de usuario como prioridad principal, logo del sitio (`SiteSettings`) como fallback inmediato, avatar por defecto o logo institucional (`logo500.png`).
+
 ## [0.26.6] - 2026-09-20
 
 ### Changed

@@ -148,8 +148,18 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
       ? user.description.slice(0, 160)
       : `Conoce el perfil oficial de ${displayName} en Link Persons. Enlaces exclusivos, fotos y contenido verificado.`;
 
-    // Resolver avatar absoluto para previsualizaciones sociales y meta tags
-    let avatarUrl = user.avatar_url || (user as any).avatar_webp || (user as any).avatar_thumb || defaultAvatar;
+    // Resolver avatar absoluto para previsualizaciones sociales y meta tags (avatar de usuario -> logo del sitio -> defaultAvatar -> logo500)
+    let avatarUrl = user.avatar_url || (user as any).avatar_webp || (user as any).avatar_thumb;
+    if (!avatarUrl && siteLogo) {
+      avatarUrl = siteLogo;
+    }
+    if (!avatarUrl && defaultAvatar) {
+      avatarUrl = defaultAvatar;
+    }
+    if (!avatarUrl) {
+      avatarUrl = `${window.location.origin}/logo500.png`;
+    }
+
     if (avatarUrl && !avatarUrl.startsWith('http')) {
       const backendBase = String((import.meta as any).env?.VITE_BACKEND_URL || BACKEND_URL).replace(/\/$/, '');
       avatarUrl = `${backendBase}${avatarUrl.startsWith('/') ? '' : '/'}${avatarUrl}`;
@@ -169,7 +179,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
     return () => {
       resetPageMeta();
     };
-  }, [user, defaultAvatar]);
+  }, [user, defaultAvatar, siteLogo]);
 
   // Nota: QRCodeCanvas ya soporta imageSettings; no dibujamos manualmente sobre el canvas
   useEffect(() => {
@@ -205,82 +215,124 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
   const handleDownloadQr = async () => {
     if (!user) return;
     const profileUrl = `${window.location.origin}/u/${user.username}`;
+    const TOTAL_SIZE = 1024;
+    const MARGIN = 56;
+    const QR_INNER_SIZE = TOTAL_SIZE - MARGIN * 2;
+    const frac = qrLogoSize / QR_DISPLAY_SIZE;
+    const logoDlSize = Math.max(32, Math.round(QR_INNER_SIZE * frac));
+    const logoSrc = logoDataUrl || siteLogo;
+
+    let loadedLogoImg: HTMLImageElement | null = null;
+    if (logoSrc) {
+      try {
+        const img = new Image();
+        if (!logoSrc.startsWith('data:')) img.crossOrigin = 'anonymous';
+        img.src = logoSrc;
+        await new Promise<void>((resolve, reject) => {
+          if (img.complete) return resolve();
+          img.onload = () => resolve();
+          img.onerror = () => reject();
+        });
+        loadedLogoImg = img;
+      } catch {
+        // Continue if logo fails to preload
+      }
+    }
+
     const container = document.createElement('div');
     container.style.position = 'fixed';
     container.style.left = '-9999px';
     container.style.top = '-9999px';
     document.body.appendChild(container);
     const root = createRoot(container);
-    const frac = qrLogoSize / QR_DISPLAY_SIZE;
-    const logoDlSize = Math.max(24, Math.round(DOWNLOAD_QR_SIZE * frac));
+
     root.render(
       <QRCodeCanvas
         value={profileUrl}
-        size={DOWNLOAD_QR_SIZE}
+        size={QR_INNER_SIZE}
         level="H"
         includeMargin={false}
+        imageSettings={
+          logoSrc
+            ? {
+                src: logoSrc,
+                width: logoDlSize,
+                height: logoDlSize,
+                excavate: true,
+              }
+            : undefined
+        }
       />
     );
+
     let downloaded = false;
-    for (let i = 0; i < 6 && !downloaded; i++) {
-      await new Promise((r) => setTimeout(r, 80));
+    for (let i = 0; i < 8 && !downloaded; i++) {
+      await new Promise((r) => setTimeout(r, 60));
       try {
         const offCanvas = container.querySelector('canvas') as HTMLCanvasElement | null;
         if (!offCanvas) continue;
-        if (logoDataUrl || siteLogo) {
-          try {
-            const ctx = offCanvas.getContext('2d');
-            if (ctx) {
-              const img = new Image();
-              if (!logoDataUrl) img.crossOrigin = 'anonymous';
-              img.src = logoDataUrl || siteLogo!;
-              await new Promise((resolve, reject) => { img.onload = resolve as any; img.onerror = reject; });
-              const x = Math.round((offCanvas.width - logoDlSize) / 2);
-              const y = Math.round((offCanvas.height - logoDlSize) / 2);
-              ctx.drawImage(img, x, y, logoDlSize, logoDlSize);
-            }
-          } catch {}
+
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = TOTAL_SIZE;
+        exportCanvas.height = TOTAL_SIZE;
+        const ctx = exportCanvas.getContext('2d');
+        if (!ctx) continue;
+
+        // Solid white background for clean JPG export with margins
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, TOTAL_SIZE, TOTAL_SIZE);
+
+        // Center QR code with generous margins
+        ctx.drawImage(offCanvas, MARGIN, MARGIN, QR_INNER_SIZE, QR_INNER_SIZE);
+
+        if (loadedLogoImg) {
+          const lx = Math.round((TOTAL_SIZE - logoDlSize) / 2);
+          const ly = Math.round((TOTAL_SIZE - logoDlSize) / 2);
+          ctx.drawImage(loadedLogoImg, lx, ly, logoDlSize, logoDlSize);
         }
+
         const a = document.createElement('a');
-        a.href = offCanvas.toDataURL('image/png');
-        a.download = `qr-${user.username}@${DOWNLOAD_QR_SIZE}.png`;
+        a.href = exportCanvas.toDataURL('image/jpeg', 0.95);
+        a.download = `qr-${user.username}.jpg`;
         a.click();
         downloaded = true;
       } catch {
         downloaded = false;
       }
     }
+
     if (!downloaded) {
       const visible = qrCanvasRef.current;
       if (visible) {
         try {
-          if (logoDataUrl || siteLogo) {
-            try {
-              const ctxV = visible.getContext('2d');
-              if (ctxV) {
-                const imgV = new Image();
-                if (!logoDataUrl) imgV.crossOrigin = 'anonymous';
-                imgV.src = logoDataUrl || siteLogo!;
-                await new Promise((resolve, reject) => { imgV.onload = resolve as any; imgV.onerror = reject; });
-                const fracV = qrLogoSize / QR_DISPLAY_SIZE;
-                const sizeV = Math.max(24, Math.round(visible.width * fracV));
-                const xV = Math.round((visible.width - sizeV) / 2);
-                const yV = Math.round((visible.height - sizeV) / 2);
-                ctxV.drawImage(imgV, xV, yV, sizeV, sizeV);
-              }
-            } catch {}
+          const exportCanvas = document.createElement('canvas');
+          exportCanvas.width = TOTAL_SIZE;
+          exportCanvas.height = TOTAL_SIZE;
+          const ctx = exportCanvas.getContext('2d');
+          if (ctx) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, TOTAL_SIZE, TOTAL_SIZE);
+            ctx.drawImage(visible, MARGIN, MARGIN, QR_INNER_SIZE, QR_INNER_SIZE);
+            if (loadedLogoImg) {
+              const lx = Math.round((TOTAL_SIZE - logoDlSize) / 2);
+              const ly = Math.round((TOTAL_SIZE - logoDlSize) / 2);
+              ctx.drawImage(loadedLogoImg, lx, ly, logoDlSize, logoDlSize);
+            }
+            const a = document.createElement('a');
+            a.href = exportCanvas.toDataURL('image/jpeg', 0.95);
+            a.download = `qr-${user.username}.jpg`;
+            a.click();
           }
-          const a = document.createElement('a');
-          a.href = visible.toDataURL('image/png');
-          a.download = `qr-${user.username}.png`;
-          a.click();
         } catch { }
       }
     }
+
     try {
       root.unmount();
     } catch { }
-    document.body.removeChild(container);
+    if (container.parentNode) {
+      document.body.removeChild(container);
+    }
   };
 
   const handleShareProfile = async () => {
@@ -1354,7 +1406,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                             size={QR_DISPLAY_SIZE}
                             level="H"
                             includeMargin={false}
-                            imageSettings={siteLogo ? { src: siteLogo, width: qrLogoSize, height: qrLogoSize, excavate: true } : undefined}
+                            imageSettings={(logoDataUrl || siteLogo) ? { src: logoDataUrl || siteLogo, width: qrLogoSize, height: qrLogoSize, excavate: true } : undefined}
                           />
                         </div>
                         <div className="mb-3">
