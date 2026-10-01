@@ -42,11 +42,18 @@ class CafeBranchForm
                         Grid::make(3)
                             ->columnSpanFull()
                             ->schema([
-                                TextInput::make('city')
-                                    ->label('Ciudad'),
+                                Select::make('city')
+                                    ->label('Ciudad / Región')
+                                    ->options(\App\Support\ChileLocations::getRegionsOptions())
+                                    ->searchable()
+                                    ->live()
+                                    ->afterStateUpdated(fn (callable $set) => $set('state', null)),
 
-                                TextInput::make('state')
-                                    ->label('Comuna'),
+                                Select::make('state')
+                                    ->label('Comuna')
+                                    ->options(fn (callable $get) => \App\Support\ChileLocations::getComunasForRegion($get('city')))
+                                    ->searchable()
+                                    ->live(),
 
                                 TextInput::make('postal_code')
                                     ->label('Código Postal'),

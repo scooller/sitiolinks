@@ -787,6 +787,34 @@
         "cat_analytics": "Analytical Cookies",
         "cat_analytics_desc": "Collect aggregated and anonymous site usage statistics to improve performance and navigation (Google Analytics).",
         "btn_save_preferences": "Save Preferences"
+    },
+    "suggest": {
+        "kicker": "Cafes Directory",
+        "title": "Suggest a Cafe",
+        "subtitle": "Help us expand the directory by sharing your favorite spots.",
+        "login_required_title": "Login Required",
+        "login_required_desc": "You must be logged in to suggest a cafe to the directory.",
+        "success_title": "Suggestion Received!",
+        "success": "Thank you for your contribution. Our team will review the details before publishing.",
+        "submit_another": "Suggest another cafe",
+        "view_cafes": "Explore Cafes",
+        "notice": "Your suggestion will be reviewed by our team before appearing publicly in the directory.",
+        "name": "Cafe Name",
+        "name_placeholder": "E.g. Literary Cafe",
+        "city": "City / Region",
+        "city_placeholder": "Select a region or city...",
+        "state": "Comuna",
+        "state_placeholder": "Select a comuna...",
+        "address": "Address",
+        "address_placeholder": "E.g. 1234 Providencia Ave",
+        "website": "Website or Social Link",
+        "website_placeholder": "https://instagram.com/mycafe",
+        "google_maps": "Google Maps Location",
+        "maps_placeholder": "https://maps.google.com/...",
+        "notes": "Additional Notes or Details",
+        "notes_placeholder": "Opening hours, price range, specials, WiFi info, etc.",
+        "submit": "Submit Suggestion",
+        "error": "An error occurred while sending your suggestion."
     }
 }
 

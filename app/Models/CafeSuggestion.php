@@ -17,6 +17,7 @@ class CafeSuggestion extends Model
         'user_id',
         'name',
         'city',
+        'state',
         'address',
         'website',
         'google_maps_url',

@@ -6,10 +6,12 @@ import { fadeIn, defaultTransition } from '../lib/animations';
 import { useAuth } from '../contexts/AuthContext';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
 import { useTranslation } from 'react-i18next';
+import { CHILE_REGIONS, getComunasForRegion } from '../lib/chileLocations';
 
 interface SuggestFormData {
   name: string;
   city: string;
+  state: string;
   address: string;
   website: string;
   google_maps_url: string;
@@ -19,6 +21,7 @@ interface SuggestFormData {
 const EMPTY: SuggestFormData = {
   name: '',
   city: '',
+  state: '',
   address: '',
   website: '',
   google_maps_url: '',
@@ -37,9 +40,16 @@ export default function SuggestCafe(): React.ReactElement {
     import('altcha');
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    if (name === 'city') {
+      setFormData((prev) => ({ ...prev, city: value, state: '' }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
+
+  const comunas = getComunasForRegion(formData.city);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +65,7 @@ export default function SuggestCafe(): React.ReactElement {
           mutation CreateCafeSuggestion(
             $name: String!,
             $city: String,
+            $state: String,
             $address: String,
             $website: String,
             $google_maps_url: String,
@@ -64,6 +75,7 @@ export default function SuggestCafe(): React.ReactElement {
             createCafeSuggestion(
               name: $name,
               city: $city,
+              state: $state,
               address: $address,
               website: $website,
               google_maps_url: $google_maps_url,
@@ -75,6 +87,7 @@ export default function SuggestCafe(): React.ReactElement {
         variables: {
           name: formData.name.trim(),
           city: formData.city.trim() || null,
+          state: formData.state.trim() || null,
           address: formData.address.trim() || null,
           website: formData.website.trim() || null,
           google_maps_url: formData.google_maps_url.trim() || null,
@@ -221,7 +234,7 @@ export default function SuggestCafe(): React.ReactElement {
                         </div>
                       </div>
 
-                      {/* Ciudad y Dirección en 2 Columnas */}
+                      {/* Ciudad/Región y Comuna vinculadas */}
                       <Row className="g-3">
                         <Col sm={6}>
                           <div className="suggest-form-group">
@@ -229,42 +242,71 @@ export default function SuggestCafe(): React.ReactElement {
                               {t('suggest.city')}
                             </label>
                             <div className="suggest-input-wrapper">
-                              <i className="fas fa-city suggest-input-icon" aria-hidden="true"></i>
-                              <input
+                              <i className="fas fa-map-location-dot suggest-input-icon" aria-hidden="true"></i>
+                              <select
                                 id="cafe-city"
-                                type="text"
                                 name="city"
                                 className="suggest-form-control"
                                 value={formData.city}
                                 onChange={handleChange}
-                                placeholder={t('suggest.city_placeholder')}
-                                maxLength={120}
-                              />
+                              >
+                                <option value="">{t('suggest.city_placeholder')}</option>
+                                {CHILE_REGIONS.map((region) => (
+                                  <option key={region} value={region}>
+                                    {region}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
                           </div>
                         </Col>
 
                         <Col sm={6}>
                           <div className="suggest-form-group">
-                            <label htmlFor="cafe-address" className="suggest-form-label">
-                              {t('suggest.address')}
+                            <label htmlFor="cafe-state" className="suggest-form-label">
+                              {t('suggest.state')}
                             </label>
                             <div className="suggest-input-wrapper">
-                              <i className="fas fa-map-pin suggest-input-icon" aria-hidden="true"></i>
-                              <input
-                                id="cafe-address"
-                                type="text"
-                                name="address"
+                              <i className="fas fa-city suggest-input-icon" aria-hidden="true"></i>
+                              <select
+                                id="cafe-state"
+                                name="state"
                                 className="suggest-form-control"
-                                value={formData.address}
+                                value={formData.state}
                                 onChange={handleChange}
-                                placeholder={t('suggest.address_placeholder')}
-                                maxLength={255}
-                              />
+                                disabled={!formData.city}
+                              >
+                                <option value="">{t('suggest.state_placeholder')}</option>
+                                {comunas.map((comuna) => (
+                                  <option key={comuna} value={comuna}>
+                                    {comuna}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
                           </div>
                         </Col>
                       </Row>
+
+                      {/* Dirección */}
+                      <div className="suggest-form-group">
+                        <label htmlFor="cafe-address" className="suggest-form-label">
+                          {t('suggest.address')}
+                        </label>
+                        <div className="suggest-input-wrapper">
+                          <i className="fas fa-map-pin suggest-input-icon" aria-hidden="true"></i>
+                          <input
+                            id="cafe-address"
+                            type="text"
+                            name="address"
+                            className="suggest-form-control"
+                            value={formData.address}
+                            onChange={handleChange}
+                            placeholder={t('suggest.address_placeholder')}
+                            maxLength={255}
+                          />
+                        </div>
+                      </div>
 
                       {/* Sitio Web y Google Maps en 2 Columnas */}
                       <Row className="g-3">

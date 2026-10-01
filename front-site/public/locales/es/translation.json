@@ -786,6 +786,34 @@
         "cat_analytics": "Cookies Analíticas",
         "cat_analytics_desc": "Recopilan información anónima sobre el uso del sitio para medir rendimiento y optimizar servicios (Google Analytics).",
         "btn_save_preferences": "Guardar Preferencias"
+    },
+    "suggest": {
+        "kicker": "Directorio de Cafés",
+        "title": "Sugerir un Café",
+        "subtitle": "Ayúdanos a expandir el directorio compartiendo tus cafeterías favoritas.",
+        "login_required_title": "Inicio de sesión requerido",
+        "login_required_desc": "Debes iniciar sesión para sugerir un café al directorio.",
+        "success_title": "¡Sugerencia Recibida!",
+        "success": "Gracias por tu aporte. Nuestro equipo revisará la información antes de publicarla.",
+        "submit_another": "Sugerir otro café",
+        "view_cafes": "Explorar Cafés",
+        "notice": "Tu sugerencia será revisada por nuestro equipo antes de ser visible públicamente en el directorio.",
+        "name": "Nombre del Café",
+        "name_placeholder": "Ej: Café Literario",
+        "city": "Ciudad / Región",
+        "city_placeholder": "Selecciona una región o ciudad...",
+        "state": "Comuna",
+        "state_placeholder": "Selecciona una comuna...",
+        "address": "Dirección",
+        "address_placeholder": "Ej: Av. Providencia 1234",
+        "website": "Sitio Web o Red Social",
+        "website_placeholder": "https://instagram.com/micafe",
+        "google_maps": "Ubicación en Google Maps",
+        "maps_placeholder": "https://maps.google.com/...",
+        "notes": "Notas o Detalles Adicionales",
+        "notes_placeholder": "Horarios, precios aproximados, especialidades, etc.",
+        "submit": "Enviar Sugerencia",
+        "error": "Ocurrió un error al enviar tu sugerencia."
     }
 }
 

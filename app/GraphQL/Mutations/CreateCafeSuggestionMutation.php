@@ -31,7 +31,8 @@ class CreateCafeSuggestionMutation extends Mutation
     {
         return [
             'name' => ['type' => Type::nonNull(Type::string()), 'description' => 'Nombre del café'],
-            'city' => ['type' => Type::string(), 'description' => 'Ciudad'],
+            'city' => ['type' => Type::string(), 'description' => 'Ciudad / Región'],
+            'state' => ['type' => Type::string(), 'description' => 'Comuna'],
             'address' => ['type' => Type::string(), 'description' => 'Dirección'],
             'website' => ['type' => Type::string(), 'description' => 'Website'],
             'google_maps_url' => ['type' => Type::string(), 'description' => 'URL de Google Maps'],
@@ -62,6 +63,7 @@ class CreateCafeSuggestionMutation extends Mutation
         Validator::make($args, [
             'name' => ['required', 'string', 'min:2', 'max:190'],
             'city' => ['nullable', 'string', 'max:120'],
+            'state' => ['nullable', 'string', 'max:120'],
             'address' => ['nullable', 'string', 'max:255'],
             'website' => ['nullable', 'url', 'max:255'],
             'google_maps_url' => ['nullable', 'url', 'max:500'],
@@ -69,7 +71,7 @@ class CreateCafeSuggestionMutation extends Mutation
         ])->validate();
 
         $suggestion = CafeSuggestion::create([
-            ...collect($args)->only(['name', 'city', 'address', 'website', 'google_maps_url', 'notes'])->all(),
+            ...collect($args)->only(['name', 'city', 'state', 'address', 'website', 'google_maps_url', 'notes'])->all(),
             'user_id' => $user->id,
             'status' => CafeSuggestion::STATUS_PENDING,
         ]);

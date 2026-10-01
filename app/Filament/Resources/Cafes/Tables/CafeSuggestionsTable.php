@@ -29,6 +29,10 @@ class CafeSuggestionsTable
                     ->label('Ciudad')
                     ->searchable(),
 
+                TextColumn::make('state')
+                    ->label('Comuna')
+                    ->searchable(),
+
                 TextColumn::make('address')
                     ->label('Dirección')
                     ->limit(40)
@@ -87,6 +91,7 @@ class CafeSuggestionsTable
                             'name' => $record->name,
                             'address' => $record->address ?: 'Sin dirección',
                             'city' => $record->city,
+                            'state' => $record->state,
                             'website' => $record->website,
                             'google_maps_url' => $record->google_maps_url,
                         ]);

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.0] - 2026-10-01
+
+### Added
+- **Selectores Vinculados de Ciudad/Región y Comuna en Cafés (`CafeBranchForm.php`, `SuggestCafe.tsx`, `ChileLocations.php`, `chileLocations.ts`)**:
+  - **Backend Filament Admin (`CafeBranchForm.php`, `ChileLocations.php`)**:
+    - Reemplazados campos de texto plano por selectores dinámicos vinculados con autocompletado y búsqueda reactiva (`live()`).
+    - Al cambiar la Ciudad/Región seleccionada, se actualizan dinámicamente las Comunas disponibles y se limpia la selección previa.
+  - **Frontend Sugerir Café (`SuggestCafe.tsx`, `chileLocations.ts`, `suggest.css`)**:
+    - Menús desplegables enlazados de Región y Comuna de Chile con estética Apple HIG.
+    - Soporte completo para el envío de `$state` (Comuna) en la mutación GraphQL `createCafeSuggestion`.
+    - Actualización en backend de `CafeSuggestion` model, migración y tabla de administración para aprobar sucursales con su comuna.
+
 ## [0.27.0] - 2026-10-01
 
 ### Added
