@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Nav, Badge, Button, Spinner, Alert, OverlayTrigger, Tooltip, ListGroup, Modal, Form, InputGroup, Pagination, Dropdown, ButtonGroup } from 'react-bootstrap';
 import { motion } from 'motion/react';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -14,6 +14,7 @@ import { createRoot } from 'react-dom/client';
 import OptimizedImage from '../components/OptimizedImage';
 import VerifiedBadge from '../components/VerifiedBadge';
 import LikeButton from '../components/LikeButton';
+import UsersGrid from '../components/UsersGrid';
 import { BACKEND_URL } from '../config/constants';
 import { updatePageMeta, resetPageMeta } from '../lib/seo';
 import ProfileCompletenessCard from '../components/ProfileCompletenessCard';
@@ -29,12 +30,14 @@ interface SettingsWithQR extends SiteSettings {
   logo?: string;
 }
 
-export default function UserProfile({ section = 'profile' as 'profile' | 'galleries' }) {
+export default function UserProfile({ section = 'profile' as 'profile' | 'galleries' | 'similar' }) {
   const { t } = useTranslation();
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'similar' ? 'similar' : section;
   const { user: currentUser, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState<'profile' | 'galleries'>(section);
+  const [activeTab, setActiveTab] = useState<'profile' | 'galleries' | 'similar'>(initialTab);
 
   const [user, setUser] = useState<User | null>(null);
   const [defaultAvatar, setDefaultAvatar] = useState<string>('');
@@ -62,6 +65,12 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
   const [followingSearch, setFollowingSearch] = useState<string>('');
   const [followingSearchInput, setFollowingSearchInput] = useState<string>('');
   const [followingSelectedTag, setFollowingSelectedTag] = useState<string>('');
+  const [similarUsers, setSimilarUsers] = useState<User[]>([]);
+  const [loadingSimilar, setLoadingSimilar] = useState<boolean>(false);
+  const [similarLoaded, setSimilarLoaded] = useState<boolean>(false);
+  const [similarPage, setSimilarPage] = useState<number>(1);
+  const [similarTotalPages, setSimilarTotalPages] = useState<number>(1);
+  const [similarTotal, setSimilarTotal] = useState<number>(0);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -713,9 +722,58 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
     }
   };
 
-  const handleTabChange = (tab: 'profile' | 'galleries') => {
+  const loadSimilarUsers = async (page: number = 1) => {
+    if (!username && !user) return;
+    setLoadingSimilar(true);
+    try {
+      const data = await graphqlRequest<{
+        similarUsers: {
+          data: User[];
+          paginatorInfo: {
+            currentPage: number;
+            lastPage: number;
+            total: number;
+          };
+        };
+      }>({
+        query: queries.similarUsers,
+        variables: {
+          username: username || user?.username,
+          user_id: user?.id ? Number(user.id) : undefined,
+          page,
+          per_page: 8,
+        },
+        schema: 'public',
+      });
+
+      setSimilarUsers(data.similarUsers?.data || []);
+      setSimilarPage(data.similarUsers?.paginatorInfo?.currentPage || 1);
+      setSimilarTotalPages(data.similarUsers?.paginatorInfo?.lastPage || 1);
+      setSimilarTotal(data.similarUsers?.paginatorInfo?.total || 0);
+      setSimilarLoaded(true);
+    } catch (e: any) {
+      console.error('Error loading similar users:', e);
+      setSimilarUsers([]);
+    } finally {
+      setLoadingSimilar(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'similar' && !similarLoaded && (username || user)) {
+      loadSimilarUsers(1);
+    }
+  }, [activeTab, username, user, similarLoaded]);
+
+  const handleTabChange = (tab: 'profile' | 'galleries' | 'similar') => {
     setActiveTab(tab);
-    navigate(`/u/${username}${tab !== 'profile' ? `/${tab}` : ''}`);
+    if (tab === 'galleries') {
+      navigate(`/u/${username}/galleries`);
+    } else if (tab === 'similar') {
+      if (!similarLoaded) {
+        loadSimilarUsers(1);
+      }
+    }
   };
 
   const handleSendVipMessage = async (event: React.FormEvent) => {
@@ -833,6 +891,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
           <Col xs={12} md={10} lg={8} xl={7}>
             {/* Segmented Control Skeleton */}
             <div className="profile-segmented-control mb-4">
+              <div className="profile-segment-btn apple-skeleton" style={{ height: '44px' }} />
               <div className="profile-segment-btn apple-skeleton" style={{ height: '44px' }} />
               <div className="profile-segment-btn apple-skeleton" style={{ height: '44px' }} />
             </div>
@@ -1535,11 +1594,13 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <div className="profile-segmented-control">
+              <div className="profile-segmented-control" role="tablist">
                 <button
                   type="button"
                   className={`profile-segment-btn ${activeTab === 'profile' ? 'active' : ''}`}
                   onClick={() => handleTabChange('profile')}
+                  role="tab"
+                  aria-selected={activeTab === 'profile'}
                 >
                   <i className="fas fa-id-card me-1" aria-hidden="true"></i>
                   <span>{t('profile.tab_profile')}</span>
@@ -1549,11 +1610,23 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                     type="button"
                     className={`profile-segment-btn ${activeTab === 'galleries' ? 'active' : ''}`}
                     onClick={() => handleTabChange('galleries')}
+                    role="tab"
+                    aria-selected={activeTab === 'galleries'}
                   >
                     <i className="fas fa-images me-1" aria-hidden="true"></i>
                     <span>{t('profile.tab_galleries')} ({(user as any).galleries_count})</span>
                   </button>
                 )}
+                <button
+                  type="button"
+                  className={`profile-segment-btn ${activeTab === 'similar' ? 'active' : ''}`}
+                  onClick={() => handleTabChange('similar')}
+                  role="tab"
+                  aria-selected={activeTab === 'similar'}
+                >
+                  <i className="fas fa-wand-magic-sparkles me-1" aria-hidden="true"></i>
+                  <span>{t('profile.tab_similar', 'Similares')}</span>
+                </button>
               </div>
             </motion.div>
 
@@ -1735,6 +1808,82 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                       </div>
                     )}
                   </>
+                )}
+
+                {activeTab === 'similar' && (
+                  <div className="profile-similar-content text-start">
+                    <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                      <div>
+                        <h3 className="profile-info-heading mb-1 d-flex align-items-center gap-2">
+                          <i className="fas fa-wand-magic-sparkles text-primary" aria-hidden="true" />
+                          {t('profile.similar_profiles_heading', 'Perfiles similares')}
+                        </h3>
+                        <p className="profile-bio-text mb-0">
+                          {t('profile.similar_profiles_desc', 'Creadores recomendados según etiquetas, intereses y características afines.')}
+                        </p>
+                      </div>
+                      {similarTotal > 0 && (
+                        <Badge bg="primary" className="rounded-pill px-3 py-2">
+                          {similarTotal} {t('profile.similar_badge', 'sugeridos')}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <UsersGrid
+                      users={similarUsers}
+                      loading={loadingSimilar}
+                      skeletonCount={4}
+                      colsDesktop={2}
+                      colsMobile={1}
+                      defaultAvatar={defaultAvatar}
+                      vipBadgeLabel={vipBadgeLabel}
+                      vipBadgeIcon={vipBadgeIcon}
+                      showTags={true}
+                      maxTags={3}
+                      emptyMessage={t('profile.no_similar_profiles', 'No se encontraron perfiles similares en este momento.')}
+                    />
+
+                    {similarTotalPages > 1 && (
+                      <div className="d-flex justify-content-center mt-4">
+                        <Pagination size="sm">
+                          <Pagination.First
+                            onClick={() => { setSimilarPage(1); loadSimilarUsers(1); }}
+                            disabled={similarPage === 1 || loadingSimilar}
+                          />
+                          <Pagination.Prev
+                            onClick={() => { const p = Math.max(1, similarPage - 1); setSimilarPage(p); loadSimilarUsers(p); }}
+                            disabled={similarPage === 1 || loadingSimilar}
+                          />
+                          {Array.from({ length: Math.min(5, similarTotalPages) }, (_, i) => {
+                            let pageNum: number;
+                            if (similarTotalPages <= 5) pageNum = i + 1;
+                            else if (similarPage <= 3) pageNum = i + 1;
+                            else if (similarPage >= similarTotalPages - 2) pageNum = similarTotalPages - 4 + i;
+                            else pageNum = similarPage - 2 + i;
+
+                            return (
+                              <Pagination.Item
+                                key={pageNum}
+                                active={pageNum === similarPage}
+                                onClick={() => { setSimilarPage(pageNum); loadSimilarUsers(pageNum); }}
+                                disabled={loadingSimilar}
+                              >
+                                {pageNum}
+                              </Pagination.Item>
+                            );
+                          })}
+                          <Pagination.Next
+                            onClick={() => { const p = Math.min(similarTotalPages, similarPage + 1); setSimilarPage(p); loadSimilarUsers(p); }}
+                            disabled={similarPage === similarTotalPages || loadingSimilar}
+                          />
+                          <Pagination.Last
+                            onClick={() => { setSimilarPage(similarTotalPages); loadSimilarUsers(similarTotalPages); }}
+                            disabled={similarPage === similarTotalPages || loadingSimilar}
+                          />
+                        </Pagination>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </motion.div>

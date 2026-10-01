@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.0] - 2026-10-01
+
+### Added
+- **Pestaña de Perfiles Similares y Recomendados Apple HIG (`SimilarUsersQuery.php`, `UserProfile.tsx`, `UserGalleries.tsx`, `queries.ts`)**:
+  - **Query GraphQL `similarUsers`**:
+    - Algoritmo de afinidad basado en coincidencia de etiquetas (tags), género y nacionalidad.
+    - **Prioridad VIP**: Los perfiles VIP similares se ordenan primero, seguidos por relevancia de afinidad y popularidad.
+    - Filtro de exclusión automática del perfil consultado y respeto al geobloqueo/país.
+  - **Segmented Control Apple HIG**:
+    - Agregado botón interactivo con icono `fas fa-wand-magic-sparkles` en la barra de pestañas de [UserProfile.tsx](file:///d:/laragon/www/link-persons/front-site/src/pages/UserProfile.tsx).
+    - Segmented control sincronizado también en [UserGalleries.tsx](file:///d:/laragon/www/link-persons/front-site/src/pages/UserGalleries.tsx) con soporte para navegación directa vía `?tab=similar`.
+  - **Grilla de Perfiles Recomendados**:
+    - Integración de `UsersGrid` con animaciones táctiles, halo VIP distintivo, etiquetas interactivas y paginación fluida.
+    - Estado de carga con skeleton placeholders y empty state accesible.
+
 ## [0.26.11] - 2026-09-27
 
 ### Added

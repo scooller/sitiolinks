@@ -149,6 +149,37 @@ export const queries = {
       }
     }
   `,
+  similarUsers: `
+    query SimilarUsers($username: String, $user_id: Int, $page: Int, $per_page: Int) {
+      similarUsers(username: $username, user_id: $user_id, page: $page, per_page: $per_page) {
+        data {
+          id
+          username
+          avatar_url
+          avatar_thumb
+          avatar_thumb_webp
+          avatar_small_webp
+          avatar_medium_webp
+          gender
+          description
+          nationality
+          birth_date
+          price_from
+          card_bg_color
+          is_verified
+          tags { id name name_en color icon weight is_fixed }
+          roles { name }
+        }
+        paginatorInfo {
+          currentPage
+          lastPage
+          perPage
+          total
+          hasMorePages
+        }
+      }
+    }
+  `,
   usersByTag: `
     query UsersByTag($tag: String!, $limit: Int) {
       users(tag: $tag, limit: $limit) {

@@ -49,6 +49,7 @@ use App\GraphQL\Queries\NotificationsQuery;
 use App\GraphQL\Queries\PageQuery;
 use App\GraphQL\Queries\PagesQuery;
 use App\GraphQL\Queries\ResolveAdultLinkQuery;
+use App\GraphQL\Queries\SimilarUsersQuery;
 use App\GraphQL\Queries\SiteSettingsQuery;
 use App\GraphQL\Queries\SystemStatsQuery;
 use App\GraphQL\Queries\TagsQuery;
@@ -169,6 +170,7 @@ return [
             'query' => [
                 UsersQuery::class,
                 UserQuery::class,
+                SimilarUsersQuery::class,
                 TagsQuery::class,
                 SiteSettingsQuery::class,
                 FollowersQuery::class,
@@ -263,6 +265,7 @@ return [
             'query' => [
                 UsersQuery::class,
                 UserQuery::class,
+                SimilarUsersQuery::class,
                 TopViewedUsersQuery::class,
                 TagsQuery::class,
                 SiteSettingsQuery::class,

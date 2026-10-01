@@ -224,7 +224,7 @@ export default function UserGalleries(): ReactElement {
 
   return (
     <Container className="py-4">
-      {/* 1. Apple Segmented Control para alternar entre Perfil y Galerías */}
+      {/* 1. Apple Segmented Control para alternar entre Perfil, Galerías y Similares */}
       <div className="profile-segmented-control mb-4" role="tablist">
         <button
           type="button"
@@ -247,6 +247,16 @@ export default function UserGalleries(): ReactElement {
             {t('profile.tab_galleries', 'Galerías')}{' '}
             {galleries?.paginatorInfo?.total ? `(${galleries.paginatorInfo.total})` : ''}
           </span>
+        </button>
+        <button
+          type="button"
+          className="profile-segment-btn"
+          onClick={() => navigate(`/u/${username}?tab=similar`)}
+          role="tab"
+          aria-selected="false"
+        >
+          <i className="fas fa-wand-magic-sparkles me-1" aria-hidden="true" />
+          <span>{t('profile.tab_similar', 'Similares')}</span>
         </button>
       </div>
 
