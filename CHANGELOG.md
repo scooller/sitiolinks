@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.29.2] - 2026-10-01
+
+### Fixed
+- **Avatar y Logo en Tarjetas y Código QR (`UserProfile.tsx`)**:
+  - Implementado `drawImageCover` en canvas para que el avatar circular de las tarjetas descargables (Story 9:16 y Feed 1:1) mantenga proporción `object-fit: cover` con recorte central en lugar de deformarse o estirarse.
+  - Aplicado `drawImageCover` al desenfoque de fondo en ambas tarjetas para evitar aberraciones de relación de aspecto.
+  - Implementado `drawImageContain` para el logo central en tarjetas QR y cálculo dinámico de dimensiones en `<QRCodeCanvas>` para evitar estiramientos si el logo no es cuadrado.
+
 ## [0.29.1] - 2026-10-01
 
 ### Fixed

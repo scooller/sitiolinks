@@ -72,6 +72,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
   const [similarTotalPages, setSimilarTotalPages] = useState<number>(1);
   const [similarTotal, setSimilarTotal] = useState<number>(0);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [logoDimensions, setLogoDimensions] = useState<{ width: number; height: number } | null>(null);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [showQrDropdown, setShowQrDropdown] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
@@ -218,6 +219,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
     const loadLogo = async () => {
       if (!siteLogo) {
         setLogoDataUrl(null);
+        setLogoDimensions(null);
         return;
       }
       try {
@@ -230,14 +232,35 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
           reader.onerror = reject;
           reader.readAsDataURL(blob);
         });
-        if (!cancelled) setLogoDataUrl(dataUrl);
+        if (!cancelled) {
+          setLogoDataUrl(dataUrl);
+          const img = new Image();
+          img.onload = () => {
+            if (!cancelled) {
+              const nw = img.naturalWidth || img.width;
+              const nh = img.naturalHeight || img.height;
+              if (nw && nh) {
+                const aspect = nw / nh;
+                if (aspect >= 1) {
+                  setLogoDimensions({ width: qrLogoSize, height: Math.max(16, Math.round(qrLogoSize / aspect)) });
+                } else {
+                  setLogoDimensions({ width: Math.max(16, Math.round(qrLogoSize * aspect)), height: qrLogoSize });
+                }
+              }
+            }
+          };
+          img.src = dataUrl;
+        }
       } catch {
-        if (!cancelled) setLogoDataUrl(null);
+        if (!cancelled) {
+          setLogoDataUrl(null);
+          setLogoDimensions(null);
+        }
       }
     };
     loadLogo();
     return () => { cancelled = true; };
-  }, [siteLogo]);
+  }, [siteLogo, qrLogoSize]);
 
   const drawRoundedRect = (
     ctx: CanvasRenderingContext2D,
@@ -274,6 +297,74 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
     ctx.restore();
   };
 
+  const drawImageCover = (
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    dx: number,
+    dy: number,
+    dw: number,
+    dh: number
+  ) => {
+    const imgW = img.naturalWidth || img.width;
+    const imgH = img.naturalHeight || img.height;
+    if (!imgW || !imgH) {
+      ctx.drawImage(img, dx, dy, dw, dh);
+      return;
+    }
+
+    const destAspect = dw / dh;
+    const srcAspect = imgW / imgH;
+
+    let sx = 0;
+    let sy = 0;
+    let sw = imgW;
+    let sh = imgH;
+
+    if (srcAspect > destAspect) {
+      sw = imgH * destAspect;
+      sx = (imgW - sw) / 2;
+    } else {
+      sh = imgW / destAspect;
+      sy = (imgH - sh) / 2;
+    }
+
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+  };
+
+  const drawImageContain = (
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    dx: number,
+    dy: number,
+    dw: number,
+    dh: number
+  ) => {
+    const imgW = img.naturalWidth || img.width;
+    const imgH = img.naturalHeight || img.height;
+    if (!imgW || !imgH) {
+      ctx.drawImage(img, dx, dy, dw, dh);
+      return;
+    }
+
+    const destAspect = dw / dh;
+    const srcAspect = imgW / imgH;
+
+    let renderW = dw;
+    let renderH = dh;
+    let renderX = dx;
+    let renderY = dy;
+
+    if (srcAspect > destAspect) {
+      renderH = dw / srcAspect;
+      renderY = dy + (dh - renderH) / 2;
+    } else {
+      renderW = dh * srcAspect;
+      renderX = dx + (dw - renderW) / 2;
+    }
+
+    ctx.drawImage(img, 0, 0, imgW, imgH, renderX, renderY, renderW, renderH);
+  };
+
   const drawCircularAvatar = (
     ctx: CanvasRenderingContext2D,
     img: HTMLImageElement,
@@ -288,7 +379,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
     ctx.arc(cx, cy, r, 0, Math.PI * 2, true);
     ctx.closePath();
     ctx.clip();
-    ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
+    drawImageCover(ctx, img, cx - r, cy - r, r * 2, r * 2);
     ctx.restore();
 
     if (borderW > 0) {
@@ -373,6 +464,23 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
       }
 
       // 3. Render offscreen QR Code
+      let logoW = logoDlSize;
+      let logoH = logoDlSize;
+      if (loadedLogoImg) {
+        const nw = loadedLogoImg.naturalWidth || loadedLogoImg.width;
+        const nh = loadedLogoImg.naturalHeight || loadedLogoImg.height;
+        if (nw && nh) {
+          const aspect = nw / nh;
+          if (aspect >= 1) {
+            logoW = logoDlSize;
+            logoH = Math.max(16, Math.round(logoDlSize / aspect));
+          } else {
+            logoW = Math.max(16, Math.round(logoDlSize * aspect));
+            logoH = logoDlSize;
+          }
+        }
+      }
+
       const container = document.createElement('div');
       container.style.position = 'fixed';
       container.style.left = '-9999px';
@@ -390,8 +498,8 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
             logoSrc
               ? {
                   src: logoSrc,
-                  width: logoDlSize,
-                  height: logoDlSize,
+                  width: logoW,
+                  height: logoH,
                   excavate: true,
                 }
               : undefined
@@ -423,9 +531,9 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
           ctx.drawImage(offCanvas, margin, margin, qrInnerSize, qrInnerSize);
         }
         if (loadedLogoImg) {
-          const lx = Math.round((W - logoDlSize) / 2);
-          const ly = Math.round((H - logoDlSize) / 2);
-          ctx.drawImage(loadedLogoImg, lx, ly, logoDlSize, logoDlSize);
+          const lx = Math.round((W - logoW) / 2);
+          const ly = Math.round((H - logoH) / 2);
+          drawImageContain(ctx, loadedLogoImg, lx, ly, logoW, logoH);
         }
       } else if (format === 'story') {
         // Story 9:16 (1080 x 1920)
@@ -434,10 +542,10 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
           ctx.save();
           if ('filter' in ctx) {
             ctx.filter = 'blur(45px) brightness(0.65)';
-            ctx.drawImage(loadedAvatarImg, -50, -50, W + 100, H + 100);
+            drawImageCover(ctx, loadedAvatarImg, -50, -50, W + 100, H + 100);
             ctx.filter = 'none';
           } else {
-            ctx.drawImage(loadedAvatarImg, 0, 0, W, H);
+            drawImageCover(ctx, loadedAvatarImg, 0, 0, W, H);
           }
           ctx.restore();
         } else {
@@ -501,9 +609,9 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
           ctx.drawImage(offCanvas, qrX, qrY, qrInnerSize, qrInnerSize);
         }
         if (loadedLogoImg) {
-          const lx = Math.round((W - logoDlSize) / 2);
-          const ly = Math.round(qrY + (qrInnerSize - logoDlSize) / 2);
-          ctx.drawImage(loadedLogoImg, lx, ly, logoDlSize, logoDlSize);
+          const lx = Math.round((W - logoW) / 2);
+          const ly = Math.round(qrY + (qrInnerSize - logoH) / 2);
+          drawImageContain(ctx, loadedLogoImg, lx, ly, logoW, logoH);
         }
 
         // Footer Text
@@ -535,10 +643,10 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
           ctx.save();
           if ('filter' in ctx) {
             ctx.filter = 'blur(40px) brightness(0.65)';
-            ctx.drawImage(loadedAvatarImg, -40, -40, W + 80, H + 80);
+            drawImageCover(ctx, loadedAvatarImg, -40, -40, W + 80, H + 80);
             ctx.filter = 'none';
           } else {
-            ctx.drawImage(loadedAvatarImg, 0, 0, W, H);
+            drawImageCover(ctx, loadedAvatarImg, 0, 0, W, H);
           }
           ctx.restore();
         } else {
@@ -580,9 +688,9 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
           ctx.drawImage(offCanvas, qrX, qrY, qrInnerSize, qrInnerSize);
         }
         if (loadedLogoImg) {
-          const lx = Math.round((W - logoDlSize) / 2);
-          const ly = Math.round(qrY + (qrInnerSize - logoDlSize) / 2);
-          ctx.drawImage(loadedLogoImg, lx, ly, logoDlSize, logoDlSize);
+          const lx = Math.round((W - logoW) / 2);
+          const ly = Math.round(qrY + (qrInnerSize - logoH) / 2);
+          drawImageContain(ctx, loadedLogoImg, lx, ly, logoW, logoH);
         }
 
         // Footer
@@ -1957,7 +2065,16 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                             size={QR_DISPLAY_SIZE}
                             level="H"
                             includeMargin={false}
-                            imageSettings={(logoDataUrl || siteLogo) ? { src: logoDataUrl || siteLogo, width: qrLogoSize, height: qrLogoSize, excavate: true } : undefined}
+                            imageSettings={
+                              (logoDataUrl || siteLogo)
+                                ? {
+                                    src: logoDataUrl || siteLogo,
+                                    width: logoDimensions?.width || qrLogoSize,
+                                    height: logoDimensions?.height || qrLogoSize,
+                                    excavate: true,
+                                  }
+                                : undefined
+                            }
                           />
                         </div>
                         <div className="mb-3 d-flex justify-content-center">
