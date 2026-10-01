@@ -1,14 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 
+const NETWORK_ERROR_MSGS = ['Failed to fetch', 'NetworkError', 'Network request failed'];
+
+function isNetworkError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  return NETWORK_ERROR_MSGS.some(m => err.message.includes(m));
+}
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 /**
  * Hook genérico para manejar fetching de datos con loading, error y retry.
- * Consolida el patrón común de useEffect + useState para loading/error.
- * 
- * @example
- * const { data, loading, error, retry } = useFetchData(async () => {
- *   const response = await graphqlRequest({ query: '...' });
- *   return response.data;
- * }, [dependencies]);
+ * Auto-retry con backoff exponencial (3 intentos, 1s→2s→4s) en errores de red.
  */
 export function useFetchData<T>(
   fetchFn: () => Promise<T>,
@@ -27,17 +32,29 @@ export function useFetchData<T>(
     }
     setError(null);
 
-    try {
-      const result = await fetchFn();
-      setData(result);
-      setError(null);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al cargar datos';
-      setError(message);
-    } finally {
-      setLoading(false);
-      setIsRetrying(false);
+    const MAX_ATTEMPTS = 3;
+    let lastErr: unknown;
+
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      try {
+        const result = await fetchFn();
+        setData(result);
+        setError(null);
+        setLoading(false);
+        setIsRetrying(false);
+        return;
+      } catch (err) {
+        lastErr = err;
+        // Only retry on network errors, not business/auth errors
+        if (!isNetworkError(err) || attempt === MAX_ATTEMPTS - 1) break;
+        await sleep(1000 * Math.pow(2, attempt)); // 1s, 2s, 4s
+      }
     }
+
+    const message = lastErr instanceof Error ? lastErr.message : 'Error al cargar datos';
+    setError(message);
+    setLoading(false);
+    setIsRetrying(false);
   }, [fetchFn]);
 
   useEffect(() => {
@@ -55,6 +72,6 @@ export function useFetchData<T>(
     error,
     retry,
     isRetrying,
-    setData, // Permitir actualización manual del estado
+    setData,
   };
 }

@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.29.1] - 2026-10-01
+
+### Fixed
+- **`graphqlRequest` — query faltante `siteSettingsThemeColors`** (`queries.ts`): El query referenciado en `App.tsx` no estaba definido, causando `query: undefined` silencioso en la segunda carga de colores del tema.
+- **`graphqlRequest` — fallback 4xx con caché** (`graphqlRequest.ts`): Ahora se sirve desde localStorage también en respuestas 401, 403 y 419 (no solo 5xx) para queries no-mutation, evitando pantallas de error cuando el backend es accesible pero la sesión caducó.
+- **`graphqlRequest` — reset automático de CSRF en 419** (`graphqlRequest.ts`): Si el backend retorna 419 (token CSRF expirado), se resetea `csrfEnsured` para que la siguiente request autenticada reobtonga el token automáticamente.
+- **`graphqlRequest` — logs eliminados de producción** (`graphqlRequest.ts`): Los `console.log` de debug estaban activos en producción; ahora se guardan detrás de `import.meta.env.DEV`.
+- **`useFetchData` — retry automático con backoff** (`useFetchData.ts`): En errores de red (`Failed to fetch`) el hook reintenta automáticamente hasta 3 veces con backoff exponencial (1s→2s→4s) antes de mostrar el error al usuario. Errores de negocio/auth no generan retries.
+
 ## [0.29.0] - 2026-10-01
+
 
 ### Added
 - **Funcionalidad de Denuncia de Perfiles con Tickets en Backend (`UserProfile.tsx`, `profile.css`, `translation.json`)**:

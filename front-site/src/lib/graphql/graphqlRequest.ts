@@ -1,6 +1,8 @@
 import type { GraphQLRequestOptions, GraphQLResponse } from '../../types';
 import { BACKEND_URL } from '../../config/constants';
 
+const isDev = import.meta.env.DEV;
+
 let csrfEnsured = false;
 
 // Helper to get CSRF token for authenticated requests (only when missing)
@@ -11,11 +13,15 @@ export async function ensureCsrfCookie(): Promise<void> {
     csrfEnsured = true;
     return;
   }
-  const isDev = import.meta.env.DEV;
   const base = (import.meta.env.VITE_BACKEND_URL || BACKEND_URL).replace(/\/$/, '');
   const csrfUrl = isDev ? '/sanctum/csrf-cookie' : `${base}/sanctum/csrf-cookie`;
   await fetch(csrfUrl, { credentials: 'include' });
   csrfEnsured = true;
+}
+
+// Reset CSRF flag so next authenticated request re-fetches the cookie
+function resetCsrfFlag(): void {
+  csrfEnsured = false;
 }
 
 // Generate deterministic cache key for query and variables
@@ -90,18 +96,18 @@ export async function graphqlRequest<T = any>({
   } else {
     path = `/graphql/${schema}`;
   }
-  const isDev = import.meta.env.DEV;
   const base = (import.meta.env.VITE_BACKEND_URL || BACKEND_URL).replace(/\/$/, '');
   const url = isDev ? path : `${base}${path}`;
   
-  console.log('🔵 GraphQL Request:', {
-    url,
-    schema,
-    authenticated,
-    isDev,
-    variables,
-    queryPreview: query.substring(0, 100) + '...'
-  });
+  if (isDev) {
+    console.log('🔵 GraphQL Request:', {
+      url,
+      schema,
+      authenticated,
+      variables,
+      queryPreview: query.substring(0, 100) + '...'
+    });
+  }
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -110,7 +116,7 @@ export async function graphqlRequest<T = any>({
 
   // Get CSRF token for authenticated requests
   if (authenticated || schema === 'default') {
-    await ensureCsrfCookie(); // Asegurarse de que la cookie existe
+    await ensureCsrfCookie();
     const token = document.cookie
       .split('; ')
       .find(row => row.startsWith('XSRF-TOKEN='))
@@ -125,7 +131,7 @@ export async function graphqlRequest<T = any>({
     method: 'POST',
     headers,
     body: JSON.stringify({ query, variables }),
-    credentials: 'include', // Always include credentials for session persistence
+    credentials: 'include',
   };
 
   let res: Response;
@@ -136,55 +142,64 @@ export async function graphqlRequest<T = any>({
     if (cacheKey) {
       const cached = getFromCache<T>(cacheKey);
       if (cached) {
-        console.warn('⚡ Network failed. Served from local cache:', cacheKey);
+        if (isDev) console.warn('⚡ Network failed. Served from local cache:', cacheKey);
         notifyServedFromCache(schema);
         return cached;
       }
     }
     throw networkErr;
   }
-  
-  console.log('🟢 GraphQL Response Status:', {
-    status: res.status,
-    statusText: res.statusText,
-    ok: res.ok,
-    url
-  });
 
-  // Handle HTTP-level errors (e.g. 500 Server Error)
-  if (!res.ok) {
-    if (cacheKey && res.status >= 500) {
+  if (isDev) {
+    console.log('🟢 GraphQL Response Status:', {
+      status: res.status,
+      ok: res.ok,
+      url
+    });
+  }
+
+  // 419: CSRF expired — reset flag so next request re-fetches the token
+  if (res.status === 419) {
+    resetCsrfFlag();
+  }
+
+  // Serve from cache for server errors (5xx) or auth-related errors (4xx) on queries
+  if (!res.ok && cacheKey) {
+    const shouldFallback = res.status >= 500 || res.status === 401 || res.status === 403 || res.status === 419;
+    if (shouldFallback) {
       const cached = getFromCache<T>(cacheKey);
       if (cached) {
-        console.warn(`⚡ HTTP ${res.status} error. Served from local cache:`, cacheKey);
+        if (isDev) console.warn(`⚡ HTTP ${res.status}. Served from local cache:`, cacheKey);
         notifyServedFromCache(schema);
         return cached;
       }
     }
+  }
 
+  if (!res.ok) {
     let message = `HTTP ${res.status}`;
     try {
       const data = await res.json();
-      console.error('❌ HTTP Error Response:', data);
+      if (isDev) console.error('❌ HTTP Error Response:', data);
       if (data?.message) message = data.message;
     } catch {
       try {
         const text = await res.text();
-        console.error('❌ HTTP Error Text:', text);
         if (text) message = text;
       } catch {}
     }
-    console.error('❌ Throwing HTTP Error:', message);
     throw new Error(message);
   }
 
   const json: GraphQLResponse<T> = await res.json();
   
-  console.log('📦 GraphQL Response Data:', {
-    hasErrors: !!json.errors,
-    errors: json.errors,
-    dataKeys: json.data ? Object.keys(json.data) : null
-  });
+  if (isDev) {
+    console.log('📦 GraphQL Response Data:', {
+      hasErrors: !!json.errors,
+      errors: json.errors,
+      dataKeys: json.data ? Object.keys(json.data) : null
+    });
+  }
   
   if (json.errors) {
     const isDbOrServerError = json.errors.some((err: any) => {
@@ -202,35 +217,23 @@ export async function graphqlRequest<T = any>({
     if (cacheKey && isDbOrServerError) {
       const cached = getFromCache<T>(cacheKey);
       if (cached) {
-        console.warn('⚡ Database error encountered. Fallback to local cache:', cacheKey);
+        if (isDev) console.warn('⚡ Database error. Fallback to local cache:', cacheKey);
         notifyServedFromCache(schema);
         return cached;
       }
     }
 
     const msg = json.errors.map((e) => e.message).join('; ');
-    console.error('❌ GraphQL Errors COMPLETO:', JSON.stringify(json.errors, null, 2));
-    console.error('❌ Mensaje de error:', msg);
-    
-    // Log cada error individualmente para mejor visibilidad
-    json.errors.forEach((err, index) => {
-      console.error(`❌ Error ${index + 1}:`, {
-        message: err.message,
-        extensions: err.extensions,
-        path: err.path,
-        locations: err.locations
-      });
-    });
-    
+    if (isDev) {
+      console.error('❌ GraphQL Errors:', JSON.stringify(json.errors, null, 2));
+    }
     const error = new Error(msg || 'GraphQL error');
     (error as any).response = { errors: json.errors };
     throw error;
   }
   
-  console.log('✅ GraphQL Request Success');
   if (cacheKey && json.data) {
     saveToCache(cacheKey, json.data);
   }
   return json.data as T;
 }
-

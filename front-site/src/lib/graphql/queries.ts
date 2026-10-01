@@ -341,4 +341,19 @@ export const queries = {
       }
     }
   `,
+  siteSettingsThemeColors: `
+    query SiteSettingsThemeColors {
+      siteSettings {
+        primary_color
+        secondary_color
+        success_color
+        danger_color
+        warning_color
+        info_color
+        light_color
+        dark_color
+      }
+    }
+  `,
 } as const;
+
