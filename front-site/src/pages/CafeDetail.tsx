@@ -72,6 +72,7 @@ export default function CafeDetail(): React.ReactElement {
   const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [showMapDialog, setShowMapDialog] = useState<boolean>(false);
+  const [branchDropdownOpen, setBranchDropdownOpen] = useState<boolean>(false);
 
   const activeBranch = useMemo(() => {
     return (cafe?.branches ?? []).find((branch) => String(branch.id) === activeBranchKey) ?? null;
@@ -534,11 +535,16 @@ export default function CafeDetail(): React.ReactElement {
                     {/* Pop-Up Button Dropdown (Visible siempre en móvil, y en escritorio si hay más de 3 sucursales) */}
                     <div className={`apple-branch-picker-wrapper ${isManyBranches ? 'd-flex' : 'd-flex d-md-none'}`}>
                       <div className="d-flex align-items-center gap-2 w-100">
-                        <Dropdown className="flex-grow-1 apple-branch-dropdown">
+                        <Dropdown
+                          className="flex-grow-1 apple-branch-dropdown"
+                          show={branchDropdownOpen}
+                          onToggle={(isOpen) => setBranchDropdownOpen(isOpen)}
+                          autoClose={true}
+                        >
                           <Dropdown.Toggle
-                            as="button"
+                            variant="link"
                             id="branch-picker-dropdown"
-                            className="apple-branch-picker-btn"
+                            className="apple-branch-picker-btn text-decoration-none"
                             aria-label={t('cafes.detail.select_branch')}
                           >
                             <div className="apple-branch-picker-content">
@@ -576,7 +582,10 @@ export default function CafeDetail(): React.ReactElement {
                                 return (
                                   <Dropdown.Item
                                     key={branch.id}
-                                    onClick={() => setActiveBranchKey(String(branch.id))}
+                                    onClick={() => {
+                                      setActiveBranchKey(String(branch.id));
+                                      setBranchDropdownOpen(false);
+                                    }}
                                     className={`apple-branch-menu-item ${isSelected ? 'active' : ''}`}
                                   >
                                     <div className="apple-branch-item-left">

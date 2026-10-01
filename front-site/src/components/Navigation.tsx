@@ -39,6 +39,9 @@ const Navigation: React.FC = () => {
   const [showUserMenu, setShowUserMenu] = React.useState<boolean>(false);
   const [showToast, setShowToast] = React.useState<boolean>(false);
   const [toastNotification, setToastNotification] = React.useState<any>(null);
+  const [showNotificationsDropdown, setShowNotificationsDropdown] = React.useState<boolean>(false);
+  const [showCafesDropdown, setShowCafesDropdown] = React.useState<boolean>(false);
+  const [showInfoDropdown, setShowInfoDropdown] = React.useState<boolean>(false);
 
   // Actualizar título de la pestaña con contador de notificaciones
   React.useEffect(() => {
@@ -216,6 +219,9 @@ const Navigation: React.FC = () => {
             </Nav.Link>
             <NavDropdown
               className="apple-tab-dropdown"
+              show={showCafesDropdown}
+              onToggle={(isOpen) => setShowCafesDropdown(isOpen)}
+              autoClose={true}
               title={
                 <AnimatedHover className="apple-tab-content">
                   <i className="fas fa-mug-hot apple-tab-icon"></i>
@@ -227,8 +233,8 @@ const Navigation: React.FC = () => {
               }
               id="cafes-dropdown"
             >
-              <NavDropdown.Item as={Link} to="/cafes">{t('nav.cafes')}</NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/sugerir-cafe">{t('nav.suggest_cafe')}</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/cafes" onClick={() => setShowCafesDropdown(false)}>{t('nav.cafes')}</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/sugerir-cafe" onClick={() => setShowCafesDropdown(false)}>{t('nav.suggest_cafe')}</NavDropdown.Item>
             </NavDropdown>
             <Nav.Link as={Link} to="/ranking" className="apple-tab-link">
               <AnimatedHover className="apple-tab-content">
@@ -238,6 +244,9 @@ const Navigation: React.FC = () => {
             </Nav.Link>
             <NavDropdown
               className="apple-tab-dropdown"
+              show={showInfoDropdown}
+              onToggle={(isOpen) => setShowInfoDropdown(isOpen)}
+              autoClose={true}
               title={
                 <AnimatedHover className="apple-tab-content">
                   <i className="fas fa-info-circle apple-tab-icon"></i>
@@ -249,12 +258,12 @@ const Navigation: React.FC = () => {
               }
               id="info-dropdown"
             >
-              <NavDropdown.Item as={Link} to="/contacto">{t('nav.contact')}</NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/preguntas-frecuentes">{t('nav.faqs')}</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/contacto" onClick={() => setShowInfoDropdown(false)}>{t('nav.contact')}</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/preguntas-frecuentes" onClick={() => setShowInfoDropdown(false)}>{t('nav.faqs')}</NavDropdown.Item>
               <NavDropdown.Divider />
-              <NavDropdown.Item as={Link} to="/terminos-y-condiciones">{t('nav.terms')}</NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/politica-de-privacidad">{t('nav.privacy')}</NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/privacidad-datos">{t('nav.arcop_rights', 'Derechos ARCOP & Datos')}</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/terminos-y-condiciones" onClick={() => setShowInfoDropdown(false)}>{t('nav.terms')}</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/politica-de-privacidad" onClick={() => setShowInfoDropdown(false)}>{t('nav.privacy')}</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/privacidad-datos" onClick={() => setShowInfoDropdown(false)}>{t('nav.arcop_rights', 'Derechos ARCOP & Datos')}</NavDropdown.Item>
             </NavDropdown>
           </Nav>
           <Nav className="align-items-center w-100">
@@ -613,7 +622,12 @@ const Navigation: React.FC = () => {
                 <ThemeSwitcher inline className="me-2" />
 
                 {/* Campana al extremo derecho (se mantiene fuera del offcanvas) */}
-                <Dropdown align="end">
+                <Dropdown
+                  align="end"
+                  show={showNotificationsDropdown}
+                  onToggle={(isOpen) => setShowNotificationsDropdown(isOpen)}
+                  autoClose={true}
+                >
                   <Dropdown.Toggle variant="link" className="text-reset position-relative p-0 border-0 d-inline-flex align-items-center justify-content-center" style={{ background: 'none', width: '44px', height: '44px' }} aria-label={t('nav.notifications')}>
                     <AnimatedHover>
                       <i className="fas fa-bell fa-lg"></i>
@@ -665,6 +679,7 @@ const Navigation: React.FC = () => {
                             <div
                               className="d-flex align-items-start"
                               onClick={() => {
+                                setShowNotificationsDropdown(false);
                                 if (!notif.read_at) handleMarkAsRead(notif.id);
                                 if (notif.url) navigate(notif.url);
                               }}
@@ -705,7 +720,12 @@ const Navigation: React.FC = () => {
                           </motion.div>
                         ))}
                         <Dropdown.Divider />
-                        <Dropdown.Item as={Link} to="/notificaciones" className="text-center text-primary">
+                        <Dropdown.Item
+                          as={Link}
+                          to="/notificaciones"
+                          onClick={() => setShowNotificationsDropdown(false)}
+                          className="text-center text-primary"
+                        >
                           {t('nav.view_all_notifications')}
                         </Dropdown.Item>
                       </>

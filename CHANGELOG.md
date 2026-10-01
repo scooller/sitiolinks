@@ -20,6 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Integración de `UsersGrid` con animaciones táctiles, halo VIP distintivo, etiquetas interactivas y paginación fluida.
     - Estado de carga con skeleton placeholders y empty state accesible.
 
+### Fixed
+- **Auditoría y Cierre Reactivo de Todos los Menús Dropdown (`CafeDetail.tsx`, `Navigation.tsx`, `LanguageSwitcher.tsx`, `UserProfile.tsx`, `cafes.css`)**:
+  - **Selector de Sucursales de Café (`CafeDetail.tsx`)**: Vinculado con estado `branchDropdownOpen`, `autoClose={true}` y cierre inmediato en cada selección de sucursal.
+  - **Menús de Navegación (`Navigation.tsx`)**: Menús desplegables de Cafés e Información (`NavDropdown`) y panel flotante de Notificaciones (`Dropdown`) convertidos a estado reactivo controlado con `autoClose={true}` y cierre automático al interactuar con cualquier elemento o enlace.
+  - **Selector de Idioma (`LanguageSwitcher.tsx`)**: Integrado estado `showDropdown` con `autoClose={true}` y cierre garantizado al seleccionar Español o Inglés.
+  - **Descarga de Códigos QR (`UserProfile.tsx`)**: Conmutador de formatos de tarjeta QR controlado con `showQrDropdown` y `autoClose={true}`.
+  - Ocultación del caret nativo de Bootstrap en selectores Apple HIG personalizados.
+
 ## [0.26.11] - 2026-09-27
 
 ### Added

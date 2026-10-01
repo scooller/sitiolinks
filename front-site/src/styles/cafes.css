@@ -463,6 +463,10 @@
   user-select: none;
 }
 
+.apple-branch-picker-btn::after {
+  display: none !important;
+}
+
 [data-bs-theme="dark"] .apple-branch-picker-btn {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.12);

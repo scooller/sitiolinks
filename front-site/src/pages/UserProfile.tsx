@@ -73,6 +73,7 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
   const [similarTotal, setSimilarTotal] = useState<number>(0);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [showQrDropdown, setShowQrDropdown] = useState<boolean>(false);
   const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const QR_DISPLAY_SIZE = 200;
   const DOWNLOAD_QR_SIZE = 800;
@@ -1757,7 +1758,12 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                           />
                         </div>
                         <div className="mb-3 d-flex justify-content-center">
-                          <Dropdown as={ButtonGroup}>
+                          <Dropdown
+                            as={ButtonGroup}
+                            show={showQrDropdown}
+                            onToggle={(isOpen) => setShowQrDropdown(isOpen)}
+                            autoClose={true}
+                          >
                             <Button
                               variant="secondary"
                               className="profile-btn-solid profile-btn-secondary d-inline-flex align-items-center"
@@ -1784,16 +1790,34 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                               disabled={downloadingQr}
                             />
                             <Dropdown.Menu className="shadow-lg border-0 rounded-3 py-2">
-                              <Dropdown.Item onClick={() => handleDownloadQr('story')} className="py-2">
+                              <Dropdown.Item
+                                onClick={() => {
+                                  handleDownloadQr('story');
+                                  setShowQrDropdown(false);
+                                }}
+                                className="py-2"
+                              >
                                 <i className="fas fa-mobile-screen me-2 text-primary"></i>
                                 {t('profile.qr_story_opt', 'Tarjeta Historia / Reels (9:16)')}
                               </Dropdown.Item>
-                              <Dropdown.Item onClick={() => handleDownloadQr('feed')} className="py-2">
+                              <Dropdown.Item
+                                onClick={() => {
+                                  handleDownloadQr('feed');
+                                  setShowQrDropdown(false);
+                                }}
+                                className="py-2"
+                              >
                                 <i className="fas fa-square me-2 text-success"></i>
                                 {t('profile.qr_feed_opt', 'Tarjeta Feed / Post (1:1)')}
                               </Dropdown.Item>
                               <Dropdown.Divider />
-                              <Dropdown.Item onClick={() => handleDownloadQr('classic')} className="py-2 text-muted">
+                              <Dropdown.Item
+                                onClick={() => {
+                                  handleDownloadQr('classic');
+                                  setShowQrDropdown(false);
+                                }}
+                                className="py-2 text-muted"
+                              >
                                 <i className="fas fa-qrcode me-2"></i>
                                 {t('profile.qr_classic_opt', 'Solo Código QR (1024x1024)')}
                               </Dropdown.Item>

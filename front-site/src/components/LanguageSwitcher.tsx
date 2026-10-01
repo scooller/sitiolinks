@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavDropdown } from 'react-bootstrap';
 
 const LanguageSwitcher: React.FC = () => {
     const { i18n } = useTranslation();
+    const [showDropdown, setShowDropdown] = useState<boolean>(false);
 
     const changeLanguage = (lng: string) => {
         i18n.changeLanguage(lng);
+        setShowDropdown(false);
     };
 
     const currentLang = i18n.language || 'es';
@@ -21,6 +23,9 @@ const LanguageSwitcher: React.FC = () => {
             }
             id="language-nav-dropdown"
             align="end"
+            show={showDropdown}
+            onToggle={(isOpen) => setShowDropdown(isOpen)}
+            autoClose={true}
         >
             <NavDropdown.Item
                 onClick={() => changeLanguage('es')}
