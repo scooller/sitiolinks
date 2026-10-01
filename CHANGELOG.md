@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.29.0] - 2026-10-01
+
+### Added
+- **Funcionalidad de Denuncia de Perfiles con Tickets en Backend (`UserProfile.tsx`, `profile.css`, `translation.json`)**:
+  - **Botón sutil Apple HIG**: Integrado botón con icono `fas fa-flag` en la tarjeta lateral de perfiles ajenos (`currentUser?.username !== user.username`).
+  - **Modal de Denuncia Interactivo**:
+    - Gate de inicio de sesión para usuarios no autenticados.
+    - Selector de motivos de denuncia: Suplantación de identidad, contenido no permitido o inapropiado, spam/fraude, fotos falsas, sospecha de menor (+18) u otros motivos.
+    - Campo de descripción detallada con validación mínima.
+    - Integración directa con la mutación GraphQL `createTicket` (categoría `contenido`, prioridad `alta`) que genera automáticamente el ticket en el panel de soporte y notifica a los moderadores.
+    - Confirmación inmediata con número de ticket generado.
+
 ## [0.28.0] - 2026-10-01
 
 ### Added

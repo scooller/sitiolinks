@@ -815,6 +815,30 @@
         "notes_placeholder": "Opening hours, price range, specials, WiFi info, etc.",
         "submit": "Submit Suggestion",
         "error": "An error occurred while sending your suggestion."
+    },
+    "report_profile": {
+        "button": "Report profile",
+        "modal_title": "Report @{{username}}'s profile",
+        "modal_subtitle": "Your report is confidential and will be prioritized by our moderation team.",
+        "reason_label": "Reason for report",
+        "reason_placeholder": "Select a reason...",
+        "reason_impersonation": "Impersonation",
+        "reason_inappropriate": "Prohibited or inappropriate content",
+        "reason_scam": "Scam, fraud, or spam",
+        "reason_fake": "Fake photos or false info",
+        "reason_underage": "Suspected minor (+18 requirement)",
+        "reason_other": "Other reason",
+        "details_label": "Details or explanation",
+        "details_placeholder": "Describe what happened in as much detail as possible...",
+        "details_min_length": "Please enter at least 10 characters explaining the issue.",
+        "submit": "Submit Report",
+        "submitting": "Submitting report...",
+        "cancel": "Cancel",
+        "close": "Close",
+        "success_title": "Report submitted",
+        "success_desc": "We have received your report regarding @{{username}} and generated moderation ticket #{{ticketId}}. Our team will review this shortly.",
+        "login_required": "You must be signed in to report a profile.",
+        "login_btn": "Sign In"
     }
 }
 

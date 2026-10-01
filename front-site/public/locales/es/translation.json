@@ -814,6 +814,30 @@
         "notes_placeholder": "Horarios, precios aproximados, especialidades, etc.",
         "submit": "Enviar Sugerencia",
         "error": "Ocurrió un error al enviar tu sugerencia."
+    },
+    "report_profile": {
+        "button": "Denunciar perfil",
+        "modal_title": "Denunciar perfil de @{{username}}",
+        "modal_subtitle": "Tu reporte es confidencial y será revisado prioritariamente por nuestro equipo de moderación.",
+        "reason_label": "Motivo de la denuncia",
+        "reason_placeholder": "Selecciona un motivo...",
+        "reason_impersonation": "Suplantación de identidad",
+        "reason_inappropriate": "Contenido no permitido o inapropiado",
+        "reason_scam": "Estafa, fraude o spam",
+        "reason_fake": "Fotos o información falsa",
+        "reason_underage": "Sospecha de menor de edad (+18)",
+        "reason_other": "Otro motivo",
+        "details_label": "Detalles o explicación",
+        "details_placeholder": "Describe lo sucedido con el mayor detalle posible para ayudarnos en la revisión...",
+        "details_min_length": "Por favor escribe al menos 10 caracteres explicando el motivo.",
+        "submit": "Enviar Denuncia",
+        "submitting": "Enviando reporte...",
+        "cancel": "Cancelar",
+        "close": "Cerrar",
+        "success_title": "Denuncia enviada",
+        "success_desc": "Hemos recibido tu reporte sobre @{{username}} y se ha generado un ticket de moderación (#{{ticketId}}). Nuestro equipo revisará el caso a la brevedad.",
+        "login_required": "Debes iniciar sesión para poder denunciar un perfil.",
+        "login_btn": "Iniciar Sesión"
     }
 }
 

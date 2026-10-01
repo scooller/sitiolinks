@@ -74,6 +74,11 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [showQrDropdown, setShowQrDropdown] = useState<boolean>(false);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reportReason, setReportReason] = useState<string>('');
+  const [reportDetails, setReportDetails] = useState<string>('');
+  const [reportSending, setReportSending] = useState<boolean>(false);
+  const [reportStatus, setReportStatus] = useState<{ variant: 'success' | 'danger'; text: string; ticketId?: number } | null>(null);
   const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const QR_DISPLAY_SIZE = 200;
   const DOWNLOAD_QR_SIZE = 800;
@@ -818,6 +823,54 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
     }
   };
 
+  const handleReportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !currentUser) return;
+    if (!reportReason) {
+      setReportStatus({ variant: 'danger', text: t('report_profile.reason_placeholder') });
+      return;
+    }
+    if (reportDetails.trim().length < 10) {
+      setReportStatus({ variant: 'danger', text: t('report_profile.details_min_length') });
+      return;
+    }
+
+    setReportSending(true);
+    setReportStatus(null);
+    try {
+      const reasonText = t(`report_profile.reason_${reportReason}`, reportReason);
+      const subject = `[Denuncia] @${user.username} (#${user.id}) - ${reasonText}`;
+      const description = `Denuncia de perfil reportada por @${currentUser.username} (ID: #${currentUser.id}, Email: ${currentUser.email || 'N/A'}).\n\nPerfil denunciado: @${user.username} (ID: #${user.id})\nURL: ${window.location.origin}/u/${user.username}\nMotivo: ${reasonText}\n\nDetalles del denunciante:\n${reportDetails.trim()}`;
+
+      const res = await graphqlRequest<{ createTicket: { id: number } }>({
+        query: mutations.createTicket,
+        variables: {
+          subject,
+          description,
+          category: 'contenido',
+          priority: 'alta',
+        },
+        schema: 'default',
+        authenticated: true,
+      });
+
+      setReportStatus({
+        variant: 'success',
+        text: t('report_profile.success_desc', { username: user.username, ticketId: res?.createTicket?.id || '' }),
+        ticketId: res?.createTicket?.id,
+      });
+      setReportDetails('');
+      setReportReason('');
+    } catch (err: any) {
+      setReportStatus({
+        variant: 'danger',
+        text: err?.response?.[0]?.message || err?.message || 'Error al enviar reporte.',
+      });
+    } finally {
+      setReportSending(false);
+    }
+  };
+
   const loadFollowing = async (page: number = 1, search: string = '', tag: string = '') => {
     if (!user) return;
     setLoadingFollowing(true);
@@ -1266,6 +1319,138 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
         </Modal.Body>
       </Modal>
 
+      {/* Modal Apple HIG de Denuncia de Perfil */}
+      <Modal
+        show={showReportModal}
+        onHide={() => {
+          if (!reportSending) setShowReportModal(false);
+        }}
+        centered
+        contentClassName="profile-modal-content"
+      >
+        <Modal.Header closeButton={!reportSending}>
+          <Modal.Title className="fs-5 d-flex align-items-center gap-2">
+            <i className="fas fa-triangle-exclamation text-danger" aria-hidden="true"></i>
+            <span>{t('report_profile.modal_title', { username: user.username })}</span>
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {!isAuthenticated ? (
+            <div className="text-center py-3">
+              <div className="mb-3">
+                <i className="fas fa-lock fa-2x text-muted" aria-hidden="true"></i>
+              </div>
+              <p className="text-muted mb-3">{t('report_profile.login_required')}</p>
+              <Button
+                variant="primary"
+                className="rounded-pill px-4"
+                as={Link}
+                to="/login"
+              >
+                <i className="fas fa-arrow-right-to-bracket me-2" aria-hidden="true"></i>
+                {t('report_profile.login_btn')}
+              </Button>
+            </div>
+          ) : reportStatus?.variant === 'success' ? (
+            <div className="text-center py-3">
+              <div className="mb-3">
+                <i className="fas fa-circle-check fa-3x text-success" aria-hidden="true"></i>
+              </div>
+              <h5 className="fw-bold mb-2">{t('report_profile.success_title')}</h5>
+              <p className="text-muted small mb-4">{reportStatus.text}</p>
+              <Button
+                variant="secondary"
+                className="rounded-pill px-4"
+                onClick={() => setShowReportModal(false)}
+              >
+                {t('report_profile.close')}
+              </Button>
+            </div>
+          ) : (
+            <Form onSubmit={handleReportSubmit}>
+              <p className="text-muted small mb-3">
+                {t('report_profile.modal_subtitle')}
+              </p>
+
+              {reportStatus?.variant === 'danger' && (
+                <Alert variant="danger" className="py-2 small mb-3">
+                  <i className="fas fa-circle-exclamation me-1" aria-hidden="true"></i>
+                  {reportStatus.text}
+                </Alert>
+              )}
+
+              <Form.Group className="mb-3">
+                <Form.Label className="small fw-semibold">
+                  {t('report_profile.reason_label')} <span className="text-danger">*</span>
+                </Form.Label>
+                <Form.Select
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  required
+                  disabled={reportSending}
+                >
+                  <option value="">{t('report_profile.reason_placeholder')}</option>
+                  <option value="impersonation">{t('report_profile.reason_impersonation')}</option>
+                  <option value="inappropriate">{t('report_profile.reason_inappropriate')}</option>
+                  <option value="scam">{t('report_profile.reason_scam')}</option>
+                  <option value="fake">{t('report_profile.reason_fake')}</option>
+                  <option value="underage">{t('report_profile.reason_underage')}</option>
+                  <option value="other">{t('report_profile.reason_other')}</option>
+                </Form.Select>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label className="small fw-semibold">
+                  {t('report_profile.details_label')} <span className="text-danger">*</span>
+                </Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={4}
+                  maxLength={1000}
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder={t('report_profile.details_placeholder')}
+                  required
+                  disabled={reportSending}
+                />
+                <Form.Text className="text-muted small">
+                  {t('report_profile.details_min_length')}
+                </Form.Text>
+              </Form.Group>
+
+              <div className="d-flex justify-content-end gap-2 mt-4">
+                <Button
+                  variant="secondary"
+                  className="rounded-pill px-3"
+                  onClick={() => setShowReportModal(false)}
+                  disabled={reportSending}
+                >
+                  {t('report_profile.cancel')}
+                </Button>
+                <Button
+                  type="submit"
+                  variant="danger"
+                  className="rounded-pill px-4 fw-semibold"
+                  disabled={reportSending || !reportReason || reportDetails.trim().length < 10}
+                >
+                  {reportSending ? (
+                    <>
+                      <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                      {t('report_profile.submitting')}
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-paper-plane me-1" aria-hidden="true"></i>
+                      {t('report_profile.submit')}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Modal.Body>
+      </Modal>
+
       <Container
         className="mt-4"
         as={motion.div}
@@ -1579,6 +1764,24 @@ export default function UserProfile({ section = 'profile' as 'profile' | 'galler
                         })}
                     </div>
                   </motion.div>
+                )}
+
+                {/* Botón sutil de denuncia de perfil */}
+                {currentUser?.username !== user.username && (
+                  <div className="profile-report-container">
+                    <button
+                      type="button"
+                      className="profile-report-btn"
+                      onClick={() => {
+                        setReportStatus(null);
+                        setShowReportModal(true);
+                      }}
+                      title={t('report_profile.button')}
+                    >
+                      <i className="fas fa-flag" aria-hidden="true"></i>
+                      <span>{t('report_profile.button')}</span>
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

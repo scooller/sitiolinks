@@ -657,6 +657,46 @@
   text-decoration: underline;
 }
 
+/* Botón y contenedor sutil de Denuncia de Perfil */
+.profile-report-container {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--apple-glass-border);
+  text-align: center;
+}
+
+.profile-report-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 6px 14px;
+  border-radius: var(--rounded-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  color: var(--apple-glass-text-muted, #8e8e93);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-apple);
+}
+
+.profile-report-btn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+[data-bs-theme="dark"] .profile-report-btn:hover {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.profile-report-btn:focus-visible {
+  outline: 2px solid rgba(239, 68, 68, 0.5);
+  outline-offset: 2px;
+}
+
 /* --------------------------------------------------------------------------
    4. Modales Apple (Seguidos & Mensaje VIP)
    -------------------------------------------------------------------------- */
