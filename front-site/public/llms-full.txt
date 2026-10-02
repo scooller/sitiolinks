@@ -36,7 +36,7 @@ The platform provides category and tag-based exploration, explicit adult photo g
 - **Route**: `/cafes` (Listing), `/cafes/:slug` (Detail)
 - **Cultural & Domain Definition**: 
   - In Chile, a *"café con piernas"* (coffee with legs) is a traditional downtown commercial coffee bar format staffed by female model hostesses.
-  - The platform provides a modern directory for discovering venues, schedules, branch maps, and linked model profiles.
+  - The platform provides a modern directory for discovering venues, schedules, branch maps, linked model profiles, and multi-format downloadable QR promotion cards (Story 9:16, Feed 1:1, Classic QR).
 
 ### 2.4 Community Leaderboard (`/ranking`)
 - **Route**: `/ranking`

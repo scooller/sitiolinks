@@ -3,6 +3,7 @@ import {
   Alert,
   Badge,
   Button,
+  ButtonGroup,
   Col,
   Container,
   Dropdown,
@@ -11,15 +12,22 @@ import {
   Row,
   Spinner,
 } from 'react-bootstrap';
+import { QRCodeCanvas } from 'qrcode.react';
+import { createRoot } from 'react-dom/client';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { APP_CURRENCY, APP_CURRENCY_FRACTION_DIGITS } from '../config/constants';
+import { APP_CURRENCY, APP_CURRENCY_FRACTION_DIGITS, BACKEND_URL } from '../config/constants';
+import { queries } from '../lib/graphql/queries';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
-import type { Cafe, CafeBranch } from '../types';
+import type { Cafe, CafeBranch, SiteSettings } from '../types';
 import 'lightgallery/css/lightgallery.css';
 import 'lightgallery/css/lg-zoom.css';
 import 'lightgallery/css/lg-fullscreen.css';
+
+interface SettingsWithQR extends SiteSettings {
+  qr_logo_size?: number;
+}
 
 interface LightGalleryInstance {
   destroy: () => void;
@@ -73,6 +81,15 @@ export default function CafeDetail(): React.ReactElement {
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [showMapDialog, setShowMapDialog] = useState<boolean>(false);
   const [branchDropdownOpen, setBranchDropdownOpen] = useState<boolean>(false);
+  const [siteLogo, setSiteLogo] = useState<string | null>(null);
+  const [siteTitle, setSiteTitle] = useState<string | null>(null);
+  const [qrLogoSize, setQrLogoSize] = useState<number>(48);
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [logoDimensions, setLogoDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [downloadingQr, setDownloadingQr] = useState<boolean>(false);
+  const [showQrDropdown, setShowQrDropdown] = useState<boolean>(false);
+  const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const QR_DISPLAY_SIZE = 200;
 
   const activeBranch = useMemo(() => {
     return (cafe?.branches ?? []).find((branch) => String(branch.id) === activeBranchKey) ?? null;
@@ -158,14 +175,40 @@ export default function CafeDetail(): React.ReactElement {
         }
       `;
 
-      const response = await graphqlRequest<CafeDetailResponse>({
-        query,
-        variables: {
-          id: /^\d+$/.test(slug) ? Number(slug) : null,
-          slug: /^\d+$/.test(slug) ? null : slug,
-        },
-        schema: 'public',
-      });
+      const [settingsRes, response] = await Promise.all([
+        graphqlRequest<{ siteSettings: SettingsWithQR }>({ query: queries.siteSettings, schema: 'public' }).catch(() => null),
+        graphqlRequest<CafeDetailResponse>({
+          query,
+          variables: {
+            id: /^\d+$/.test(slug) ? Number(slug) : null,
+            slug: /^\d+$/.test(slug) ? null : slug,
+          },
+          schema: 'public',
+        }),
+      ]);
+
+      if (settingsRes?.siteSettings) {
+        const titleRaw = settingsRes.siteSettings.site_title;
+        if (titleRaw && !titleRaw.toLowerCase().includes('link persons')) {
+          setSiteTitle(titleRaw);
+        }
+        const logoRaw = settingsRes.siteSettings.logo_url || (settingsRes.siteSettings as any)?.logo;
+        if (logoRaw) {
+          try {
+            const backendBase = String((import.meta as any).env?.VITE_BACKEND_URL || BACKEND_URL).replace(/\/$/, '');
+            const u = new URL(String(logoRaw), backendBase);
+            const absolute = `${backendBase}${u.pathname}${u.search}`;
+            setSiteLogo(absolute);
+          } catch {
+            setSiteLogo(String(logoRaw));
+          }
+        }
+        const qls = settingsRes.siteSettings.qr_logo_size;
+        if (typeof qls === 'number' && qls > 0) {
+          const clamped = Math.max(24, Math.min(96, qls));
+          setQrLogoSize(clamped);
+        }
+      }
 
       const detail = response?.cafeDetail ?? null;
       setCafe(detail);
@@ -347,6 +390,518 @@ export default function CafeDetail(): React.ReactElement {
       });
     } catch {
       // Ignore canceled share dialog to avoid noisy UI errors.
+    }
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadLogo = async () => {
+      if (!siteLogo) {
+        setLogoDataUrl(null);
+        setLogoDimensions(null);
+        return;
+      }
+      try {
+        const res = await fetch(siteLogo);
+        if (!res.ok) throw new Error('logo fetch failed');
+        const blob = await res.blob();
+        const reader = new FileReader();
+        const dataUrl: string = await new Promise((resolve, reject) => {
+          reader.onloadend = () => resolve(String(reader.result || ''));
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        if (!cancelled) {
+          setLogoDataUrl(dataUrl);
+          const img = new Image();
+          img.onload = () => {
+            if (!cancelled) {
+              const nw = img.naturalWidth || img.width;
+              const nh = img.naturalHeight || img.height;
+              if (nw && nh) {
+                const aspect = nw / nh;
+                if (aspect >= 1) {
+                  setLogoDimensions({ width: qrLogoSize, height: Math.max(16, Math.round(qrLogoSize / aspect)) });
+                } else {
+                  setLogoDimensions({ width: Math.max(16, Math.round(qrLogoSize * aspect)), height: qrLogoSize });
+                }
+              }
+            }
+          };
+          img.src = dataUrl;
+        }
+      } catch {
+        if (!cancelled) {
+          setLogoDataUrl(null);
+          setLogoDimensions(null);
+        }
+      }
+    };
+    loadLogo();
+    return () => {
+      cancelled = true;
+    };
+  }, [siteLogo, qrLogoSize]);
+
+  const drawRoundedRect = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number,
+    fill?: string,
+    stroke?: string,
+    strokeW?: number
+  ) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    if (fill) {
+      ctx.fillStyle = fill;
+      ctx.fill();
+    }
+    if (stroke && strokeW) {
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = strokeW;
+      ctx.stroke();
+    }
+    ctx.restore();
+  };
+
+  const drawImageCover = (
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    dx: number,
+    dy: number,
+    dw: number,
+    dh: number
+  ) => {
+    const imgW = img.naturalWidth || img.width;
+    const imgH = img.naturalHeight || img.height;
+    if (!imgW || !imgH) {
+      ctx.drawImage(img, dx, dy, dw, dh);
+      return;
+    }
+
+    const destAspect = dw / dh;
+    const srcAspect = imgW / imgH;
+
+    let sx = 0;
+    let sy = 0;
+    let sw = imgW;
+    let sh = imgH;
+
+    if (srcAspect > destAspect) {
+      sw = imgH * destAspect;
+      sx = (imgW - sw) / 2;
+    } else {
+      sh = imgW / destAspect;
+      sy = (imgH - sh) / 2;
+    }
+
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+  };
+
+  const drawImageContain = (
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    dx: number,
+    dy: number,
+    dw: number,
+    dh: number
+  ) => {
+    const imgW = img.naturalWidth || img.width;
+    const imgH = img.naturalHeight || img.height;
+    if (!imgW || !imgH) {
+      ctx.drawImage(img, dx, dy, dw, dh);
+      return;
+    }
+
+    const destAspect = dw / dh;
+    const srcAspect = imgW / imgH;
+
+    let renderW = dw;
+    let renderH = dh;
+    let renderX = dx;
+    let renderY = dy;
+
+    if (srcAspect > destAspect) {
+      renderH = dw / srcAspect;
+      renderY = dy + (dh - renderH) / 2;
+    } else {
+      renderW = dh * srcAspect;
+      renderX = dx + (dw - renderW) / 2;
+    }
+
+    ctx.drawImage(img, 0, 0, imgW, imgH, renderX, renderY, renderW, renderH);
+  };
+
+  const drawCircularAvatar = (
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    cx: number,
+    cy: number,
+    r: number,
+    borderCol: string = '#6f4e37',
+    borderW: number = 4
+  ) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.clip();
+    drawImageCover(ctx, img, cx - r, cy - r, r * 2, r * 2);
+    ctx.restore();
+
+    if (borderW > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2, true);
+      ctx.strokeStyle = borderCol;
+      ctx.lineWidth = borderW;
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
+
+  const handleDownloadQr = async (format: 'classic' | 'story' | 'feed' = 'story') => {
+    if (!cafe) return;
+    setDownloadingQr(true);
+
+    try {
+      const cafeUrl = `${window.location.origin}/cafes/${cafe.slug || slug}`;
+      const resolvedSiteName = siteTitle || (typeof document !== 'undefined' && document.title && !document.title.toLowerCase().includes('link persons') ? document.title.split(' - ').pop()?.trim() : '') || 'Only Models';
+      const displayName = cafe.name;
+      const branchLocation = activeBranch?.city || activeBranch?.state || '';
+      const branchesCountText = cafe.branches_count && cafe.branches_count > 1 ? `${cafe.branches_count} sucursales` : branchLocation;
+      const ratingText = typeof cafe.average_rating === 'number' && cafe.average_rating > 0 ? `${cafe.average_rating.toFixed(1)} ★` : '';
+      const detailTxt = [branchesCountText, ratingText].filter(Boolean).join(' · ');
+
+      let W = 1024;
+      let H = 1024;
+      let qrInnerSize = 600;
+
+      if (format === 'story') {
+        W = 1080;
+        H = 1920;
+        qrInnerSize = 600;
+      } else if (format === 'feed') {
+        W = 1080;
+        H = 1080;
+        qrInnerSize = 520;
+      } else {
+        W = 1024;
+        H = 1024;
+        qrInnerSize = 912;
+      }
+
+      const frac = qrLogoSize / QR_DISPLAY_SIZE;
+      const logoDlSize = Math.max(36, Math.round(qrInnerSize * frac));
+      const logoSrc = logoDataUrl || siteLogo;
+
+      // 1. Preload Logo
+      let loadedLogoImg: HTMLImageElement | null = null;
+      if (logoSrc) {
+        try {
+          const img = new Image();
+          if (!logoSrc.startsWith('data:')) img.crossOrigin = 'anonymous';
+          img.src = logoSrc;
+          await new Promise<void>((resolve, reject) => {
+            if (img.complete) return resolve();
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+          });
+          loadedLogoImg = img;
+        } catch {}
+      }
+
+      // 2. Preload Cafe Image
+      let loadedCafeImg: HTMLImageElement | null = null;
+      let cafeImgSrc = cafe.image_url;
+      if (cafeImgSrc) {
+        if (!cafeImgSrc.startsWith('http') && !cafeImgSrc.startsWith('data:')) {
+          const backendBase = String((import.meta as any).env?.VITE_BACKEND_URL || BACKEND_URL).replace(/\/$/, '');
+          cafeImgSrc = `${backendBase}${cafeImgSrc.startsWith('/') ? '' : '/'}${cafeImgSrc}`;
+        }
+        try {
+          const img = new Image();
+          if (!cafeImgSrc.startsWith('data:')) img.crossOrigin = 'anonymous';
+          img.src = cafeImgSrc;
+          await new Promise<void>((resolve, reject) => {
+            if (img.complete) return resolve();
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+          });
+          loadedCafeImg = img;
+        } catch {}
+      }
+
+      // 3. Render offscreen QR Code
+      let logoW = logoDlSize;
+      let logoH = logoDlSize;
+      if (loadedLogoImg) {
+        const nw = loadedLogoImg.naturalWidth || loadedLogoImg.width;
+        const nh = loadedLogoImg.naturalHeight || loadedLogoImg.height;
+        if (nw && nh) {
+          const aspect = nw / nh;
+          if (aspect >= 1) {
+            logoW = logoDlSize;
+            logoH = Math.max(16, Math.round(logoDlSize / aspect));
+          } else {
+            logoW = Math.max(16, Math.round(logoDlSize * aspect));
+            logoH = logoDlSize;
+          }
+        }
+      }
+
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '-9999px';
+      document.body.appendChild(container);
+      const root = createRoot(container);
+
+      root.render(
+        <QRCodeCanvas
+          value={cafeUrl}
+          size={qrInnerSize}
+          level="H"
+          includeMargin={false}
+          imageSettings={
+            logoSrc
+              ? {
+                  src: logoSrc,
+                  width: logoW,
+                  height: logoH,
+                  excavate: true,
+                }
+              : undefined
+          }
+        />
+      );
+
+      let offCanvas: HTMLCanvasElement | null = null;
+      for (let i = 0; i < 8 && !offCanvas; i++) {
+        await new Promise((r) => setTimeout(r, 60));
+        offCanvas = container.querySelector('canvas') as HTMLCanvasElement | null;
+      }
+      if (!offCanvas) {
+        offCanvas = qrCanvasRef.current;
+      }
+
+      // 4. Composite final Canvas
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = W;
+      exportCanvas.height = H;
+      const ctx = exportCanvas.getContext('2d');
+      if (!ctx) throw new Error('No canvas context');
+
+      if (format === 'classic') {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, W, H);
+        const margin = 56;
+        if (offCanvas) {
+          ctx.drawImage(offCanvas, margin, margin, qrInnerSize, qrInnerSize);
+        }
+        if (loadedLogoImg) {
+          const lx = Math.round((W - logoW) / 2);
+          const ly = Math.round((H - logoH) / 2);
+          drawImageContain(ctx, loadedLogoImg, lx, ly, logoW, logoH);
+        }
+      } else if (format === 'story') {
+        // Story 9:16 (1080 x 1920)
+        if (loadedCafeImg) {
+          ctx.save();
+          if ('filter' in ctx) {
+            ctx.filter = 'blur(45px) brightness(0.65)';
+            drawImageCover(ctx, loadedCafeImg, -50, -50, W + 100, H + 100);
+            ctx.filter = 'none';
+          } else {
+            drawImageCover(ctx, loadedCafeImg, 0, 0, W, H);
+          }
+          ctx.restore();
+        } else {
+          const grad = ctx.createLinearGradient(0, 0, 0, H);
+          grad.addColorStop(0, '#3e2723');
+          grad.addColorStop(1, '#1b1b1b');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, W, H);
+        }
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(0, 0, W, H);
+
+        // Top Branding Pill
+        const pillW = 440;
+        const pillH = 50;
+        const pillX = (W - pillW) / 2;
+        const pillY = 120;
+        drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 25, 'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.3)', 1.5);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 22px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${resolvedSiteName.toUpperCase()} · CAFETERÍAS`, W / 2, pillY + pillH / 2);
+
+        // Central White Card
+        const cardW = 900;
+        const cardH = 1420;
+        const cardX = (W - cardW) / 2;
+        const cardY = 220;
+        drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 48, '#FFFFFF');
+
+        // Card Avatar
+        const avatarR = 80;
+        const avatarCY = cardY + 120;
+        if (loadedCafeImg) {
+          drawCircularAvatar(ctx, loadedCafeImg, W / 2, avatarCY, avatarR, '#6f4e37', 6);
+        }
+
+        // Display Name & detail
+        ctx.fillStyle = '#111827';
+        ctx.font = 'bold 44px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(displayName, W / 2, avatarCY + 115);
+
+        if (detailTxt) {
+          ctx.fillStyle = '#6f4e37';
+          ctx.font = 'bold 26px system-ui, -apple-system, sans-serif';
+          ctx.fillText(detailTxt, W / 2, avatarCY + 165);
+        }
+
+        // QR Code
+        const qrX = (W - qrInnerSize) / 2;
+        const qrY = cardY + 390;
+        if (offCanvas) {
+          ctx.drawImage(offCanvas, qrX, qrY, qrInnerSize, qrInnerSize);
+        }
+        if (loadedLogoImg) {
+          const lx = Math.round((W - logoW) / 2);
+          const ly = Math.round(qrY + (qrInnerSize - logoH) / 2);
+          drawImageContain(ctx, loadedLogoImg, lx, ly, logoW, logoH);
+        }
+
+        // Footer Text
+        ctx.fillStyle = '#1f2937';
+        ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
+        ctx.fillText(t('cafes.detail.qr_cta_scan', 'Escanea para ver información, sucursales y reseñas'), W / 2, cardY + 1120);
+
+        ctx.fillStyle = '#6f4e37';
+        ctx.font = '600 26px system-ui, -apple-system, sans-serif';
+        ctx.fillText(cafeUrl.replace(/^https?:\/\//, ''), W / 2, cardY + 1170);
+
+        const badgePillW = 380;
+        const badgePillH = 46;
+        const badgePillX = (W - badgePillW) / 2;
+        const badgePillY = cardY + 1225;
+        drawRoundedRect(ctx, badgePillX, badgePillY, badgePillW, badgePillH, 23, '#f3f4f6');
+        ctx.fillStyle = '#4b5563';
+        ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
+        ctx.fillText('☕ CAFETERÍA DESTACADA', W / 2, badgePillY + badgePillH / 2);
+
+        // Subtitle
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.font = '500 24px system-ui, -apple-system, sans-serif';
+        ctx.fillText(`Encuéntranos en ${resolvedSiteName}`, W / 2, 1720);
+
+      } else if (format === 'feed') {
+        // Feed 1:1 (1080 x 1080)
+        if (loadedCafeImg) {
+          ctx.save();
+          if ('filter' in ctx) {
+            ctx.filter = 'blur(40px) brightness(0.65)';
+            drawImageCover(ctx, loadedCafeImg, -40, -40, W + 80, H + 80);
+            ctx.filter = 'none';
+          } else {
+            drawImageCover(ctx, loadedCafeImg, 0, 0, W, H);
+          }
+          ctx.restore();
+        } else {
+          ctx.fillStyle = '#2d1810';
+          ctx.fillRect(0, 0, W, H);
+        }
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(0, 0, W, H);
+
+        // Central White Card
+        const cardW = 940;
+        const cardH = 940;
+        const cardX = (W - cardW) / 2;
+        const cardY = (H - cardH) / 2;
+        drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 44, '#FFFFFF');
+
+        // Header Avatar + Name
+        const avatarR = 55;
+        const avatarCX = cardX + 90;
+        const avatarCY = cardY + 90;
+        if (loadedCafeImg) {
+          drawCircularAvatar(ctx, loadedCafeImg, avatarCX, avatarCY, avatarR, '#6f4e37', 4);
+        }
+
+        ctx.fillStyle = '#111827';
+        ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(displayName, cardX + 165, cardY + 80);
+
+        if (detailTxt) {
+          ctx.fillStyle = '#6b7280';
+          ctx.font = '600 26px system-ui, -apple-system, sans-serif';
+          ctx.fillText(detailTxt, cardX + 165, cardY + 118);
+        }
+
+        // QR Code
+        const qrX = (W - qrInnerSize) / 2;
+        const qrY = cardY + 160;
+        if (offCanvas) {
+          ctx.drawImage(offCanvas, qrX, qrY, qrInnerSize, qrInnerSize);
+        }
+        if (loadedLogoImg) {
+          const lx = Math.round((W - logoW) / 2);
+          const ly = Math.round(qrY + (qrInnerSize - logoH) / 2);
+          drawImageContain(ctx, loadedLogoImg, lx, ly, logoW, logoH);
+        }
+
+        // Footer
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#1f2937';
+        ctx.font = 'bold 26px system-ui, -apple-system, sans-serif';
+        ctx.fillText(t('cafes.detail.qr_cta_scan', 'Escanea para ver información, sucursales y reseñas'), W / 2, cardY + 775);
+
+        ctx.fillStyle = '#6f4e37';
+        ctx.font = '600 24px system-ui, -apple-system, sans-serif';
+        ctx.fillText(cafeUrl.replace(/^https?:\/\//, ''), W / 2, cardY + 820);
+
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '500 20px system-ui, -apple-system, sans-serif';
+        ctx.fillText(`${resolvedSiteName} · Directorio Oficial`, W / 2, cardY + 865);
+      }
+
+      const a = document.createElement('a');
+      a.href = exportCanvas.toDataURL('image/jpeg', 0.95);
+      a.download = `qr-cafe-${cafe.slug || slug}-${format}.jpg`;
+      a.click();
+
+      try {
+        root.unmount();
+      } catch {}
+      if (container.parentNode) {
+        document.body.removeChild(container);
+      }
+    } catch (e) {
+      console.error('Error generando tarjeta QR:', e);
+    } finally {
+      setDownloadingQr(false);
     }
   };
 
@@ -1006,6 +1561,110 @@ export default function CafeDetail(): React.ReactElement {
               </Button>
             </div>
 
+            {/* Tarjeta Código QR de la Cafetería */}
+            <div className="cafe-apple-card cafe-qr-card">
+              <h3 className="cafe-card-title mb-3">
+                <i className="fas fa-qrcode text-primary" aria-hidden="true"></i>
+                {t('cafes.detail.qr_title', 'Código QR de la Cafetería')}
+              </h3>
+              <div className="cafe-qr-canvas-container">
+                <QRCodeCanvas
+                  ref={qrCanvasRef}
+                  value={typeof window !== 'undefined' ? `${window.location.origin}/cafes/${cafe.slug || slug}` : ''}
+                  size={QR_DISPLAY_SIZE}
+                  level="H"
+                  includeMargin={false}
+                  imageSettings={
+                    (logoDataUrl || siteLogo)
+                      ? {
+                          src: logoDataUrl || siteLogo,
+                          width: logoDimensions?.width || qrLogoSize,
+                          height: logoDimensions?.height || qrLogoSize,
+                          excavate: true,
+                        }
+                      : undefined
+                  }
+                />
+              </div>
+              <div className="mb-3 d-flex justify-content-center">
+                <Dropdown
+                  as={ButtonGroup}
+                  show={showQrDropdown}
+                  onToggle={(isOpen) => setShowQrDropdown(isOpen)}
+                  autoClose={true}
+                >
+                  <Button
+                    variant="secondary"
+                    className="cafe-secondary-action-btn d-inline-flex align-items-center mt-0"
+                    onClick={() => handleDownloadQr('story')}
+                    disabled={downloadingQr}
+                  >
+                    {downloadingQr ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="me-2" />
+                        {t('common.generating', 'Generando...')}
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-arrow-down-to-bracket me-2" aria-hidden="true"></i>
+                        {t('cafes.detail.download_qr_story', 'Tarjeta Historia (9:16)')}
+                      </>
+                    )}
+                  </Button>
+                  <Dropdown.Toggle
+                    split
+                    variant="secondary"
+                    className="mt-0 rounded-pill px-3"
+                    id="dropdown-cafe-qr-download"
+                    disabled={downloadingQr}
+                  />
+                  <Dropdown.Menu className="shadow-lg border-0 rounded-3 py-2">
+                    <Dropdown.Item
+                      onClick={() => {
+                        handleDownloadQr('story');
+                        setShowQrDropdown(false);
+                      }}
+                      className="py-2"
+                    >
+                      <i className="fas fa-mobile-screen me-2 text-primary"></i>
+                      {t('cafes.detail.qr_story_opt', 'Tarjeta Historia / Reels (9:16)')}
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      onClick={() => {
+                        handleDownloadQr('feed');
+                        setShowQrDropdown(false);
+                      }}
+                      className="py-2"
+                    >
+                      <i className="fas fa-square me-2 text-success"></i>
+                      {t('cafes.detail.qr_feed_opt', 'Tarjeta Feed / Post (1:1)')}
+                    </Dropdown.Item>
+                    <Dropdown.Divider />
+                    <Dropdown.Item
+                      onClick={() => {
+                        handleDownloadQr('classic');
+                        setShowQrDropdown(false);
+                      }}
+                      className="py-2 text-muted"
+                    >
+                      <i className="fas fa-qrcode me-2"></i>
+                      {t('cafes.detail.qr_classic_opt', 'Solo Código QR (1024x1024)')}
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+              <p className="small mb-0">
+                <a
+                  href={typeof window !== 'undefined' ? `${window.location.origin}/cafes/${cafe.slug || slug}` : ''}
+                  className="cafe-qr-link"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {typeof window !== 'undefined' ? `${window.location.origin}/cafes/${cafe.slug || slug}` : ''}
+                </a>
+              </p>
+            </div>
+
             {/* Ficha Resumen */}
             {activeBranch && (
               <div className="cafe-apple-card">
@@ -1084,14 +1743,56 @@ export default function CafeDetail(): React.ReactElement {
             </Alert>
           )}
         </Modal.Body>
-        <Modal.Footer className="border-top-0 pt-0 d-flex gap-2 justify-content-between">
-          <div>
+        <Modal.Footer className="border-top-0 pt-0 d-flex gap-2 justify-content-between flex-wrap">
+          <div className="d-flex gap-2 flex-wrap">
             {typeof navigator !== 'undefined' && 'share' in navigator && (
               <Button variant="dark" className="rounded-pill" onClick={handleNativeShare}>
                 <i className="fas fa-share-nodes me-2" aria-hidden="true"></i>
                 {t('cafes.detail.share_native')}
               </Button>
             )}
+            <Dropdown as={ButtonGroup}>
+              <Button
+                variant="outline-primary"
+                className="rounded-pill"
+                onClick={() => handleDownloadQr('story')}
+                disabled={downloadingQr}
+              >
+                {downloadingQr ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    {t('common.generating', 'Generando...')}
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-qrcode me-2" aria-hidden="true"></i>
+                    {t('cafes.detail.download_qr', 'Descargar QR')}
+                  </>
+                )}
+              </Button>
+              <Dropdown.Toggle
+                split
+                variant="outline-primary"
+                className="rounded-pill"
+                id="dropdown-modal-qr-download"
+                disabled={downloadingQr}
+              />
+              <Dropdown.Menu className="shadow-lg border-0 rounded-3 py-2">
+                <Dropdown.Item onClick={() => handleDownloadQr('story')} className="py-2">
+                  <i className="fas fa-mobile-screen me-2 text-primary"></i>
+                  {t('cafes.detail.qr_story_opt', 'Tarjeta Historia / Reels (9:16)')}
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => handleDownloadQr('feed')} className="py-2">
+                  <i className="fas fa-square me-2 text-success"></i>
+                  {t('cafes.detail.qr_feed_opt', 'Tarjeta Feed / Post (1:1)')}
+                </Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item onClick={() => handleDownloadQr('classic')} className="py-2 text-muted">
+                  <i className="fas fa-qrcode me-2"></i>
+                  {t('cafes.detail.qr_classic_opt', 'Solo Código QR (1024x1024)')}
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
           </div>
           <div className="d-flex gap-2 ms-auto">
             <Button variant="secondary" className="rounded-pill" onClick={closeShareDialog}>{t('common.close')}</Button>

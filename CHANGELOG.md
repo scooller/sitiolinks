@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.0] - 2026-10-02
+
+### Added
+- **Descarga de Códigos QR para Cafeterías (`CafeDetail.tsx`, `cafes.css`, `translation.json`)**:
+  - **Tarjeta dedicada en barra lateral**: Tarjeta Apple HIG con vista previa de código QR interactivo (`QRCodeCanvas`) con el logotipo del sitio incrustado y escalado proporcionalmente.
+  - **Opciones de descarga multiformato**: Botón split con soporte para 3 formatos de exportación en alta resolución (JPEG 0.95):
+    - **Historia / Reels (9:16 - 1080x1920)**: Fondo blur con la fotografía del café, branding superior, tarjeta central blanca, imagen con recorte circular `cover`, nombre, ubicación/sucursales, calificación por estrellas, código QR con logo central, llamada a la acción y pie de página oficial.
+    - **Feed / Post (1:1 - 1080x1080)**: Diseño cuadrado para publicaciones con avatar de cabecera, nombre, ubicación, código QR y branding oficial.
+    - **Solo Código QR (1024x1024)**: Código QR nítido con fondo blanco y logo centralizado.
+  - **Acceso rápido en Modal de Compartir**: Integrado selector desplegable de descarga de QR dentro del modal de compartir del café.
+  - **Soporte multi-idioma**: Claves de localización agregadas en español e inglés.
+
 ## [0.29.2] - 2026-10-01
 
 ### Fixed
