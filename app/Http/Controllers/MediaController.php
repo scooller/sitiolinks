@@ -259,7 +259,7 @@ class MediaController extends Controller
             abort(404, 'Document not found');
         }
 
-        $user = auth('web')->user();
+        $user = auth('web')->user() ?? auth('sanctum')->user() ?? request()->user();
         if (! $user) {
             abort(401);
         }
@@ -283,6 +283,8 @@ class MediaController extends Controller
             'Content-Type' => $media->mime_type,
             'Cache-Control' => 'private, no-cache, no-store, must-revalidate',
             'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'DENY',
+            'Content-Security-Policy' => "default-src 'none'; style-src 'unsafe-inline'; sandbox",
             'Pragma' => 'no-cache',
         ]);
     }

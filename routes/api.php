@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CafeMediaUploadController;
 use App\Http\Controllers\Api\GalleryMediaController;
 use App\Http\Controllers\Api\MagicLinkController;
 use App\Http\Controllers\Api\ManagerController;
+use App\Http\Controllers\Api\VerificationDocumentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,13 @@ Route::delete('/avatar/revert', [AvatarUploadController::class, 'revert'])->midd
 Route::post('/cafe-media/upload-cafe-image', [CafeMediaUploadController::class, 'uploadCafeImage'])->middleware('auth:web');
 Route::post('/cafe-media/upload-branch-image', [CafeMediaUploadController::class, 'uploadBranchImage'])->middleware('auth:web');
 Route::delete('/cafe-media/revert', [CafeMediaUploadController::class, 'revert'])->middleware('auth:web');
+
+// Documentos de verificación +18 (KYC creadores y managers)
+Route::prefix('verification-documents')->middleware('auth:web')->group(function () {
+    Route::get('/status', [VerificationDocumentController::class, 'status']);
+    Route::post('/upload', [VerificationDocumentController::class, 'upload'])->middleware('throttle:30,1');
+    Route::delete('/{collection}', [VerificationDocumentController::class, 'deleteDocument'])->middleware('throttle:30,1');
+});
 
 // ─── Manager API ─────────────────────────────────────────────────────────────
 Route::prefix('manager')->middleware(['auth:web'])->group(function () {

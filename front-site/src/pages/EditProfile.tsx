@@ -20,6 +20,7 @@ import LinkEditorModal, { type ProfileLinkItem } from '../components/LinkEditorM
 import { SOCIAL_PLATFORMS, detectSocialPlatform, getPlatformById } from '../lib/socialLinks';
 import ProfileCompletenessCard from '../components/ProfileCompletenessCard';
 import { calculateProfileCompleteness } from '../lib/profileCompleteness';
+import VerificationDocumentsUpload, { type VerificationStatus } from '../components/VerificationDocumentsUpload';
 
 registerPlugin(FilePondPluginImagePreview, FilePondPluginFileValidateType, FilePondPluginFileValidateSize);
 
@@ -90,6 +91,7 @@ export default function EditProfile(): ReactElement {
   const [showLinkModal, setShowLinkModal] = useState<boolean>(false);
   const [editingLinkIndex, setEditingLinkIndex] = useState<number | null>(null);
   const [selectedLinkForEdit, setSelectedLinkForEdit] = useState<ProfileLinkItem | null>(null);
+  const [docsStatus, setDocsStatus] = useState<VerificationStatus | null>(null);
   const [showCreatorRequestModal, setShowCreatorRequestModal] = useState<boolean>(false);
   const [creatorRequestNotes, setCreatorRequestNotes] = useState<string>('');
   const [creatorRequestSending, setCreatorRequestSending] = useState<boolean>(false);
@@ -357,8 +359,13 @@ export default function EditProfile(): ReactElement {
     setCreatorRequestError(null);
 
     try {
+      const docsSummary = docsStatus?.is_complete
+        ? '✓ Documentación +18: Completa (3/3 fotos subidas en el sistema para verificación administrativa)'
+        : `⚠ Documentación +18: ${docsStatus ? `${[docsStatus.has_id_front, docsStatus.has_id_back, docsStatus.has_selfie].filter(Boolean).length}/3 fotos subidas` : 'Incompleta o pendiente'}`;
+
       const description = `El usuario ${currentUser?.name || ''} (@${currentUser?.username || ''}) ha solicitado la activación de su perfil como Creador(a) desde su panel de perfil.\n\n` +
         `Email: ${currentUser?.email || ''}\n` +
+        `Estado Documentación +18: ${docsSummary}\n` +
         `Mensaje / Detalles adicionales: ${creatorRequestNotes.trim() || 'Sin notas adicionales'}\n\n` +
         `Revisar y cambiar su rol a 'creator' en la tabla de Usuarios de Filament si cumple con los requisitos.`;
 
@@ -392,9 +399,14 @@ export default function EditProfile(): ReactElement {
         ? `Sí - Nombre del Café: ${managerRequestCafeName.trim() || 'Por definir'}`
         : 'No';
 
+      const docsSummary = docsStatus?.is_complete
+        ? '✓ Documentación +18: Completa (3/3 fotos subidas en el sistema para verificación administrativa)'
+        : `⚠ Documentación +18: ${docsStatus ? `${[docsStatus.has_id_front, docsStatus.has_id_back, docsStatus.has_selfie].filter(Boolean).length}/3 fotos subidas` : 'Incompleta o pendiente'}`;
+
       const description = `El usuario ${currentUser?.name || ''} (@${currentUser?.username || ''}) ha solicitado la activación de su perfil como MANAGER desde su panel de perfil.\n\n` +
         `Email: ${currentUser?.email || ''}\n` +
         `¿Representa un Café / Establecimiento?: ${isCafeText}\n` +
+        `Estado Documentación +18: ${docsSummary}\n` +
         `Mensaje / Experiencia / Notas adicionales: ${managerRequestNotes.trim() || 'Sin notas adicionales'}\n\n` +
         `Paso administrativo: Se ha registrado la solicitud con estado 'pending'. Para activarla, ingresar al panel de Filament en 'Perfiles de Managers' y hacer clic en 'Activar'.`;
 
@@ -1695,6 +1707,20 @@ export default function EditProfile(): ReactElement {
                 </div>
               </div>
 
+              {/* Verificación de Documentos +18 */}
+              <div className="edit-profile-card">
+                <div className="edit-profile-section-header">
+                  <div className="edit-profile-icon-plate icon-plate-indigo">
+                    <i className="fas fa-id-card"></i>
+                  </div>
+                  <div>
+                    <h4>{t('verification.tab_title', 'Verificación de Identidad y Mayoría de Edad (+18)')}</h4>
+                    <p>{t('verification.tab_desc', 'Sube tus documentos oficiales para optar a los roles de Creador o Manager (Ley 21.719).')}</p>
+                  </div>
+                </div>
+                <VerificationDocumentsUpload onStatusChange={setDocsStatus} />
+              </div>
+
               <div className="edit-profile-card apple-danger-zone-card">
                 <div className="edit-profile-section-header border-danger border-opacity-25">
                   <div className="edit-profile-icon-plate icon-plate-rose">
@@ -1899,6 +1925,16 @@ export default function EditProfile(): ReactElement {
                   </div>
                 )}
 
+                {/* Subida de Documentos +18 */}
+                <div className="mb-3">
+                  <VerificationDocumentsUpload
+                    compact
+                    title={t('verification.creator_docs_title', 'Documentación requerida (+18)')}
+                    description={t('verification.creator_docs_desc', 'Adjunta las 3 fotos para que el administrador valide tu mayoría de edad y apruebe tu perfil.')}
+                    onStatusChange={setDocsStatus}
+                  />
+                </div>
+
                 <div className="mb-3">
                   <label className="apple-label">
                     {t('profile.creator_notes_label', 'Detalles o enlaces adicionales (opcional)')}
@@ -2081,6 +2117,16 @@ export default function EditProfile(): ReactElement {
                       />
                     </div>
                   )}
+                </div>
+
+                {/* Subida de Documentos +18 */}
+                <div className="mb-3">
+                  <VerificationDocumentsUpload
+                    compact
+                    title={t('verification.manager_docs_title', 'Documentación del solicitante (+18)')}
+                    description={t('verification.manager_docs_desc', 'Adjunta las 3 fotos de identificación para validar tu mayoría de edad como Manager responsable.')}
+                    onStatusChange={setDocsStatus}
+                  />
                 </div>
 
                 <div className="mb-3">

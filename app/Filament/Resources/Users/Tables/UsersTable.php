@@ -125,6 +125,15 @@ class UsersTable
                     ->trueColor('success')
                     ->falseColor('gray')
                     ->tooltip(fn ($record) => $record->is_verified ? 'Usuario verificado desde '.$record->verified_at?->format('d/m/Y') : 'Usuario no verificado'),
+                IconColumn::make('documents_complete')
+                    ->label('Docs +18')
+                    ->boolean()
+                    ->getStateUsing(fn ($record) => $record->creatorDocuments()->first()?->isComplete() ?? false)
+                    ->trueColor(fn ($record) => $record->creatorDocuments()->first()?->verified ? 'success' : 'warning')
+                    ->tooltip(fn ($record) => ($doc = $record->creatorDocuments()->first())
+                        ? ($doc->verified ? 'Docs verificados (+18)' : ($doc->isComplete() ? 'Docs completos (3/3) - Pendiente de validar' : 'Docs incompletos'))
+                        : 'Sin documentos subidos')
+                    ->toggleable(isToggledHiddenByDefault: false),
                 IconColumn::make('privacy_consent')
                     ->label('Privacidad')
                     ->boolean()
@@ -159,6 +168,38 @@ class UsersTable
                     })
                     ->openUrlInNewTab()
                     ->visible(fn ($record) => filled($record->username)),
+                Action::make('view_documents')
+                    ->label('Docs +18')
+                    ->icon('heroicon-o-document-text')
+                    ->color('info')
+                    ->visible(fn ($record) => (bool) $record->creatorDocuments()->first())
+                    ->modalHeading(fn ($record) => "Documentación de Mayoría de Edad - @{$record->username}")
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Cerrar')
+                    ->modalContent(fn ($record) => view('filament.modals.creator-documents', ['record' => $record])),
+                Action::make('verify_documents')
+                    ->label('Validar +18')
+                    ->icon('heroicon-o-shield-check')
+                    ->color('success')
+                    ->visible(fn ($record) => ($doc = $record->creatorDocuments()->first()) && ! $doc->verified && $doc->isComplete())
+                    ->requiresConfirmation()
+                    ->modalHeading('Confirmar mayoría de edad')
+                    ->modalDescription(fn ($record) => "¿Confirmas que has revisado los 3 documentos de @{$record->username} y confirmas que es mayor de 18 años?")
+                    ->action(function ($record) {
+                        $doc = $record->creatorDocuments()->first();
+                        if ($doc) {
+                            $doc->update([
+                                'verified' => true,
+                                'verified_at' => now(),
+                                'verified_by' => auth()->id(),
+                            ]);
+                            Notification::make()
+                                ->title('Documentación validada')
+                                ->body("Se ha verificado la mayoría de edad de @{$record->username}.")
+                                ->success()
+                                ->send();
+                        }
+                    }),
                 EditAction::make(),
                 Action::make('resetPassword')
                     ->label('Reset Password')

@@ -428,4 +428,105 @@ class ManagerSystemTest extends TestCase
             ->get("/creator-documents/{$media->id}");
         $resStranger->assertStatus(403);
     }
+
+    public function test_user_can_upload_and_manage_verification_documents(): void
+    {
+        $applicant = User::factory()->create();
+        $applicant->assignRole('user');
+
+        // 1. Estado inicial sin documentos
+        $statusRes = $this->actingAs($applicant)->getJson('/api/verification-documents/status');
+        $statusRes->assertStatus(200);
+        $statusRes->assertJson([
+            'has_id_front' => false,
+            'has_id_back' => false,
+            'has_selfie' => false,
+            'is_complete' => false,
+            'verified' => false,
+        ]);
+
+        // 2. Subida de id_front
+        $frontFile = UploadedFile::fake()->image('front.jpg');
+        $uploadFront = $this->actingAs($applicant)->postJson('/api/verification-documents/upload', [
+            'collection' => 'id_front',
+            'file' => $frontFile,
+        ]);
+        $uploadFront->assertStatus(200);
+        $uploadFront->assertJson([
+            'has_id_front' => true,
+            'has_id_back' => false,
+            'has_selfie' => false,
+            'is_complete' => false,
+        ]);
+
+        // 3. Subida de id_back
+        $backFile = UploadedFile::fake()->image('back.jpg');
+        $uploadBack = $this->actingAs($applicant)->postJson('/api/verification-documents/upload', [
+            'collection' => 'id_back',
+            'file' => $backFile,
+        ]);
+        $uploadBack->assertStatus(200);
+        $uploadBack->assertJson([
+            'has_id_front' => true,
+            'has_id_back' => true,
+            'has_selfie' => false,
+            'is_complete' => false,
+        ]);
+
+        // 4. Subida de selfie_with_id -> completa los 3 documentos
+        $selfieFile = UploadedFile::fake()->image('selfie.jpg');
+        $uploadSelfie = $this->actingAs($applicant)->postJson('/api/verification-documents/upload', [
+            'collection' => 'selfie_with_id',
+            'file' => $selfieFile,
+        ]);
+        $uploadSelfie->assertStatus(200);
+        $uploadSelfie->assertJson([
+            'has_id_front' => true,
+            'has_id_back' => true,
+            'has_selfie' => true,
+            'is_complete' => true,
+        ]);
+
+        // 5. Eliminar uno de los documentos
+        $deleteRes = $this->actingAs($applicant)->deleteJson('/api/verification-documents/id_back');
+        $deleteRes->assertStatus(200);
+        $deleteRes->assertJson([
+            'has_id_front' => true,
+            'has_id_back' => false,
+            'is_complete' => false,
+        ]);
+    }
+
+    public function test_malicious_files_and_polyglots_are_blocked_from_upload(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('user');
+
+        // 1. Archivo PHP directo disfrazado con extensión o contenido shell
+        $phpFile = UploadedFile::fake()->createWithContent('exploit.php', '<?php phpinfo(); ?>');
+        $resPhp = $this->actingAs($user)->postJson('/api/verification-documents/upload', [
+            'collection' => 'id_front',
+            'file' => $phpFile,
+        ]);
+        $resPhp->assertStatus(422);
+
+        // 2. Archivo SVG con script XSS
+        $svgFile = UploadedFile::fake()->createWithContent('vector.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
+        $resSvg = $this->actingAs($user)->postJson('/api/verification-documents/upload', [
+            'collection' => 'id_front',
+            'file' => $svgFile,
+        ]);
+        $resSvg->assertStatus(422);
+
+        // 3. Polyglot: Cabecera binaria de JPEG válida pero con código PHP inyectado en EXIF
+        $jpegHeader = "\xFF\xD8\xFF\xE0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00\xFF\xDB\x00C\x00";
+        $polyglotContent = $jpegHeader."\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f<?php system(\$_GET['cmd']); ?>\xFF\xD9";
+        $polyglotFile = UploadedFile::fake()->createWithContent('photo.jpg', $polyglotContent);
+
+        $resPolyglot = $this->actingAs($user)->postJson('/api/verification-documents/upload', [
+            'collection' => 'id_front',
+            'file' => $polyglotFile,
+        ]);
+        $resPolyglot->assertStatus(422);
+    }
 }

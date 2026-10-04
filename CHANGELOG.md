@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.32.0] - 2026-10-04
+
+### Added
+- **Subida de Documentación de Verificación +18 en Frontend**:
+  - Componente [VerificationDocumentsUpload.tsx](file:///d:/laragon/www/link-persons/front-site/src/components/VerificationDocumentsUpload.tsx) con estética Apple HIG y Liquid Glass.
+  - Carga intuitiva de las 3 fotografías requeridas: cédula frontal (`id_front`), reverso (`id_back`) y selfie sosteniendo el documento (`selfie_with_id`).
+  - Previsualización segura, reemplazo, eliminación y badges de estado en tiempo real.
+  - Integración en modales de solicitud de perfil de Creador y perfil de Manager en [EditProfile.tsx](file:///d:/laragon/www/link-persons/front-site/src/pages/EditProfile.tsx), notificando en el ticket administrativo el estado de la documentación.
+  - Sección permanente de verificación en la pestaña de Seguridad de [EditProfile.tsx](file:///d:/laragon/www/link-persons/front-site/src/pages/EditProfile.tsx).
+  - Endpoints REST en [VerificationDocumentController.php](file:///d:/laragon/www/link-persons/app/Http/Controllers/Api/VerificationDocumentController.php): `GET /api/verification-documents/status`, `POST /api/verification-documents/upload` y `DELETE /api/verification-documents/{collection}` protegidos por `auth:web` y rate limiting.
+  - Columna `Docs +18` y acciones `view_documents` y `verify_documents` en [UsersTable.php](file:///d:/laragon/www/link-persons/app/Filament/Resources/Users/Tables/UsersTable.php) del panel administrativo de Filament.
+  - Compatibilidad polimórfica en [creator-documents.blade.php](file:///d:/laragon/www/link-persons/resources/views/filament/modals/creator-documents.blade.php) para registros `User` y `ManagerCreator`.
+
+### Security
+- **Blindaje Antimalware y Polyglots en Carga de Archivos**:
+  - Escaneo proactivo de contenido binario mediante `assertSafeFile` en [VerificationDocumentController.php](file:///d:/laragon/www/link-persons/app/Http/Controllers/Api/VerificationDocumentController.php) y [ManagerController.php](file:///d:/laragon/www/link-persons/app/Http/Controllers/Api/ManagerController.php) para abortar cargas con código ejecutable (`<?php`, `<?=`, `__halt_compiler`, `<script`, `<svg`, `<html`).
+  - Validación binaria estricta vía `getimagesize()` (únicamente `IMAGETYPE_JPEG`, `IMAGETYPE_PNG`, `IMAGETYPE_WEBP`).
+  - Nombres de archivo forzados con hashes aleatorios y extensiones seguras (`jpg`, `png`, `webp`), bloqueando path traversal y suplantación de extensiones ejecutables.
+  - Aislamiento HTTP estricto al servir documentos con cabeceras `Content-Security-Policy: default-src 'none'; sandbox`, `X-Content-Type-Options: nosniff` y `X-Frame-Options: DENY` en [MediaController.php](file:///d:/laragon/www/link-persons/app/Http/Controllers/MediaController.php).
+  - Almacenamiento fuera de la raíz web en disco local privado (`storage/app/private`), impidiendo cualquier invocación directa de PHP o servidores web.
+
 ## [0.31.0] - 2026-10-04
 
 ### Added

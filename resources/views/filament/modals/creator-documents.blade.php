@@ -1,19 +1,22 @@
 @php
-    $document = $record->creator?->creatorDocuments()
-        ->where('manager_profile_id', $record->manager_profile_id)
-        ->first();
+    $targetUser = $record instanceof \App\Models\User ? $record : $record->creator;
+    $document = $record instanceof \App\Models\User
+        ? $record->creatorDocuments()->first()
+        : $record->creator?->creatorDocuments()
+            ->where('manager_profile_id', $record->manager_profile_id)
+            ->first();
     $frontMedia = $document?->getFirstMedia('id_front');
     $backMedia = $document?->getFirstMedia('id_back');
     $selfieMedia = $document?->getFirstMedia('selfie_with_id');
-    $birthDate = $record->creator?->birth_date;
+    $birthDate = $targetUser?->birth_date;
     $age = $birthDate ? \Carbon\Carbon::parse($birthDate)->age : null;
 @endphp
 
 <div class="space-y-4 text-sm text-gray-700 dark:text-gray-200">
     <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
         <div>
-            <span class="text-xs text-gray-500 uppercase tracking-wider">Creador</span>
-            <p class="font-semibold">{{ $record->creator?->name }} ({{ '@' . $record->creator?->username }})</p>
+            <span class="text-xs text-gray-500 uppercase tracking-wider">Usuario / Creador</span>
+            <p class="font-semibold">{{ $targetUser?->name }} ({{ '@' . $targetUser?->username }})</p>
         </div>
         <div>
             <span class="text-xs text-gray-500 uppercase tracking-wider">Fecha Nacimiento / Edad</span>

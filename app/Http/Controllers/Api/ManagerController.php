@@ -13,6 +13,7 @@ use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -244,10 +245,21 @@ class ManagerController extends Controller
         $managerCreator = $this->requireOwnedCreator($profile, $id);
         $creator = $managerCreator->creator;
 
-        $request->validate(['avatar' => ['required', 'image', 'max:5120']]);
+        $request->validate(['avatar' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120']]);
+        $uploaded = $request->file('avatar');
+        $this->assertSafeFile($uploaded);
 
         $creator->clearMediaCollection('avatar');
-        $creator->addMediaFromRequest('avatar')->toMediaCollection('avatar');
+        $extension = match ($uploaded->guessExtension()) {
+            'png' => 'png',
+            'webp' => 'webp',
+            default => 'jpg',
+        };
+        $safeName = 'avatar_'.$creator->id.'_'.Str::random(16).'.'.$extension;
+
+        $creator->addMediaFromRequest('avatar')
+            ->usingFileName($safeName)
+            ->toMediaCollection('avatar');
 
         return response()->json(['avatar_url' => $creator->getFirstMediaUrl('avatar', 'thumb')]);
     }
@@ -333,10 +345,21 @@ class ManagerController extends Controller
 
         $data = $request->validate([
             'collection' => ['required', Rule::in(['id_front', 'id_back', 'selfie_with_id'])],
-            'file' => ['required', 'image', 'max:8192'],
+            'file' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:8192'],
         ]);
 
+        $uploaded = $request->file('file');
+        $this->assertSafeFile($uploaded);
+
+        $extension = match ($uploaded->guessExtension()) {
+            'png' => 'png',
+            'webp' => 'webp',
+            default => 'jpg',
+        };
+        $safeName = 'doc_'.$data['collection'].'_'.$managerCreator->creator_user_id.'_'.Str::random(24).'.'.$extension;
+
         $document->addMediaFromRequest('file')
+            ->usingFileName($safeName)
             ->toMediaCollection($data['collection']);
 
         // SEC-02: Si se actualizan documentos tras aprobación previa, revertir estado a pendiente y revocar verificación
@@ -502,5 +525,30 @@ class ManagerController extends Controller
             'creator_count' => $profile->creators()->count(),
             'active_creators' => $profile->activeCreators()->count(),
         ];
+    }
+
+    /**
+     * Inspección de seguridad: valida estructura binaria y ausencia de código ejecutable/polyglots
+     */
+    protected function assertSafeFile(UploadedFile $file): void
+    {
+        $path = $file->getRealPath();
+        if (! $path || ! file_exists($path)) {
+            abort(422, 'Archivo no válido.');
+        }
+
+        // 1. Validar que sea una imagen reconocible por GD/exif
+        $imageInfo = @getimagesize($path);
+        if (! $imageInfo || ! in_array($imageInfo[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP], true)) {
+            abort(422, 'Estructura o formato binario de imagen no válido.');
+        }
+
+        // 2. Escanear contenido en busca de código ejecutable (PHP, scripts, SVG embebido)
+        $contents = @file_get_contents($path);
+        if ($contents !== false) {
+            if (preg_match('/<\?php|<\?=|__halt_compiler|<script|<svg|<html|<!doctype/i', $contents)) {
+                abort(422, 'El archivo contiene secuencias de código no permitidas.');
+            }
+        }
     }
 }
