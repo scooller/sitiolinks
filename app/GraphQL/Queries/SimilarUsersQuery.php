@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\GraphQL\Queries;
 
 use App\Models\User;
-use App\Services\GraphQLCache;
+use App\Services\GeoLocationService;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Rebing\GraphQL\Support\Facades\GraphQL;
@@ -93,7 +93,7 @@ class SimilarUsersQuery extends Query
             } catch (RoleDoesNotExist $e) {
             }
 
-            app(\App\Services\GeoLocationService::class)->applyCountryBlockScope($q, $currentUser);
+            app(GeoLocationService::class)->applyCountryBlockScope($q, $currentUser);
         }
 
         // 1. VIPs primero

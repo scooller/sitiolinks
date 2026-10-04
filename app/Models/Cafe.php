@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -59,6 +60,14 @@ class Cafe extends Model implements HasMedia
     public function branches(): HasMany
     {
         return $this->hasMany(CafeBranch::class);
+    }
+
+    /**
+     * Manager profile vinculado a este café.
+     */
+    public function manager(): HasOne
+    {
+        return $this->hasOne(ManagerProfile::class);
     }
 
     public function registerMediaCollections(): void

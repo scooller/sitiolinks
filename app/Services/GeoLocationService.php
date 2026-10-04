@@ -114,7 +114,7 @@ class GeoLocationService
             ];
         }
 
-        return Cache::remember('ip_intel_' . md5($ip), now()->addHours(24), function () use ($ip) {
+        return Cache::remember('ip_intel_'.md5($ip), now()->addHours(24), function () use ($ip) {
             return $this->lookupIp($ip);
         });
     }
@@ -154,7 +154,7 @@ class GeoLocationService
                     foreach (self::HOSTING_SIGNATURES as $sig) {
                         if (str_contains($lowerOrg, $sig)) {
                             $isVpn = true;
-                            $reason = 'signature_match_' . $sig;
+                            $reason = 'signature_match_'.$sig;
                             break;
                         }
                     }
@@ -169,7 +169,7 @@ class GeoLocationService
                 ];
             }
         } catch (\Throwable $e) {
-            Log::warning("GeoLocationService: ip-api.com failed for {$ip}: " . $e->getMessage());
+            Log::warning("GeoLocationService: ip-api.com failed for {$ip}: ".$e->getMessage());
         }
 
         // Provider 2 fallback: ipapi.co
@@ -186,7 +186,7 @@ class GeoLocationService
                 foreach (self::HOSTING_SIGNATURES as $sig) {
                     if (str_contains($lowerOrg, $sig)) {
                         $isVpn = true;
-                        $reason = 'signature_match_' . $sig;
+                        $reason = 'signature_match_'.$sig;
                         break;
                     }
                 }
@@ -200,7 +200,7 @@ class GeoLocationService
                 ];
             }
         } catch (\Throwable $e) {
-            Log::warning("GeoLocationService: ipapi.co failed for {$ip}: " . $e->getMessage());
+            Log::warning("GeoLocationService: ipapi.co failed for {$ip}: ".$e->getMessage());
         }
 
         return [
@@ -287,28 +287,28 @@ class GeoLocationService
             // If viewer is on a VPN, hide ALL users who have country_block enabled
             $w->where(function (Builder $q) {
                 $q->where('country_block', false)
-                  ->orWhereNull('country_block');
+                    ->orWhereNull('country_block');
             });
         } elseif ($viewerCountry) {
             // If viewer is residential and country is known, hide users whose country or nationality matches
             $w->where(function (Builder $q) use ($viewerCountry) {
                 $q->where(function (Builder $noBlock) {
                     $noBlock->where('country_block', false)
-                            ->orWhereNull('country_block');
+                        ->orWhereNull('country_block');
                 })->orWhere(function (Builder $blockedDifferentCountry) use ($viewerCountry) {
                     $blockedDifferentCountry->where('country_block', true)
                         ->where(function (Builder $countryCheck) use ($viewerCountry) {
                             $countryCheck->where(function (Builder $c) use ($viewerCountry) {
                                 $c->whereNotNull('country')
-                                  ->where('country', '!=', '')
-                                  ->where('country', '!=', $viewerCountry);
+                                    ->where('country', '!=', '')
+                                    ->where('country', '!=', $viewerCountry);
                             })->orWhere(function (Builder $n) use ($viewerCountry) {
                                 $n->where(function (Builder $emptyC) {
                                     $emptyC->whereNull('country')
-                                           ->orWhere('country', '');
+                                        ->orWhere('country', '');
                                 })
-                                ->whereNotNull('nationality')
-                                ->where('nationality', '!=', $viewerCountry);
+                                    ->whereNotNull('nationality')
+                                    ->where('nationality', '!=', $viewerCountry);
                             });
                         });
                 });
@@ -317,7 +317,7 @@ class GeoLocationService
             // If country cannot be determined and not VPN, only show users without country_block
             $w->where(function (Builder $q) {
                 $q->where('country_block', false)
-                  ->orWhereNull('country_block');
+                    ->orWhereNull('country_block');
             });
         }
     }

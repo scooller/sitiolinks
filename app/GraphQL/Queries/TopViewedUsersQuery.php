@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\GraphQL\Queries;
 
 use App\Models\User;
+use App\Services\GeoLocationService;
 use Closure;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
@@ -49,7 +50,7 @@ class TopViewedUsersQuery extends Query
             ->with($with)
             ->orderBy('views', 'desc');
 
-        app(\App\Services\GeoLocationService::class)->applyCountryBlockScope($query, $currentUser);
+        app(GeoLocationService::class)->applyCountryBlockScope($query, $currentUser);
 
         return $query->limit($limit)->get();
     }

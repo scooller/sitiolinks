@@ -5,7 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.31.0] - 2026-10-04
+
+### Added
+- **Sistema Integral de Manager y Workflow de Aprobación de Creadores**:
+  - Panel Filament dedicado `/manager` (`ManagerPanelProvider`) para usuarios con rol `manager`.
+  - Recursos de gestión en el panel manager: `CreatorResource` (creación, edición, baja, links rápidos), `MyCafeResource` (gestión de café propio y asignación a sucursales) y `ManagerTagResource` (creación de etiquetas bajo permiso).
+  - Verificación obligatoria de mayoría de edad (+18) con subida de 3 documentos fotográficos privados: cédula/pasaporte frontal, reverso y selfie sosteniendo el documento.
+  - Almacenamiento seguro en disco local con registro de auditoría de vistas (GDPR / Ley 21.719) vía `MediaController::serveDocumentMedia`.
+  - Acceso seguro para creadores sin correo obligatorio mediante Magic Link de un solo uso con caducidad de 72 horas (`MagicLinkController`).
+  - Workflow de aprobación admin en `/admin`: `ManagerCreatorResource` con visor modal de fotos de verificación y acciones para aprobar o rechazar con motivo.
+  - Eventos y oyentes `CreatorApproved` y `CreatorRejected` con despacho de notificaciones in-app y correos asíncronos (`CreatorApprovedMail`, `CreatorRejectedMail`).
+  - Sistema de mensajería unidireccional manager ➔ creadores con tipo de notificación `manager_message`.
+  - Límites configurables por manager (`max_creators_per_manager` y `manager_can_create_tags`) en `SiteSettings`.
+### Security
+- **Auditoría y Blindaje de Flujo Manager & Creadores**:
+  - `SEC-01`: Restricción estricta de acceso al panel Filament `/manager` validando estado activo del perfil (`ManagerProfile::isActive()`).
+  - `SEC-02`: Detección de modificación posterior de documentos +18; revoca verificación (`verified = false`), regresa creador a estado pendiente (`STATUS_PENDING`) y alerta a administradores.
+  - `SEC-03`: Almacenamiento seguro de tokens de enlace mágico (`magic_link_token`) mediante hash SHA-256 en base de datos; previene exposición ante volcados o fugas de BD.
+  - `SEC-04`: Protección contra toma de control de cuentas (Account Takeover); bloquea regeneración de enlaces mágicos para perfiles de creador ya aprobados.
+  - `SEC-05`: Streaming seguro de documentación confidencial con cabeceras anti-caché estrictas (`no-store`, `nosniff`, `Pragma: no-cache`) y acceso explícito para que el creador titular consulte sus propios documentos (cumplimiento Ley 21.719 / ARCOP).
+  - `SEC-06`: Corrección de ruta de almacenamiento privado en Laravel 12 usando `Storage::disk('local')->path(...)` en acciones de carga de Filament.
+
 ## [0.30.5] - 2026-10-04
+
 
 ### Changed
 - **Eliminación de logotipo/avatar redundante en Tarjetas QR (`CafeDetail.tsx`)**:

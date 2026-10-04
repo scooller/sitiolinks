@@ -36,7 +36,7 @@ class EmailTemplate extends Model
     /**
      * Render subject and content replacing placeholders with data.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array{subject: string, content: string}
      */
     public function render(array $data = []): array
@@ -49,8 +49,8 @@ class EmailTemplate extends Model
 
         foreach ($flatData as $key => $value) {
             $valStr = is_scalar($value) ? (string) $value : '';
-            $subject = str_replace(['{{ ' . $key . ' }}', '{{' . $key . '}}'], $valStr, $subject);
-            $content = str_replace(['{{ ' . $key . ' }}', '{{' . $key . '}}'], $valStr, $content);
+            $subject = str_replace(['{{ '.$key.' }}', '{{'.$key.'}}'], $valStr, $subject);
+            $content = str_replace(['{{ '.$key.' }}', '{{'.$key.'}}'], $valStr, $content);
         }
 
         return [
@@ -66,13 +66,14 @@ class EmailTemplate extends Model
     {
         $result = [];
         foreach ($array as $key => $value) {
-            $newKey = $prefix === '' ? $key : $prefix . '.' . $key;
+            $newKey = $prefix === '' ? $key : $prefix.'.'.$key;
             if (is_array($value)) {
                 $result = array_merge($result, self::flattenData($value, $newKey));
             } else {
                 $result[$newKey] = $value;
             }
         }
+
         return $result;
     }
 }

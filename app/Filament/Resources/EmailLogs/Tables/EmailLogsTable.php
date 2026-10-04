@@ -90,14 +90,15 @@ class EmailLogsTable
                     ->label('Ver Correo')
                     ->icon(Heroicon::OutlinedEye)
                     ->color('info')
-                    ->modalHeading(fn (EmailLog $record) => 'Asunto: ' . $record->subject)
-                    ->modalSubheading(fn (EmailLog $record) => "Destinatario: {$record->to} | Fecha: " . ($record->sent_at?->format('d/m/Y H:i:s') ?? $record->created_at->format('d/m/Y H:i:s')))
+                    ->modalHeading(fn (EmailLog $record) => 'Asunto: '.$record->subject)
+                    ->modalSubheading(fn (EmailLog $record) => "Destinatario: {$record->to} | Fecha: ".($record->sent_at?->format('d/m/Y H:i:s') ?? $record->created_at->format('d/m/Y H:i:s')))
                     ->modalWidth('4xl')
                     ->form([
                         Placeholder::make('email_preview')
                             ->label('')
                             ->content(function (EmailLog $record) {
                                 $encodedHtml = htmlspecialchars($record->body_html, ENT_QUOTES, 'UTF-8');
+
                                 return new HtmlString("
                                     <div class=\"border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white shadow-sm\">
                                         <iframe srcdoc=\"{$encodedHtml}\" style=\"width: 100%; height: 500px; border: none;\"></iframe>

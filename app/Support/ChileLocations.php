@@ -399,13 +399,13 @@ class ChileLocations
     public static function getRegionsOptions(): array
     {
         $keys = array_keys(self::LOCATIONS);
+
         return array_combine($keys, $keys);
     }
 
     /**
      * Devuelve las comunas de una región específica o todas si no se especifica.
      *
-     * @param string|null $region
      * @return array<string, string>
      */
     public static function getComunasForRegion(?string $region): array
@@ -419,6 +419,7 @@ class ChileLocations
                 }
             }
             ksort($allComunas);
+
             return $allComunas;
         }
 
@@ -436,6 +437,7 @@ class ChileLocations
         // Si es "Santiago" o "Metropolitana"
         if (stripos($region, 'Santiago') !== false || stripos($region, 'Metropolitana') !== false) {
             $metropolitana = self::LOCATIONS['Región Metropolitana de Santiago'];
+
             return array_combine($metropolitana, $metropolitana);
         }
 

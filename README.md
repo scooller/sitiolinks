@@ -11,9 +11,10 @@ Monorepo del proyecto **only-models**: backend Laravel con API GraphQL y panel d
 
 | Entorno | URL |
 | --- | --- |
-| Backend / API / Admin (local) | `http://127.0.0.1:8000` (`/admin`, `/graphql`, `/api/*`) |
+| Backend / API / Admin (local) | `http://127.0.0.1:8000` (`/admin`, `/manager`, `/graphql`, `/api/*`) |
 | Frontend (local) | `http://127.0.0.1:3000` (Vite, con proxy al backend) |
 | Producción | `only-models.online` (frontend) · `admin.only-models.online` (backend/admin) |
+
 
 ## Puesta en marcha (backend)
 

@@ -20,7 +20,7 @@ class SendBulkEmailJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @param array<int> $userIds
+     * @param  array<int>  $userIds
      */
     public function __construct(
         public array $userIds,
@@ -67,12 +67,12 @@ class SendBulkEmailJob implements ShouldQueue
 
             foreach ($flatData as $k => $v) {
                 $valStr = is_scalar($v) ? (string) $v : '';
-                $userSubject = str_replace(['{{ ' . $k . ' }}', '{{' . $k . '}}'], $valStr, $userSubject);
-                $userContent = str_replace(['{{ ' . $k . ' }}', '{{' . $k . '}}'], $valStr, $userContent);
+                $userSubject = str_replace(['{{ '.$k.' }}', '{{'.$k.'}}'], $valStr, $userSubject);
+                $userContent = str_replace(['{{ '.$k.' }}', '{{'.$k.'}}'], $valStr, $userContent);
             }
 
             try {
-                $unsubscribeUrl = $frontendBase . '/perfil/editar';
+                $unsubscribeUrl = $frontendBase.'/perfil/editar';
                 $mailable = new DynamicTemplateMail(
                     mailSubject: $userSubject,
                     contentHtml: $userContent,

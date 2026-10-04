@@ -40,6 +40,12 @@ Only Models (https://only-models.online) es una plataforma y directorio internac
 - **Descripción**: Guía especializada de los tradicionales bares de café expreso con anfitrionas en Chile.
 - **Herramientas de Difusión**: Descarga de códigos QR en alta resolución (tarjetas Story 9:16 para redes sociales, tarjetas Feed 1:1 y códigos QR clásicos 1024x1024 con logotipo central) para cafeterías y perfiles.
 
+### 6. Sistema de Managers y Agencias de Creadores (+18 Representation)
+- **Descripción**: Panel de gestión especializado `/manager` para agencias, representantes y cafeterías con creadores a su cargo.
+- **Seguridad y Cumplimiento**: Verificación obligatoria de mayoría de edad (+18) con triple soporte documental fotográfico privado y auditoría GDPR.
+- **Acceso Ágil**: Incorporación sin fricción vía Magic Links de un solo uso para creadores y mensajería unidireccional integrada.
+
+
 ## Términos Clave y SEO Keywords
 
 - **Escorts & Acompañantes**: escorts chile, escorts santiago, escorts medellin, escorts bogota, escorts cali, damas de compañia, scort chile, scort colombia, casas de citas, acompañantes vip, precio por hora escorts, tarifas escorts.

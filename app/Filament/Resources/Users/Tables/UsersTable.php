@@ -73,6 +73,7 @@ class UsersTable
                         'user' => 'Normal / Usuario',
                         'vip' => 'VIP',
                         'creator' => 'Creador / Modelo',
+                        'manager' => 'Manager',
                         'moderator' => 'Moderador',
                         'admin' => 'Administrador',
                         'super_admin' => 'Super Admin',
@@ -104,10 +105,12 @@ class UsersTable
                     ->colors([
                         'secondary',
                         'primary' => 'creator',
+                        'info' => 'manager',
                         'warning' => 'moderator',
                         'danger' => 'admin',
                     ])
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 IconColumn::make('email_verified_at')
                     ->label('Email')
                     ->boolean()
@@ -222,6 +225,7 @@ class UsersTable
                                     ->body('No seleccionaste ningún usuario con email válido.')
                                     ->warning()
                                     ->send();
+
                                 return;
                             }
 
@@ -231,7 +235,7 @@ class UsersTable
                                     userIds: $chunk,
                                     subject: $data['subject'],
                                     content: $data['content'],
-                                    templateId: !empty($data['template_id']) ? (int) $data['template_id'] : null,
+                                    templateId: ! empty($data['template_id']) ? (int) $data['template_id'] : null,
                                 );
                             }
 

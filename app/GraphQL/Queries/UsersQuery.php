@@ -4,11 +4,10 @@ namespace App\GraphQL\Queries;
 
 use App\Models\SiteSettings;
 use App\Models\User;
+use App\Services\GeoLocationService;
 use App\Services\GraphQLCache;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Rebing\GraphQL\Support\Facades\GraphQL;
 use Rebing\GraphQL\Support\Query;
 use Spatie\Permission\Exceptions\RoleDoesNotExist;
@@ -95,7 +94,7 @@ class UsersQuery extends Query
             }
 
             // Aplicar filtro centralizado de bloqueo por país y evasión por VPN
-            app(\App\Services\GeoLocationService::class)->applyCountryBlockScope($q, $currentUser);
+            app(GeoLocationService::class)->applyCountryBlockScope($q, $currentUser);
         }
 
         // Búsqueda por texto

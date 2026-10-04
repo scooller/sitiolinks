@@ -18,7 +18,7 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
     $request->fulfill();
 
     // Redirect to frontend with success message
-    return redirect(config('app.frontend_url') . '/email-verified?success=true');
+    return redirect(config('app.frontend_url').'/email-verified?success=true');
 })->middleware(['auth:web', 'signed'])->name('verification.verify');
 
 Route::get('/email/verify', function () {
@@ -43,4 +43,8 @@ Route::middleware(['web'])->group(function () {
         ->name('branch.media');
     Route::match(['get', 'options'], '/branch-media/{media}/{conversion}', [MediaController::class, 'serveBranchMediaConversion'])
         ->name('branch.media.conversion');
+
+    // Private creator verification documents
+    Route::get('/creator-documents/{media}', [MediaController::class, 'serveDocumentMedia'])
+        ->name('creator.document.media');
 });

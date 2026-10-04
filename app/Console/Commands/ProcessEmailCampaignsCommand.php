@@ -32,6 +32,7 @@ class ProcessEmailCampaignsCommand extends Command
 
         if ($campaigns->isEmpty()) {
             $this->info('No email campaigns ready to execute.');
+
             return self::SUCCESS;
         }
 
@@ -45,6 +46,7 @@ class ProcessEmailCampaignsCommand extends Command
 
             if (empty($subject) || empty($content)) {
                 $this->warn("Campaign {$campaign->id} skipped: empty subject or content.");
+
                 continue;
             }
 
@@ -61,6 +63,7 @@ class ProcessEmailCampaignsCommand extends Command
                     $campaign->updateNextRunTime();
                 }
                 $campaign->save();
+
                 continue;
             }
 
@@ -82,7 +85,7 @@ class ProcessEmailCampaignsCommand extends Command
                 );
             }
 
-            $this->info("Campaign {$campaign->id} dispatched {$total} recipients across " . count($chunks) . " queue jobs.");
+            $this->info("Campaign {$campaign->id} dispatched {$total} recipients across ".count($chunks).' queue jobs.');
         }
 
         return self::SUCCESS;

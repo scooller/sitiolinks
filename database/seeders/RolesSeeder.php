@@ -18,6 +18,7 @@ class RolesSeeder extends Seeder
             'moderator',
             'vip',
             'creator',
+            'manager',
             'user',
         ];
 

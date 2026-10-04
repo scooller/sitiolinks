@@ -3,10 +3,10 @@
 namespace App\GraphQL\Queries;
 
 use App\Models\User;
+use App\Services\GeoLocationService;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Rebing\GraphQL\Support\Facades\GraphQL;
 use Rebing\GraphQL\Support\Query;
 
@@ -70,7 +70,7 @@ class UserQuery extends Query
         }
 
         // Verificar bloqueo por país y evasión automática por VPN / Proxy
-        if (app(\App\Services\GeoLocationService::class)->shouldBlockUser($user, $currentUser)) {
+        if (app(GeoLocationService::class)->shouldBlockUser($user, $currentUser)) {
             return null;
         }
 

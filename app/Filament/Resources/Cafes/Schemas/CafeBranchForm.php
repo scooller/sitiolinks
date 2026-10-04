@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Cafes\Schemas;
 
+use App\Support\ChileLocations;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
@@ -44,14 +45,14 @@ class CafeBranchForm
                             ->schema([
                                 Select::make('city')
                                     ->label('Ciudad / Región')
-                                    ->options(\App\Support\ChileLocations::getRegionsOptions())
+                                    ->options(ChileLocations::getRegionsOptions())
                                     ->searchable()
                                     ->live()
                                     ->afterStateUpdated(fn (callable $set) => $set('state', null)),
 
                                 Select::make('state')
                                     ->label('Comuna')
-                                    ->options(fn (callable $get) => \App\Support\ChileLocations::getComunasForRegion($get('city')))
+                                    ->options(fn (callable $get) => ChileLocations::getComunasForRegion($get('city')))
                                     ->searchable()
                                     ->live(),
 

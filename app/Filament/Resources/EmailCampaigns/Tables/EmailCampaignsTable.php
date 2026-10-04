@@ -4,7 +4,6 @@ namespace App\Filament\Resources\EmailCampaigns\Tables;
 
 use App\Jobs\SendBulkEmailJob;
 use App\Models\EmailCampaign;
-use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -111,6 +110,7 @@ class EmailCampaignsTable
                                 ->body('Debes definir el asunto y cuerpo del mensaje antes de ejecutar.')
                                 ->danger()
                                 ->send();
+
                             return;
                         }
 
@@ -123,6 +123,7 @@ class EmailCampaignsTable
                                 ->body('No se encontraron usuarios que coincidan con la audiencia configurada.')
                                 ->warning()
                                 ->send();
+
                             return;
                         }
 

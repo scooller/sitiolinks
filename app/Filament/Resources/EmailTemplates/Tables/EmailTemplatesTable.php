@@ -76,7 +76,7 @@ class EmailTemplatesTable
 
                         try {
                             Mail::to($recipient)->send(new DynamicTemplateMail(
-                                mailSubject: '[PRUEBA] ' . $rendered['subject'],
+                                mailSubject: '[PRUEBA] '.$rendered['subject'],
                                 contentHtml: $rendered['content'],
                                 unsubscribeUrl: null,
                                 templateId: $record->id,

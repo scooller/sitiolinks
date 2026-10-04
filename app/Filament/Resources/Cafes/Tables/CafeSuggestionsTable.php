@@ -45,13 +45,13 @@ class CafeSuggestionsTable
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         CafeSuggestion::STATUS_PENDING => 'warning',
                         CafeSuggestion::STATUS_APPROVED => 'success',
                         CafeSuggestion::STATUS_REJECTED => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
                         CafeSuggestion::STATUS_PENDING => 'Pendiente',
                         CafeSuggestion::STATUS_APPROVED => 'Aprobada',
                         CafeSuggestion::STATUS_REJECTED => 'Rechazada',
@@ -79,7 +79,7 @@ class CafeSuggestionsTable
                     ->color('success')
                     ->requiresConfirmation()
                     ->modalDescription('Se creará el café y su sucursal con los datos de la sugerencia. Podrás editarlos después en Cafés.')
-                    ->visible(fn(CafeSuggestion $record): bool => $record->status === CafeSuggestion::STATUS_PENDING)
+                    ->visible(fn (CafeSuggestion $record): bool => $record->status === CafeSuggestion::STATUS_PENDING)
                     ->action(function (CafeSuggestion $record): void {
                         $cafe = Cafe::create([
                             'name' => $record->name,
@@ -108,7 +108,7 @@ class CafeSuggestionsTable
                     ->icon('heroicon-m-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->visible(fn(CafeSuggestion $record): bool => $record->status === CafeSuggestion::STATUS_PENDING)
+                    ->visible(fn (CafeSuggestion $record): bool => $record->status === CafeSuggestion::STATUS_PENDING)
                     ->action(function (CafeSuggestion $record): void {
                         $record->update([
                             'status' => CafeSuggestion::STATUS_REJECTED,
@@ -119,6 +119,6 @@ class CafeSuggestionsTable
             ])
             ->bulkActions([])
             ->defaultSort('created_at', 'desc')
-            ->modifyQueryUsing(fn($query) => $query->with('user'));
+            ->modifyQueryUsing(fn ($query) => $query->with('user'));
     }
 }

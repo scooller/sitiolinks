@@ -99,6 +99,7 @@ class EmailCampaign extends Model
             } else {
                 $this->next_run_at = $this->scheduled_at;
             }
+
             return;
         }
 

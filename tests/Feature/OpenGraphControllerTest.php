@@ -14,11 +14,11 @@ class OpenGraphControllerTest extends TestCase
     {
         $user = User::factory()->create([
             'name' => 'Valentina Rojas',
-            'username' => 'valerajas_' . uniqid(),
+            'username' => 'valerajas_'.uniqid(),
             'description' => 'Modelo y creadora de contenido en Santiago Centro.',
         ]);
 
-        $response = $this->get('/api/og/user/' . $user->username);
+        $response = $this->get('/api/og/user/'.$user->username);
 
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'text/html; charset=UTF-8');

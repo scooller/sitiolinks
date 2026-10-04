@@ -6,7 +6,9 @@ namespace Tests\Feature;
 
 use App\Models\Gallery;
 use App\Models\User;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -23,8 +25,8 @@ class SecurityPatchesTest extends TestCase
         Role::firstOrCreate(['name' => 'creator', 'guard_name' => 'web']);
         Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
 
-        if (! \Illuminate\Support\Facades\Schema::hasTable('tags')) {
-            \Illuminate\Support\Facades\Schema::create('tags', function (\Illuminate\Database\Schema\Blueprint $table): void {
+        if (! Schema::hasTable('tags')) {
+            Schema::create('tags', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name')->unique();
                 $table->string('color')->default('primary');
@@ -35,8 +37,8 @@ class SecurityPatchesTest extends TestCase
             });
         }
 
-        if (! \Illuminate\Support\Facades\Schema::hasTable('user_tag')) {
-            \Illuminate\Support\Facades\Schema::create('user_tag', function (\Illuminate\Database\Schema\Blueprint $table): void {
+        if (! Schema::hasTable('user_tag')) {
+            Schema::create('user_tag', function (Blueprint $table): void {
                 $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
                 $table->foreignId('tag_id')->constrained('tags')->onDelete('cascade');
                 $table->timestamps();
@@ -44,8 +46,8 @@ class SecurityPatchesTest extends TestCase
             });
         }
 
-        if (! \Illuminate\Support\Facades\Schema::hasTable('links')) {
-            \Illuminate\Support\Facades\Schema::create('links', function (\Illuminate\Database\Schema\Blueprint $table): void {
+        if (! Schema::hasTable('links')) {
+            Schema::create('links', function (Blueprint $table): void {
                 $table->id();
                 $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
                 $table->string('name');

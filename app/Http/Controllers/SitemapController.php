@@ -16,7 +16,7 @@ class SitemapController extends Controller
     {
         $frontendUrl = rtrim((string) (config('app.frontend_url') ?: env('FRONTEND_URL', 'https://only-models.online')), '/');
 
-        $xml = Cache::remember('dynamic_sitemap_xml_' . md5($frontendUrl), 3600, function () use ($frontendUrl) {
+        $xml = Cache::remember('dynamic_sitemap_xml_'.md5($frontendUrl), 3600, function () use ($frontendUrl) {
             $urls = [];
 
             // 1. Static public core routes
@@ -34,7 +34,7 @@ class SitemapController extends Controller
 
             foreach ($staticRoutes as $route) {
                 $urls[] = [
-                    'loc' => $frontendUrl . $route['path'],
+                    'loc' => $frontendUrl.$route['path'],
                     'lastmod' => $route['lastmod'],
                     'changefreq' => $route['changefreq'],
                     'priority' => $route['priority'],
@@ -48,18 +48,18 @@ class SitemapController extends Controller
                     ->where('username', '!=', '')
                     ->where(function ($q) {
                         $q->whereNull('search_indexing_opt_in')
-                          ->orWhere('search_indexing_opt_in', true);
+                            ->orWhere('search_indexing_opt_in', true);
                     })
                     ->where(function ($q) {
                         $q->whereNull('country_block')
-                          ->orWhere('country_block', false);
+                            ->orWhere('country_block', false);
                     })
                     ->select(['username', 'updated_at'])
                     ->get();
 
                 foreach ($creators as $creator) {
                     $urls[] = [
-                        'loc' => $frontendUrl . '/u/' . rawurlencode($creator->username),
+                        'loc' => $frontendUrl.'/u/'.rawurlencode($creator->username),
                         'lastmod' => ($creator->updated_at ?: now())->toIso8601String(),
                         'changefreq' => 'weekly',
                         'priority' => '0.8',
@@ -76,7 +76,7 @@ class SitemapController extends Controller
                 foreach ($cafes as $cafe) {
                     $identifier = $cafe->slug ?: $cafe->id;
                     $urls[] = [
-                        'loc' => $frontendUrl . '/cafes/' . rawurlencode((string) $identifier),
+                        'loc' => $frontendUrl.'/cafes/'.rawurlencode((string) $identifier),
                         'lastmod' => ($cafe->updated_at ?: now())->toIso8601String(),
                         'changefreq' => 'weekly',
                         'priority' => '0.8',
@@ -92,12 +92,12 @@ class SitemapController extends Controller
 
             foreach ($urls as $item) {
                 $xmlLines[] = '  <url>';
-                $xmlLines[] = '    <loc>' . htmlspecialchars($item['loc'], ENT_XML1, 'UTF-8') . '</loc>';
+                $xmlLines[] = '    <loc>'.htmlspecialchars($item['loc'], ENT_XML1, 'UTF-8').'</loc>';
                 if (! empty($item['lastmod'])) {
-                    $xmlLines[] = '    <lastmod>' . $item['lastmod'] . '</lastmod>';
+                    $xmlLines[] = '    <lastmod>'.$item['lastmod'].'</lastmod>';
                 }
-                $xmlLines[] = '    <changefreq>' . $item['changefreq'] . '</changefreq>';
-                $xmlLines[] = '    <priority>' . $item['priority'] . '</priority>';
+                $xmlLines[] = '    <changefreq>'.$item['changefreq'].'</changefreq>';
+                $xmlLines[] = '    <priority>'.$item['priority'].'</priority>';
                 $xmlLines[] = '  </url>';
             }
 

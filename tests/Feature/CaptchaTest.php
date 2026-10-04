@@ -74,7 +74,7 @@ class CaptchaTest extends TestCase
         $salt = 'testsalt&';
         $number = 42;
 
-        $challenge = $hasher->hashHex($algorithm, $salt . $number);
+        $challenge = $hasher->hashHex($algorithm, $salt.$number);
         $signature = $hasher->hashHmacHex($algorithm, $challenge, $secret);
 
         return base64_encode(json_encode([

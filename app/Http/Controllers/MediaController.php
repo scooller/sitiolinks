@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cafe;
 use App\Models\CafeBranch;
+use App\Models\CreatorDocument;
 use App\Models\Gallery;
 use Illuminate\Http\Request;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -238,6 +239,51 @@ class MediaController extends Controller
         return response()->file($path, [
             'Content-Type' => $mimeType,
             'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
+    /**
+     * Serve private creator verification document with authorization check and GDPR view audit
+     */
+    public function serveDocumentMedia(Request $request, $mediaId)
+    {
+        $media = Media::findOrFail($mediaId);
+
+        if ($media->model_type !== CreatorDocument::class) {
+            abort(404, 'Document media not found');
+        }
+
+        /** @var CreatorDocument|null $document */
+        $document = $media->model;
+        if (! $document) {
+            abort(404, 'Document not found');
+        }
+
+        $user = auth('web')->user();
+        if (! $user) {
+            abort(401);
+        }
+
+        $isAdmin = $user->hasRole(['admin', 'super_admin']);
+        $isOwnerManager = $user->managerProfile && $user->managerProfile->id === $document->manager_profile_id;
+        $isCreator = (int) $user->id === (int) $document->creator_user_id;
+
+        if (! $isAdmin && ! $isOwnerManager && ! $isCreator) {
+            abort(403, 'No autorizado para ver este documento');
+        }
+
+        $document->recordView($user->id);
+
+        $path = $media->getPath();
+        if (! file_exists($path)) {
+            abort(404, 'Archivo no encontrado');
+        }
+
+        return response()->file($path, [
+            'Content-Type' => $media->mime_type,
+            'Cache-Control' => 'private, no-cache, no-store, must-revalidate',
+            'X-Content-Type-Options' => 'nosniff',
+            'Pragma' => 'no-cache',
         ]);
     }
 }

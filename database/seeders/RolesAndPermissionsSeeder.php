@@ -64,6 +64,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete_any_post',
         ]);
 
+        // Manager - Gestiona creadores y su perfil
+        $managerRole = Role::firstOrCreate(['name' => 'manager']);
+        $managerRole->givePermissionTo([
+            'view_post',
+            'create_post',
+        ]);
+
         // Admin - Ya tiene super_admin, pero por si acaso
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $adminRole->givePermissionTo(Permission::all());

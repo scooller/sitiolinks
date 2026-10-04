@@ -49,6 +49,9 @@ class User extends Authenticatable implements FilamentUser, HasMedia, MustVerify
         'privacy_consent_at',
         'privacy_policy_version',
         'search_indexing_opt_in',
+        'magic_link_token',
+        'magic_link_expires_at',
+        'phone',
     ];
 
     /**
@@ -84,12 +87,17 @@ class User extends Authenticatable implements FilamentUser, HasMedia, MustVerify
             'privacy_consent_at' => 'datetime',
             'privacy_policy_version' => 'string',
             'search_indexing_opt_in' => 'boolean',
+            'magic_link_expires_at' => 'datetime',
         ];
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasRole(['super_admin', 'admin']);
+        return match ($panel->getId()) {
+            'admin' => $this->hasRole(['super_admin', 'admin']),
+            'manager' => $this->hasRole(['super_admin', 'admin']) || ($this->hasRole('manager') && (bool) $this->managerProfile?->isActive()),
+            default => false,
+        };
     }
 
     public function registerMediaCollections(): void
@@ -392,5 +400,34 @@ class User extends Authenticatable implements FilamentUser, HasMedia, MustVerify
     public function likes()
     {
         return $this->hasMany(Like::class);
+    }
+
+    /**
+     * Perfil de manager del usuario (si es manager)
+     */
+    public function managerProfile()
+    {
+        return $this->hasOne(ManagerProfile::class);
+    }
+
+    /**
+     * Relación manager que gestiona este perfil (si es creator bajo un manager)
+     */
+    public function managedBy()
+    {
+        return $this->hasOne(ManagerCreator::class, 'creator_user_id');
+    }
+
+    /**
+     * Documentos de identidad (subidos por el manager al crear el perfil)
+     */
+    public function creatorDocuments()
+    {
+        return $this->hasMany(CreatorDocument::class, 'creator_user_id');
+    }
+
+    public function isManager(): bool
+    {
+        return $this->hasRole('manager');
     }
 }

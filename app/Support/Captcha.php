@@ -32,7 +32,7 @@ class Captcha
 
             return (bool) $altcha->verifySolution($token, true);
         } catch (\Exception $e) {
-            Log::error('ALTCHA verification failed: ' . $e->getMessage());
+            Log::error('ALTCHA verification failed: '.$e->getMessage());
 
             return false;
         }

@@ -27,7 +27,7 @@ class CafeSuggestionReceived extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Nueva sugerencia de café: ' . $this->suggestion->name,
+            subject: 'Nueva sugerencia de café: '.$this->suggestion->name,
         );
     }
 

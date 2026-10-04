@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\CreatorApproved;
+use App\Events\CreatorRejected;
 use App\Events\NotificationCreated;
+use App\Listeners\NotifyManagerCreatorApproved;
+use App\Listeners\NotifyManagerCreatorRejected;
 use App\Listeners\SendNotificationEmail;
 use App\Models\Gallery;
 use App\Models\SiteSettings;
@@ -16,7 +20,6 @@ use App\Observers\TagObserver;
 use App\Observers\TicketObserver;
 use App\Observers\UserObserver;
 use App\Support\WatermarkManipulator;
-use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Spatie\MediaLibrary\Conversions\Events\ConversionHasBeenCompletedEvent;
@@ -50,6 +53,10 @@ class AppServiceProvider extends ServiceProvider
             NotificationCreated::class,
             SendNotificationEmail::class
         );
+
+        // Manager → Creator approval workflow
+        Event::listen(CreatorApproved::class, NotifyManagerCreatorApproved::class);
+        Event::listen(CreatorRejected::class, NotifyManagerCreatorRejected::class);
 
         // Aplicar watermark al archivo original cuando se agrega
         Event::listen(

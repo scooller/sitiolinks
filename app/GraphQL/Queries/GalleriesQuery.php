@@ -6,6 +6,7 @@ namespace App\GraphQL\Queries;
 
 use App\Models\Gallery;
 use App\Models\Like;
+use App\Services\GeoLocationService;
 use App\Services\GraphQLCache;
 use GraphQL\Type\Definition\Type;
 use Rebing\GraphQL\Support\Facades\GraphQL;
@@ -81,7 +82,7 @@ class GalleriesQuery extends Query
 
         if (! ($hasAdmin || $hasSuper || $hasModerator)) {
             $query->whereHas('user', function ($userQuery) use ($user) {
-                app(\App\Services\GeoLocationService::class)->applyCountryBlockScope($userQuery, $user);
+                app(GeoLocationService::class)->applyCountryBlockScope($userQuery, $user);
             });
         }
 

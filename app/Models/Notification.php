@@ -20,6 +20,13 @@ class Notification extends Model
 
     public const TYPE_VIP_USER_MESSAGE = 'vip_user_message';
 
+    // Manager types
+    public const TYPE_CREATOR_APPROVED = 'creator_approved';
+
+    public const TYPE_CREATOR_REJECTED = 'creator_rejected';
+
+    public const TYPE_MANAGER_MESSAGE = 'manager_message';
+
     protected $fillable = [
         'user_id',
         'type',

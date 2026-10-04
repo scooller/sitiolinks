@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SiteSettings;
 use App\Models\User;
 use Illuminate\Http\Response;
 
@@ -13,9 +14,9 @@ class OpenGraphController extends Controller
     public function user(string $username): Response
     {
         $frontendUrl = rtrim((string) (config('app.frontend_url') ?: env('FRONTEND_URL', 'https://only-models.online')), '/');
-        $profileUrl = $frontendUrl . '/u/' . urlencode($username);
+        $profileUrl = $frontendUrl.'/u/'.urlencode($username);
 
-        $siteSettings = \App\Models\SiteSettings::first();
+        $siteSettings = SiteSettings::first();
         $siteName = $siteSettings?->site_title ?: config('app.name', 'Only Models');
         if (trim($siteName) === '' || strcasecmp($siteName, 'Link Persons') === 0 || strcasecmp($siteName, 'laravel') === 0) {
             $siteName = 'Only Models';
@@ -23,12 +24,12 @@ class OpenGraphController extends Controller
 
         $user = User::where('username', $username)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response(
                 $this->renderHtml(
                     title: "Perfil no encontrado - {$siteName}",
                     description: 'Directorio internacional de creadores, modelos, escorts y damas de compañía.',
-                    imageUrl: $frontendUrl . '/logo500.png',
+                    imageUrl: $frontendUrl.'/logo500.png',
                     canonicalUrl: $profileUrl,
                     fallbackUrl: $frontendUrl,
                     siteName: $siteName
@@ -40,12 +41,12 @@ class OpenGraphController extends Controller
 
         $displayName = $user->name ? "{$user->name} (@{$user->username})" : "@{$user->username}";
         $location = implode(', ', array_filter([$user->city, $user->country]));
-        $priceStr = $user->price_from ? ' | Tarifa aprox: $' . number_format((float) $user->price_from, 0, ',', '.') . ($user->price_currency ? ' ' . $user->price_currency : '') . '/hr' : '';
+        $priceStr = $user->price_from ? ' | Tarifa aprox: $'.number_format((float) $user->price_from, 0, ',', '.').($user->price_currency ? ' '.$user->price_currency : '').'/hr' : '';
 
-        $title = "{$displayName}" . ($location ? " en {$location}" : "") . " | Creador Adulto (+18) & Escort - {$siteName}";
+        $title = "{$displayName}".($location ? " en {$location}" : '')." | Creador Adulto (+18) & Escort - {$siteName}";
         $description = $user->description
-            ? mb_substr($user->description, 0, 130) . ($priceStr ? " - {$priceStr}" : "") . " | Perfil verificado (+18) en {$siteName}."
-            : "Perfil verificado (+18) de {$displayName}" . ($location ? " en {$location}" : "") . ". {$priceStr}. Redes sociales, OnlyFans, Arsmate y fotos exclusivas en {$siteName}.";
+            ? mb_substr($user->description, 0, 130).($priceStr ? " - {$priceStr}" : '')." | Perfil verificado (+18) en {$siteName}."
+            : "Perfil verificado (+18) de {$displayName}".($location ? " en {$location}" : '').". {$priceStr}. Redes sociales, OnlyFans, Arsmate y fotos exclusivas en {$siteName}.";
 
         // Obtener avatar absoluto del usuario, o como fallback el logo del sitio
         $avatarUrl = null;
@@ -55,7 +56,7 @@ class OpenGraphController extends Controller
             $avatarUrl = null;
         }
 
-        if (!$avatarUrl) {
+        if (! $avatarUrl) {
             try {
                 $avatarUrl = $siteSettings?->getFirstMediaUrl('logo') ?: $siteSettings?->getFirstMediaUrl('default_avatar');
             } catch (\Throwable) {
@@ -63,8 +64,8 @@ class OpenGraphController extends Controller
             }
         }
 
-        if (!$avatarUrl) {
-            $avatarUrl = $frontendUrl . '/logo500.png';
+        if (! $avatarUrl) {
+            $avatarUrl = $frontendUrl.'/logo500.png';
         }
 
         $html = $this->renderHtml(
@@ -92,7 +93,7 @@ class OpenGraphController extends Controller
         $safeFallback = htmlspecialchars($fallbackUrl, ENT_QUOTES, 'UTF-8');
         $safeSiteName = htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8');
 
-        $profileUsernameTag = $username ? "<meta property=\"profile:username\" content=\"" . htmlspecialchars($username, ENT_QUOTES, 'UTF-8') . "\" />\n    " : '';
+        $profileUsernameTag = $username ? '<meta property="profile:username" content="'.htmlspecialchars($username, ENT_QUOTES, 'UTF-8')."\" />\n    " : '';
 
         return <<<HTML
 <!DOCTYPE html>
