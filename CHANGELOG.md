@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.4] - 2026-10-04
+
+### Fixed
+- **Logo del Café vs Avatar en Tarjetas y Código QR (`CafeDetail.tsx`, `MediaController.php`, `web.php`)**:
+  - Eliminado por completo `drawCircularAvatar` y el formato de avatar circular en las tarjetas de exportación QR (Story 9:16 y Feed 1:1), reemplazándolo por renderizado directo del logotipo de marca (`drawImageContain`) con su proporción nativa.
+  - Eliminado el bloqueo por CORS (`crossOrigin = 'anonymous'`) en la medición de dimensiones de `loadQrLogo` que provocaba que la imagen del café fallara y cayera en el fallback del logotipo del sitio.
+  - Agregadas cabeceras directas `Access-Control-Allow-Origin: *` y soporte de preflight `OPTIONS` en `MediaController.php` y `routes/web.php` para endpoints de medios de café.
+
 ## [0.30.3] - 2026-10-04
 
 ### Changed

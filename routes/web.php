@@ -33,14 +33,14 @@ Route::middleware(['web'])->group(function () {
         ->name('gallery.media.conversion');
 
     // Cafe media routes (public)
-    Route::get('/cafe-media/{media}', [MediaController::class, 'serveCafeMedia'])
+    Route::match(['get', 'options'], '/cafe-media/{media}', [MediaController::class, 'serveCafeMedia'])
         ->name('cafe.media');
-    Route::get('/cafe-media/{media}/{conversion}', [MediaController::class, 'serveCafeMediaConversion'])
+    Route::match(['get', 'options'], '/cafe-media/{media}/{conversion}', [MediaController::class, 'serveCafeMediaConversion'])
         ->name('cafe.media.conversion');
 
     // Cafe branch media routes (public)
-    Route::get('/branch-media/{media}', [MediaController::class, 'serveBranchMedia'])
+    Route::match(['get', 'options'], '/branch-media/{media}', [MediaController::class, 'serveBranchMedia'])
         ->name('branch.media');
-    Route::get('/branch-media/{media}/{conversion}', [MediaController::class, 'serveBranchMediaConversion'])
+    Route::match(['get', 'options'], '/branch-media/{media}/{conversion}', [MediaController::class, 'serveBranchMediaConversion'])
         ->name('branch.media.conversion');
 });

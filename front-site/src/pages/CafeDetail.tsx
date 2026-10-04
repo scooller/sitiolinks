@@ -441,23 +441,27 @@ export default function CafeDetail(): React.ReactElement {
             }
           }
 
-          // Measure natural dimensions and calculate aspect ratio
-          const img = new Image();
-          if (!dataUrl.startsWith('data:')) {
-            img.crossOrigin = 'anonymous';
+          // Measure natural dimensions and calculate aspect ratio.
+          // Load image safely without requiring crossOrigin so CORS never blocks dimension measurement
+          let nw = 0;
+          let nh = 0;
+          try {
+            const img = new Image();
+            img.src = dataUrl;
+            await new Promise<void>((resolve, reject) => {
+              if (img.complete && (img.naturalWidth || img.width)) return resolve();
+              img.onload = () => resolve();
+              img.onerror = () => reject();
+            });
+            nw = img.naturalWidth || img.width;
+            nh = img.naturalHeight || img.height;
+          } catch {
+            nw = qrLogoSize;
+            nh = qrLogoSize;
           }
-          img.src = dataUrl;
-
-          await new Promise<void>((resolve, reject) => {
-            if (img.complete && (img.naturalWidth || img.width)) return resolve();
-            img.onload = () => resolve();
-            img.onerror = () => reject();
-          });
 
           if (cancelled) return;
 
-          const nw = img.naturalWidth || img.width;
-          const nh = img.naturalHeight || img.height;
           let width = qrLogoSize;
           let height = qrLogoSize;
 
@@ -599,34 +603,6 @@ export default function CafeDetail(): React.ReactElement {
     ctx.drawImage(img, 0, 0, imgW, imgH, renderX, renderY, renderW, renderH);
   };
 
-  const drawCircularAvatar = (
-    ctx: CanvasRenderingContext2D,
-    img: HTMLImageElement,
-    cx: number,
-    cy: number,
-    r: number,
-    borderCol: string = '#6f4e37',
-    borderW: number = 4
-  ) => {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.clip();
-    drawImageCover(ctx, img, cx - r, cy - r, r * 2, r * 2);
-    ctx.restore();
-
-    if (borderW > 0) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2, true);
-      ctx.strokeStyle = borderCol;
-      ctx.lineWidth = borderW;
-      ctx.stroke();
-      ctx.restore();
-    }
-  };
-
   const handleDownloadQr = async (format: 'classic' | 'story' | 'feed' = 'story') => {
     if (!cafe) return;
     setDownloadingQr(true);
@@ -660,9 +636,9 @@ export default function CafeDetail(): React.ReactElement {
 
       const frac = qrLogoSize / QR_DISPLAY_SIZE;
       const logoDlSize = Math.max(36, Math.round(qrInnerSize * frac));
-      const logoSrc = logoDataUrl || siteLogo;
+      const logoSrc = logoDataUrl || cafeLogoCandidate || siteLogo;
 
-      // 1. Preload Logo
+      // 1. Preload Logo (with robust crossOrigin fallback)
       let loadedLogoImg: HTMLImageElement | null = null;
       if (logoSrc) {
         try {
@@ -670,17 +646,28 @@ export default function CafeDetail(): React.ReactElement {
           if (!logoSrc.startsWith('data:')) img.crossOrigin = 'anonymous';
           img.src = logoSrc;
           await new Promise<void>((resolve, reject) => {
-            if (img.complete) return resolve();
+            if (img.complete && (img.naturalWidth || img.width)) return resolve();
             img.onload = () => resolve();
             img.onerror = () => reject();
           });
           loadedLogoImg = img;
-        } catch {}
+        } catch {
+          try {
+            const img = new Image();
+            img.src = logoSrc;
+            await new Promise<void>((resolve, reject) => {
+              if (img.complete && (img.naturalWidth || img.width)) return resolve();
+              img.onload = () => resolve();
+              img.onerror = () => reject();
+            });
+            loadedLogoImg = img;
+          } catch {}
+        }
       }
 
-      // 2. Preload Cafe Image
+      // 2. Preload Cafe Image (with robust crossOrigin fallback)
       let loadedCafeImg: HTMLImageElement | null = null;
-      let cafeImgSrc = cafe.image_url;
+      let cafeImgSrc = cafeLogoCandidate || cafe.image_url;
       if (cafeImgSrc) {
         if (!cafeImgSrc.startsWith('http') && !cafeImgSrc.startsWith('data:')) {
           const backendBase = String((import.meta as any).env?.VITE_BACKEND_URL || BACKEND_URL).replace(/\/$/, '');
@@ -691,12 +678,23 @@ export default function CafeDetail(): React.ReactElement {
           if (!cafeImgSrc.startsWith('data:')) img.crossOrigin = 'anonymous';
           img.src = cafeImgSrc;
           await new Promise<void>((resolve, reject) => {
-            if (img.complete) return resolve();
+            if (img.complete && (img.naturalWidth || img.width)) return resolve();
             img.onload = () => resolve();
             img.onerror = () => reject();
           });
           loadedCafeImg = img;
-        } catch {}
+        } catch {
+          try {
+            const img = new Image();
+            img.src = cafeImgSrc;
+            await new Promise<void>((resolve, reject) => {
+              if (img.complete && (img.naturalWidth || img.width)) return resolve();
+              img.onload = () => resolve();
+              img.onerror = () => reject();
+            });
+            loadedCafeImg = img;
+          } catch {}
+        }
       }
 
       // 3. Render offscreen QR Code
@@ -812,26 +810,36 @@ export default function CafeDetail(): React.ReactElement {
         const cardY = 220;
         drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 48, '#FFFFFF');
 
-        // Card Avatar
-        const avatarR = 80;
-        const avatarCY = cardY + 120;
-        if (loadedCafeImg) {
-          drawCircularAvatar(ctx, loadedCafeImg, W / 2, avatarCY, avatarR, '#6f4e37', 6);
-        } else if (loadedLogoImg) {
-          drawCircularAvatar(ctx, loadedLogoImg, W / 2, avatarCY, avatarR, '#6f4e37', 6);
+        // Cafe Brand Logo (Rendered as logo with natural aspect ratio, no circular avatar)
+        const brandLogoImg = loadedLogoImg || loadedCafeImg;
+        const logoBoxMaxW = 340;
+        const logoBoxMaxH = 130;
+        const logoBoxY = cardY + 50;
+
+        if (brandLogoImg) {
+          const nw = brandLogoImg.naturalWidth || brandLogoImg.width;
+          const nh = brandLogoImg.naturalHeight || brandLogoImg.height;
+          let bw = logoBoxMaxW;
+          let bh = logoBoxMaxH;
+          if (nw && nh) {
+            const aspect = nw / nh;
+            if (aspect >= logoBoxMaxW / logoBoxMaxH) {
+              bw = logoBoxMaxW;
+              bh = Math.max(30, Math.round(logoBoxMaxW / aspect));
+            } else {
+              bh = logoBoxMaxH;
+              bw = Math.max(30, Math.round(logoBoxMaxH * aspect));
+            }
+          }
+          const bx = Math.round((W - bw) / 2);
+          const by = Math.round(logoBoxY + (logoBoxMaxH - bh) / 2);
+          drawImageContain(ctx, brandLogoImg, bx, by, bw, bh);
         } else {
           ctx.save();
-          ctx.beginPath();
-          ctx.arc(W / 2, avatarCY, avatarR, 0, Math.PI * 2);
-          ctx.fillStyle = '#fdf8f4';
-          ctx.fill();
-          ctx.strokeStyle = '#6f4e37';
-          ctx.lineWidth = 6;
-          ctx.stroke();
           ctx.font = '64px system-ui, sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText('☕', W / 2, avatarCY);
+          ctx.fillText('☕', W / 2, logoBoxY + logoBoxMaxH / 2);
           ctx.restore();
         }
 
@@ -840,12 +848,12 @@ export default function CafeDetail(): React.ReactElement {
         ctx.font = 'bold 44px system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(displayName, W / 2, avatarCY + 115);
+        ctx.fillText(displayName, W / 2, cardY + 215);
 
         if (detailTxt) {
           ctx.fillStyle = '#6f4e37';
           ctx.font = 'bold 26px system-ui, -apple-system, sans-serif';
-          ctx.fillText(detailTxt, W / 2, avatarCY + 165);
+          ctx.fillText(detailTxt, W / 2, cardY + 265);
         }
 
         // QR Code
@@ -909,27 +917,37 @@ export default function CafeDetail(): React.ReactElement {
         const cardY = (H - cardH) / 2;
         drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 44, '#FFFFFF');
 
-        // Header Avatar + Name
-        const avatarR = 55;
-        const avatarCX = cardX + 90;
-        const avatarCY = cardY + 90;
-        if (loadedCafeImg) {
-          drawCircularAvatar(ctx, loadedCafeImg, avatarCX, avatarCY, avatarR, '#6f4e37', 4);
-        } else if (loadedLogoImg) {
-          drawCircularAvatar(ctx, loadedLogoImg, avatarCX, avatarCY, avatarR, '#6f4e37', 4);
+        // Header Logo + Name (Rendered as logo with natural aspect ratio, no circular avatar)
+        const brandLogoImg = loadedLogoImg || loadedCafeImg;
+        const logoBoxMaxW = 130;
+        const logoBoxMaxH = 80;
+        const logoBoxX = cardX + 45;
+        const logoBoxY = cardY + 45;
+
+        if (brandLogoImg) {
+          const nw = brandLogoImg.naturalWidth || brandLogoImg.width;
+          const nh = brandLogoImg.naturalHeight || brandLogoImg.height;
+          let bw = logoBoxMaxW;
+          let bh = logoBoxMaxH;
+          if (nw && nh) {
+            const aspect = nw / nh;
+            if (aspect >= logoBoxMaxW / logoBoxMaxH) {
+              bw = logoBoxMaxW;
+              bh = Math.max(24, Math.round(logoBoxMaxW / aspect));
+            } else {
+              bh = logoBoxMaxH;
+              bw = Math.max(24, Math.round(logoBoxMaxH * aspect));
+            }
+          }
+          const bx = Math.round(logoBoxX + (logoBoxMaxW - bw) / 2);
+          const by = Math.round(logoBoxY + (logoBoxMaxH - bh) / 2);
+          drawImageContain(ctx, brandLogoImg, bx, by, bw, bh);
         } else {
           ctx.save();
-          ctx.beginPath();
-          ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
-          ctx.fillStyle = '#fdf8f4';
-          ctx.fill();
-          ctx.strokeStyle = '#6f4e37';
-          ctx.lineWidth = 4;
-          ctx.stroke();
           ctx.font = '40px system-ui, sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText('☕', avatarCX, avatarCY);
+          ctx.fillText('☕', logoBoxX + logoBoxMaxW / 2, logoBoxY + logoBoxMaxH / 2);
           ctx.restore();
         }
 
@@ -937,12 +955,12 @@ export default function CafeDetail(): React.ReactElement {
         ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
-        ctx.fillText(displayName, cardX + 165, cardY + 80);
+        ctx.fillText(displayName, cardX + 195, cardY + 80);
 
         if (detailTxt) {
           ctx.fillStyle = '#6b7280';
-          ctx.font = '600 26px system-ui, -apple-system, sans-serif';
-          ctx.fillText(detailTxt, cardX + 165, cardY + 118);
+          ctx.font = '600 24px system-ui, -apple-system, sans-serif';
+          ctx.fillText(detailTxt, cardX + 195, cardY + 115);
         }
 
         // QR Code

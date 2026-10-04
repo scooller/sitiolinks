@@ -93,6 +93,14 @@ class MediaController extends Controller
      */
     public function serveCafeMedia(Request $request, $mediaId)
     {
+        if ($request->isMethod('OPTIONS')) {
+            return response('', 204, [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+                'Access-Control-Allow-Headers' => '*',
+            ]);
+        }
+
         $media = Media::findOrFail($mediaId);
 
         // Verify this media belongs to a cafe
@@ -112,6 +120,9 @@ class MediaController extends Controller
         return response()->file($path, [
             'Content-Type' => $media->mime_type,
             'Cache-Control' => 'public, max-age=86400',
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+            'Access-Control-Allow-Headers' => '*',
         ]);
     }
 
@@ -120,6 +131,14 @@ class MediaController extends Controller
      */
     public function serveCafeMediaConversion(Request $request, $mediaId, $conversion)
     {
+        if ($request->isMethod('OPTIONS')) {
+            return response('', 204, [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+                'Access-Control-Allow-Headers' => '*',
+            ]);
+        }
+
         $media = Media::findOrFail($mediaId);
 
         // Verify this media belongs to a cafe
@@ -145,6 +164,9 @@ class MediaController extends Controller
         return response()->file($path, [
             'Content-Type' => $mimeType,
             'Cache-Control' => 'public, max-age=86400',
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+            'Access-Control-Allow-Headers' => '*',
         ]);
     }
 
@@ -153,6 +175,14 @@ class MediaController extends Controller
      */
     public function serveBranchMedia(Request $request, $mediaId)
     {
+        if ($request->isMethod('OPTIONS')) {
+            return response('', 204, [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+                'Access-Control-Allow-Headers' => '*',
+            ]);
+        }
+
         $media = Media::findOrFail($mediaId);
 
         // Verify this media belongs to a cafe branch
@@ -172,6 +202,9 @@ class MediaController extends Controller
         return response()->file($path, [
             'Content-Type' => $media->mime_type,
             'Cache-Control' => 'public, max-age=86400',
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+            'Access-Control-Allow-Headers' => '*',
         ]);
     }
 
