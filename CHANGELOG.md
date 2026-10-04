@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Eventos y oyentes `CreatorApproved` y `CreatorRejected` con despacho de notificaciones in-app y correos asíncronos (`CreatorApprovedMail`, `CreatorRejectedMail`).
   - Sistema de mensajería unidireccional manager ➔ creadores con tipo de notificación `manager_message`.
   - Límites configurables por manager (`max_creators_per_manager` y `manager_can_create_tags`) en `SiteSettings`.
+  - Solicitud de perfil de manager desde el frontend: Banner y modal interactivo en [EditProfile.tsx](file:///d:/laragon/www/link-persons/front-site/src/pages/EditProfile.tsx) con opción de indicar café/local físico, switch en formulario de registro ([Register.tsx](file:///d:/laragon/www/link-persons/front-site/src/pages/Register.tsx)), creación automática de `ManagerProfile` pendiente y ticket de soporte para el equipo administrativo.
+  - Indicador de estado de manager y enlace directo al panel `/manager` en el menú de navegación ([Navigation.tsx](file:///d:/laragon/www/link-persons/front-site/src/components/Navigation.tsx)).
 ### Security
 - **Auditoría y Blindaje de Flujo Manager & Creadores**:
   - `SEC-01`: Restricción estricta de acceso al panel Filament `/manager` validando estado activo del perfil (`ManagerProfile::isActive()`).

@@ -228,6 +228,14 @@ class UserType extends GraphQLType
                 'type' => Type::listOf(GraphQL::type('Role')),
                 'description' => 'Roles asignados al usuario',
             ],
+            'manager_status' => [
+                'type' => Type::string(),
+                'description' => 'Estado del perfil de manager (active, pending, suspended o null)',
+                'selectable' => false,
+                'resolve' => function (User $user) {
+                    return $user->managerProfile?->status;
+                },
+            ],
             'email_notifications' => [
                 'type' => Type::boolean(),
                 'description' => 'Si el usuario desea recibir notificaciones por email',

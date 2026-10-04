@@ -35,6 +35,7 @@ export default function Register(): ReactElement {
   const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState<boolean>(false);
   const [requestCreator, setRequestCreator] = useState<boolean>(false);
+  const [requestManager, setRequestManager] = useState<boolean>(false);
   const altchaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -104,7 +105,8 @@ export default function Register(): ReactElement {
         formData.birth_date,
         formData.gender,
         captchaToken as any,
-        requestCreator
+        requestCreator,
+        requestManager
       );
       navigate('/verify-email');
     } catch (err: any) {
@@ -395,6 +397,54 @@ export default function Register(): ReactElement {
                         id="request_creator_switch"
                         checked={requestCreator}
                         onChange={(e) => setRequestCreator(e.target.checked)}
+                        style={{ width: '2.5rem', height: '1.4rem', cursor: 'pointer' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Switch Solicitar Perfil de Manager */}
+                  <div
+                    className="apple-switch-wrapper mb-3 p-3"
+                    style={{
+                      borderRadius: '14px',
+                      background: 'rgba(120, 120, 128, 0.08)',
+                      border: '1px solid var(--apple-glass-border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '1rem',
+                    }}
+                  >
+                    <div className="d-flex align-items-center gap-3">
+                      <div
+                        className="d-flex align-items-center justify-content-center text-white flex-shrink-0"
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '11px',
+                          background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
+                          boxShadow: '0 3px 10px rgba(37, 99, 235, 0.3)',
+                        }}
+                      >
+                        <i className="fas fa-briefcase"></i>
+                      </div>
+                      <div>
+                        <div className="fw-bold" style={{ fontSize: '0.92rem', color: 'var(--color-text)' }}>
+                          {t('auth.request_manager_title', 'Quiero ser Manager de Creadores')}
+                        </div>
+                        <div className="text-muted small" style={{ fontSize: '0.78rem' }}>
+                          {t('auth.request_manager_help', 'Solicita acceso para gestionar creadores a tu cargo, documentación +18 o asociar tu café físico.')}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="form-check form-switch m-0">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="request_manager_switch"
+                        checked={requestManager}
+                        onChange={(e) => setRequestManager(e.target.checked)}
                         style={{ width: '2.5rem', height: '1.4rem', cursor: 'pointer' }}
                       />
                     </div>

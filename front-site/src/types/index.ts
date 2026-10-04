@@ -37,6 +37,7 @@ export interface User {
   tags?: Tag[];
   links?: Link[];
   roles?: Role[] | string[]; // Acepta array de objetos o strings para compatibilidad
+  manager_status?: string | null;
 }
 
 export interface Role {
@@ -287,7 +288,7 @@ export interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string, remember?: boolean) => Promise<User>;
   logout: () => Promise<void>;
-  register: (name: string, email: string, username: string, password: string, password_confirmation: string, birth_date: string, gender: string, captcha?: string, request_creator?: boolean) => Promise<User>;
+  register: (name: string, email: string, username: string, password: string, password_confirmation: string, birth_date: string, gender: string, captcha?: string, request_creator?: boolean, request_manager?: boolean) => Promise<User>;
   refreshUser: () => Promise<void>;
 }
 

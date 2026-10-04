@@ -396,6 +396,12 @@ const Navigation: React.FC = () => {
                                     {t('nav.role_creator')}
                                   </span>
                                 )}
+                                {hasRole('manager') && (
+                                  <span className="apple-offcanvas-role-pill" style={{ background: 'rgba(37, 99, 235, 0.15)', color: '#3B82F6', border: '1px solid rgba(37, 99, 235, 0.3)' }}>
+                                    <i className="fas fa-briefcase"></i>
+                                    Manager
+                                  </span>
+                                )}
                                 {hasRole('vip') && (
                                   <span className="apple-offcanvas-role-pill role-vip">
                                     <i className="fas fa-crown"></i>
@@ -530,24 +536,44 @@ const Navigation: React.FC = () => {
                                   </div>
                                   <i className="fas fa-arrow-up-right-from-square apple-offcanvas-chevron"></i>
                                 </a>
-                              ) : (
-                                user?.email_verified_at && (
-                                  <Link
-                                    to="/tickets"
-                                    className="apple-offcanvas-row"
-                                    onClick={() => setShowUserMenu(false)}
-                                  >
-                                    <div className="apple-offcanvas-row-left">
-                                      <div className="apple-offcanvas-icon-plate icon-plate-emerald">
-                                        <i className="fas fa-ticket"></i>
-                                      </div>
-                                      <span className="apple-offcanvas-row-label">
-                                        {t('nav.tickets')}
-                                      </span>
+                              ) : null}
+
+                              {hasRole('manager') && (
+                                <a
+                                  href={`${adminUrl.replace(/\/admin$/, '')}/manager`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="apple-offcanvas-row"
+                                  onClick={() => setShowUserMenu(false)}
+                                >
+                                  <div className="apple-offcanvas-row-left">
+                                    <div className="apple-offcanvas-icon-plate icon-plate-blue">
+                                      <i className="fas fa-briefcase"></i>
                                     </div>
-                                    <i className="fas fa-chevron-right apple-offcanvas-chevron"></i>
-                                  </Link>
-                                )
+                                    <span className="apple-offcanvas-row-label">
+                                      {t('nav.manager_panel', 'Panel de Manager')}
+                                    </span>
+                                  </div>
+                                  <i className="fas fa-arrow-up-right-from-square apple-offcanvas-chevron"></i>
+                                </a>
+                              )}
+
+                              {(!hasRole('admin') && !hasRole('super_admin') && !hasRole('moderator') && user?.email_verified_at) && (
+                                <Link
+                                  to="/tickets"
+                                  className="apple-offcanvas-row"
+                                  onClick={() => setShowUserMenu(false)}
+                                >
+                                  <div className="apple-offcanvas-row-left">
+                                    <div className="apple-offcanvas-icon-plate icon-plate-emerald">
+                                      <i className="fas fa-ticket"></i>
+                                    </div>
+                                    <span className="apple-offcanvas-row-label">
+                                      {t('nav.tickets')}
+                                    </span>
+                                  </div>
+                                  <i className="fas fa-chevron-right apple-offcanvas-chevron"></i>
+                                </Link>
                               )}
 
                               <Link

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ManagerProfile;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Support\Captcha;
@@ -77,6 +78,28 @@ class AuthController extends Controller
                     'user_id' => $user->id,
                     'error' => $e->getMessage(),
                 ]);
+            }
+        }
+
+        // Check if user requested manager role during registration
+        if ($request->boolean('request_manager')) {
+            try {
+                ManagerProfile::firstOrCreate([
+                    'user_id' => $user->id,
+                ], [
+                    'status' => 'pending',
+                ]);
+
+                Ticket::create([
+                    'user_id' => $user->id,
+                    'category' => Ticket::CATEGORY_ACCOUNT,
+                    'priority' => Ticket::PRIORITY_HIGH,
+                    'status' => Ticket::STATUS_OPEN,
+                    'subject' => "Solicitud de Perfil Manager - @{$user->username}",
+                    'description' => "El usuario {$user->name} (@{$user->username}) ha solicitado un perfil de Manager durante su registro inicial en la plataforma.\n\nEmail: {$user->email}\n\nPuede activarse directamente en Filament en 'Perfiles de Managers' o en la tabla de Usuarios.",
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Error al registrar solicitud de manager en registro: '.$e->getMessage());
             }
         }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\GraphQL\Mutations;
 
 use App\Mail\TicketCreated;
+use App\Models\ManagerProfile;
 use App\Models\Ticket;
 use App\Models\User;
 use GraphQL\Type\Definition\Type;
@@ -80,6 +81,13 @@ class CreateTicketMutation extends Mutation
             'priority' => $args['priority'],
             'status' => Ticket::STATUS_OPEN,
         ]);
+
+        if (stripos($args['subject'], 'Manager') !== false) {
+            ManagerProfile::firstOrCreate(
+                ['user_id' => $user->id],
+                ['status' => 'pending']
+            );
+        }
 
         // Notify admins and moderators
         $admins = User::whereHas('roles', function ($q) {

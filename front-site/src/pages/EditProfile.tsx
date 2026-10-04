@@ -95,6 +95,15 @@ export default function EditProfile(): ReactElement {
   const [creatorRequestSending, setCreatorRequestSending] = useState<boolean>(false);
   const [creatorRequestSuccess, setCreatorRequestSuccess] = useState<boolean>(false);
   const [creatorRequestError, setCreatorRequestError] = useState<string | null>(null);
+
+  const [managerStatus, setManagerStatus] = useState<string | null>(null);
+  const [showManagerRequestModal, setShowManagerRequestModal] = useState<boolean>(false);
+  const [managerRequestNotes, setManagerRequestNotes] = useState<string>('');
+  const [managerRequestIsCafe, setManagerRequestIsCafe] = useState<boolean>(false);
+  const [managerRequestCafeName, setManagerRequestCafeName] = useState<string>('');
+  const [managerRequestSending, setManagerRequestSending] = useState<boolean>(false);
+  const [managerRequestSuccess, setManagerRequestSuccess] = useState<boolean>(false);
+  const [managerRequestError, setManagerRequestError] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState<boolean>(true);
   const [avatarFiles, setAvatarFiles] = useState<FilePondFile[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState<boolean>(false);
@@ -180,6 +189,7 @@ export default function EditProfile(): ReactElement {
             roles {
               name
             }
+            manager_status
             tags { id name color icon weight is_fixed }
           }
         }
@@ -195,6 +205,7 @@ export default function EditProfile(): ReactElement {
       if (data?.user) {
         const userData = data.user;
         setCurrentAvatarUrl(userData.avatar_thumb || userData.avatar_url || null);
+        setManagerStatus((userData as any).manager_status || null);
         setFormData({
           name: userData.name || '',
           description: userData.description || '',
@@ -368,6 +379,43 @@ export default function EditProfile(): ReactElement {
       setCreatorRequestError(err?.message || t('profile.creator_request_error', 'Error al enviar la solicitud. Por favor intenta de nuevo.'));
     } finally {
       setCreatorRequestSending(false);
+    }
+  };
+
+  const handleSendManagerRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setManagerRequestSending(true);
+    setManagerRequestError(null);
+
+    try {
+      const isCafeText = managerRequestIsCafe
+        ? `Sí - Nombre del Café: ${managerRequestCafeName.trim() || 'Por definir'}`
+        : 'No';
+
+      const description = `El usuario ${currentUser?.name || ''} (@${currentUser?.username || ''}) ha solicitado la activación de su perfil como MANAGER desde su panel de perfil.\n\n` +
+        `Email: ${currentUser?.email || ''}\n` +
+        `¿Representa un Café / Establecimiento?: ${isCafeText}\n` +
+        `Mensaje / Experiencia / Notas adicionales: ${managerRequestNotes.trim() || 'Sin notas adicionales'}\n\n` +
+        `Paso administrativo: Se ha registrado la solicitud con estado 'pending'. Para activarla, ingresar al panel de Filament en 'Perfiles de Managers' y hacer clic en 'Activar'.`;
+
+      await graphqlRequest({
+        query: mutations.createTicket,
+        variables: {
+          subject: `Solicitud de Perfil Manager - @${currentUser?.username || 'usuario'}`,
+          description,
+          category: 'cuenta',
+          priority: 'alta',
+        },
+        schema: 'default',
+        authenticated: true,
+      });
+
+      setManagerRequestSuccess(true);
+      setManagerStatus('pending');
+    } catch (err: any) {
+      setManagerRequestError(err?.message || t('profile.manager_request_error', 'Error al enviar la solicitud. Por favor intenta de nuevo.'));
+    } finally {
+      setManagerRequestSending(false);
     }
   };
 
@@ -575,6 +623,10 @@ export default function EditProfile(): ReactElement {
     (currentUser as any).roles?.some((role: any) => role.name === 'creator') ||
     (currentUser as any).roles?.includes('creator');
 
+  const isManager =
+    (currentUser as any).roles?.some((role: any) => role.name === 'manager') ||
+    (currentUser as any).roles?.includes('manager');
+
   const isAdmin =
     (currentUser as any).roles?.some((r: any) => r.name === 'admin' || r.name === 'super_admin') ||
     (currentUser as any).roles?.includes('admin') ||
@@ -677,6 +729,106 @@ export default function EditProfile(): ReactElement {
             <i className="fas fa-paper-plane me-1"></i>
             <span>{t('profile.request_creator_btn', 'Solicitar Perfil de Creador')}</span>
           </button>
+        </div>
+      )}
+
+      {/* Banner de Solicitud de Manager */}
+      {!isManager && (
+        <div
+          className="apple-manager-banner mb-4 p-3 p-md-4 rounded-4"
+          style={{
+            background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(30, 64, 175, 0.12))',
+            border: '1px solid rgba(37, 99, 235, 0.28)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+          }}
+        >
+          <div className="d-flex align-items-center gap-3">
+            <div
+              className="d-flex align-items-center justify-content-center text-white flex-shrink-0"
+              style={{
+                width: '46px',
+                height: '46px',
+                borderRadius: '13px',
+                background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
+                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)',
+              }}
+            >
+              <i className="fas fa-briefcase fs-5"></i>
+            </div>
+            <div>
+              <div className="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <h5 className="fw-bold mb-0" style={{ color: 'var(--color-text)', fontSize: '1.05rem' }}>
+                  {t('profile.become_manager_title', '¿Quieres ser Manager de Creadores?')}
+                </h5>
+                {managerStatus === 'pending' && (
+                  <span className="badge rounded-pill bg-warning text-dark px-2 py-1" style={{ fontSize: '0.72rem' }}>
+                    <i className="fas fa-clock me-1"></i>
+                    {t('profile.manager_pending_badge', 'Solicitud en revisión')}
+                  </span>
+                )}
+              </div>
+              <p className="text-muted small mb-0" style={{ maxWidth: '540px' }}>
+                {managerStatus === 'pending'
+                  ? t('profile.become_manager_pending_desc', 'Tu solicitud de manager ya fue enviada y se encuentra en revisión por el equipo administrativo. Se te notificará una vez activada.')
+                  : t('profile.become_manager_desc', 'Gestiona creadores de contenido a tu cargo, sube su documentación +18 y administra sucursales si representas a un café o agencia.')}
+              </p>
+            </div>
+          </div>
+          {managerStatus !== 'pending' && (
+            <button
+              type="button"
+              className="apple-btn-primary"
+              onClick={() => {
+                setManagerRequestSuccess(false);
+                setManagerRequestError(null);
+                setShowManagerRequestModal(true);
+              }}
+              style={{
+                background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
+                border: 'none',
+                minHeight: '44px',
+                padding: '0.55rem 1.4rem',
+                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)',
+              }}
+            >
+              <i className="fas fa-paper-plane me-1"></i>
+              <span>{t('profile.request_manager_btn', 'Solicitar Perfil de Manager')}</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Banner Manager Activo */}
+      {isManager && (
+        <div
+          className="mb-4 p-3 rounded-4 d-flex align-items-center justify-content-between flex-wrap gap-2"
+          style={{
+            background: 'rgba(37, 99, 235, 0.08)',
+            border: '1px solid rgba(37, 99, 235, 0.2)',
+          }}
+        >
+          <div className="d-flex align-items-center gap-2">
+            <span className="badge bg-primary px-2 py-1">
+              <i className="fas fa-briefcase me-1"></i> Manager
+            </span>
+            <span className="small text-muted">
+              {t('profile.manager_active_desc', 'Tienes perfil activo para gestionar creadores')}
+            </span>
+          </div>
+          <a
+            href={(import.meta.env.DEV ? 'http://127.0.0.1:8000' : (import.meta.env.VITE_BACKEND_URL || '')).replace(/\/$/, '') + '/manager'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="apple-btn-glass"
+            style={{ fontSize: '0.84rem', padding: '0.35rem 0.9rem', minHeight: '36px' }}
+          >
+            <i className="fas fa-arrow-up-right-from-square me-1"></i>
+            {t('profile.go_to_manager_panel', 'Abrir Panel Manager')}
+          </a>
         </div>
       )}
 
@@ -1800,6 +1952,190 @@ export default function EditProfile(): ReactElement {
                   }}
                 >
                   {creatorRequestSending ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-1" />
+                      <span>{t('common.sending', 'Enviando...')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-paper-plane me-1"></i>
+                      <span>{t('profile.send_request', 'Enviar Solicitud')}</span>
+                    </>
+                  )}
+                </button>
+              </>
+            )}
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal de Solicitud de Manager Apple HIG */}
+      <Modal
+        show={showManagerRequestModal}
+        onHide={() => !managerRequestSending && setShowManagerRequestModal(false)}
+        centered
+        contentClassName="apple-glass-card border-0 rounded-4 overflow-hidden"
+        backdropClassName="apple-glass-backdrop"
+      >
+        <form onSubmit={handleSendManagerRequest}>
+          <div className="p-4 border-bottom border-secondary border-opacity-10 d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center gap-3">
+              <div
+                className="d-flex align-items-center justify-content-center text-white flex-shrink-0"
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
+                  boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)',
+                }}
+              >
+                <i className="fas fa-briefcase fs-5"></i>
+              </div>
+              <div>
+                <h5 className="modal-title fw-bold mb-0" style={{ fontSize: '1.15rem' }}>
+                  {t('profile.request_manager_modal_title', 'Solicitar Perfil de Manager')}
+                </h5>
+                <p className="text-muted small mb-0">
+                  {t('profile.request_manager_modal_sub', 'Revisión y activación por el equipo administrativo')}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={() => setShowManagerRequestModal(false)}
+              aria-label={t('common.close', 'Cerrar')}
+            ></button>
+          </div>
+
+          <div className="p-4">
+            {managerRequestSuccess ? (
+              <div className="text-center py-4">
+                <div
+                  className="mx-auto mb-3 d-flex align-items-center justify-content-center text-success"
+                  style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    background: 'rgba(52, 199, 89, 0.15)',
+                  }}
+                >
+                  <i className="fas fa-check fs-2"></i>
+                </div>
+                <h5 className="fw-bold mb-2">{t('profile.manager_request_sent_title', '¡Solicitud enviada con éxito!')}</h5>
+                <p className="text-muted small mb-0">
+                  {t('profile.manager_request_sent_desc', 'Se ha registrado tu solicitud para el equipo administrativo. Se te notificará una vez activado tu perfil de manager para acceder al panel /manager.')}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="alert alert-info rounded-3 py-2 px-3 small mb-3 d-flex align-items-center gap-2">
+                  <i className="fas fa-circle-info fs-5 flex-shrink-0"></i>
+                  <div>
+                    {t('profile.manager_request_info_note', 'Como Manager podrás crear y administrar perfiles de creadores, gestionar su documentación obligatoria (+18) y vincular tus sucursales de café.')}
+                  </div>
+                </div>
+
+                {managerRequestError && (
+                  <div className="alert alert-danger rounded-3 py-2 px-3 small mb-3">
+                    {managerRequestError}
+                  </div>
+                )}
+
+                <div className="mb-3 p-3 rounded-3" style={{ background: 'rgba(120, 120, 128, 0.08)' }}>
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div>
+                      <div className="fw-semibold small">
+                        {t('profile.manager_is_cafe_label', '¿Representas a un Café o Local físico?')}
+                      </div>
+                      <div className="text-muted" style={{ fontSize: '0.78rem' }}>
+                        {t('profile.manager_is_cafe_hint', 'Podrás asociar tus sucursales y asignar creadores a cada local.')}
+                      </div>
+                    </div>
+                    <div className="form-check form-switch m-0">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="manager_is_cafe_switch"
+                        checked={managerRequestIsCafe}
+                        onChange={(e) => setManagerRequestIsCafe(e.target.checked)}
+                        style={{ width: '2.5rem', height: '1.4rem', cursor: 'pointer' }}
+                      />
+                    </div>
+                  </div>
+
+                  {managerRequestIsCafe && (
+                    <div className="mt-3">
+                      <label className="apple-label">
+                        {t('profile.manager_cafe_name_label', 'Nombre del Café o Establecimiento')}
+                      </label>
+                      <input
+                        type="text"
+                        className="apple-input"
+                        value={managerRequestCafeName}
+                        onChange={(e) => setManagerRequestCafeName(e.target.value)}
+                        placeholder="Ej. Café Delights Santiago"
+                        disabled={managerRequestSending}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="mb-3">
+                  <label className="apple-label">
+                    {t('profile.manager_notes_label', 'Detalles, agencia o experiencia (opcional)')}
+                  </label>
+                  <textarea
+                    className="apple-input apple-textarea"
+                    rows={4}
+                    value={managerRequestNotes}
+                    onChange={(e) => setManagerRequestNotes(e.target.value)}
+                    placeholder={t('profile.manager_notes_placeholder', 'Cuéntanos sobre los creadores que representas o detalles de tu proyecto...')}
+                    disabled={managerRequestSending}
+                  />
+                  <div className="apple-form-hint">
+                    {t('profile.manager_notes_hint', 'Esta información se enviará al equipo de administración para evaluar tu solicitud.')}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="p-3 border-top border-secondary border-opacity-10 d-flex justify-content-end gap-2">
+            {managerRequestSuccess ? (
+              <button
+                type="button"
+                className="apple-btn-primary"
+                onClick={() => setShowManagerRequestModal(false)}
+                style={{ minHeight: '42px', padding: '0.5rem 1.4rem' }}
+              >
+                {t('common.understood', 'Entendido')}
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="apple-btn-glass"
+                  onClick={() => setShowManagerRequestModal(false)}
+                  disabled={managerRequestSending}
+                  style={{ minHeight: '42px', padding: '0.5rem 1.25rem' }}
+                >
+                  {t('common.cancel', 'Cancelar')}
+                </button>
+                <button
+                  type="submit"
+                  className="apple-btn-primary"
+                  disabled={managerRequestSending}
+                  style={{
+                    minHeight: '42px',
+                    padding: '0.5rem 1.5rem',
+                    background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
+                    border: 'none',
+                  }}
+                >
+                  {managerRequestSending ? (
                     <>
                       <Spinner animation="border" size="sm" className="me-1" />
                       <span>{t('common.sending', 'Enviando...')}</span>
