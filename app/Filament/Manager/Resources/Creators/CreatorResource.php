@@ -10,6 +10,7 @@ use App\Models\ManagerCreator;
 use App\Models\Notification;
 use App\Models\User;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -162,7 +163,7 @@ class CreatorResource extends Resource
             ])
             ->actions([
                 // Subir documentos +18
-                Tables\Actions\Action::make('upload_docs')
+                Action::make('upload_docs')
                     ->label('Docs +18')
                     ->icon('heroicon-o-document-arrow-up')
                     ->color('warning')
@@ -252,7 +253,7 @@ class CreatorResource extends Resource
                     }),
 
                 // Enviar mensaje / notificación al creador
-                Tables\Actions\Action::make('notify')
+                Action::make('notify')
                     ->label('Notificar')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('info')
@@ -288,7 +289,7 @@ class CreatorResource extends Resource
                     }),
 
                 // Magic link de acceso
-                Tables\Actions\Action::make('magic_link')
+                Action::make('magic_link')
                     ->label('Link Acceso')
                     ->icon('heroicon-o-key')
                     ->color('gray')
@@ -310,7 +311,7 @@ class CreatorResource extends Resource
                     }),
 
                 // Dar de baja
-                Tables\Actions\Action::make('deactivate')
+                Action::make('deactivate')
                     ->label('Dar de Baja')
                     ->icon('heroicon-o-archive-box-x-mark')
                     ->color('danger')

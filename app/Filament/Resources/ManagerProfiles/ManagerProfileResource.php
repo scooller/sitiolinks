@@ -6,6 +6,8 @@ use App\Filament\Resources\ManagerProfiles\Pages\EditManagerProfile;
 use App\Filament\Resources\ManagerProfiles\Pages\ListManagerProfiles;
 use App\Models\ManagerProfile;
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
@@ -108,8 +110,8 @@ class ManagerProfileResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('activate')
+                EditAction::make(),
+                Action::make('activate')
                     ->label('Activar')
                     ->icon('heroicon-o-check')
                     ->color('success')

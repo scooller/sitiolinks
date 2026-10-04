@@ -6,6 +6,7 @@ use App\Filament\Manager\Resources\Cafes\Pages\EditMyCafe;
 use App\Filament\Manager\Resources\Cafes\Pages\ListMyCafes;
 use App\Models\Cafe;
 use BackedEnum;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -83,7 +84,7 @@ class MyCafeResource extends Resource
                     ->label('Sucursales'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ]);
     }
 

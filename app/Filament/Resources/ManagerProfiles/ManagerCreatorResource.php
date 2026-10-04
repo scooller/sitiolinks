@@ -7,6 +7,7 @@ use App\Events\CreatorRejected;
 use App\Filament\Resources\ManagerProfiles\Pages\ListManagerCreators;
 use App\Models\ManagerCreator;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
@@ -68,7 +69,7 @@ class ManagerCreatorResource extends \Filament\Resources\Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
-                Tables\Actions\Action::make('approve')
+                Action::make('approve')
                     ->label('Aprobar')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
@@ -83,7 +84,7 @@ class ManagerCreatorResource extends \Filament\Resources\Resource
                         CreatorApproved::dispatch($record, auth()->id());
                     }),
 
-                Tables\Actions\Action::make('reject')
+                Action::make('reject')
                     ->label('Rechazar')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
@@ -102,7 +103,7 @@ class ManagerCreatorResource extends \Filament\Resources\Resource
                         CreatorRejected::dispatch($record, $data['reason'], auth()->id());
                     }),
 
-                Tables\Actions\Action::make('view_documents')
+                Action::make('view_documents')
                     ->label('Ver docs')
                     ->icon('heroicon-o-document-text')
                     ->modalHeading('Documentación de Mayoría de Edad')
@@ -110,7 +111,7 @@ class ManagerCreatorResource extends \Filament\Resources\Resource
                     ->modalCancelActionLabel('Cerrar')
                     ->modalContent(fn ($record) => view('filament.modals.creator-documents', ['record' => $record])),
 
-                Tables\Actions\Action::make('verify_documents')
+                Action::make('verify_documents')
                     ->label('Validar docs')
                     ->icon('heroicon-o-shield-check')
                     ->color('info')
