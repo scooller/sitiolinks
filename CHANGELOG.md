@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.3] - 2026-10-04
+
+### Changed
+- **Logo del Café en Código QR (`CafeDetail.tsx`, `cors.php`)**:
+  - El código QR de perfil de café ahora incrusta directamente el logotipo del café con su relación de aspecto original (calculada dinámicamente) y excavación proporcional en la matriz del QR.
+  - Como fallback automático si el café no posee imagen o falla su carga, se utiliza el logotipo oficial del sitio.
+  - Eliminado el recorte y token de avatar circular para el QR (`generateCafeQrAvatar`), empleando el logotipo como tal sin forzar apariencia de avatar.
+  - Incorporadas rutas de medios de café y sucursales (`cafe-media/*`, `branch-media/*`, `gallery-media/*`) en `config/cors.php` para asegurar cabeceras CORS permisivas en operaciones de canvas.
+
+## [0.30.2] - 2026-10-04
+
+### Fixed
+- **Descarga de Códigos QR para Cafeterías (`CafeDetail.tsx`)**:
+  - Corregido error de seguridad por canvas contaminado (CORS / `tainted canvas`) al intentar exportar la imagen con `toDataURL()`.
+  - En caso de que la imagen remota del café no cuente con cabeceras CORS permisivas, `generateCafeQrAvatar` descarta la URL externa sin asignar un enlace inseguro al código QR, usando en su lugar el logotipo local o base64 limpio.
+  - Añadido fallback visual elegante con icono de café si la imagen remota no puede ser renderizada en el canvas de la tarjeta.
+  - Implementada recuperación de errores con respaldo a `offCanvas` para garantizar siempre la descarga exitosa del archivo QR.
+
+## [0.30.1] - 2026-10-04
+
+### Changed
+- **Diseño Apple HIG para Dropdown de Descarga QR (`CafeDetail.tsx`, `cafes.css`)**:
+  - Reemplazado grupo de botones tosco por control segmentado Apple HIG (`.cafe-qr-download-group`) con terminación píldora unificada, divisor fino y botón chevron integrado.
+  - Menú flotante Liquid Glass con desenfoque de fondo (`blur(28px) saturate(180%)`), borde translúcido y animación fluida `appleEase`.
+  - Elementos de lista enriquecidos con iconos dedicados, títulos destacados y descripciones de uso (Historias/Reels, Feed/Post, Solo QR).
+- **Logo / Avatar del Café incrustado en el Código QR (`CafeDetail.tsx`, `cafes.css`)**:
+  - Generación de token circular de avatar del café con borde blanco protector (`256x256`) procesado en canvas.
+  - El código QR en pantalla y las descargas en alta resolución ahora incrustan el logo/foto del café en el centro en lugar del logo genérico del sitio.
+
 ## [0.30.0] - 2026-10-02
 
 ### Added

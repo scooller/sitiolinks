@@ -393,55 +393,108 @@ export default function CafeDetail(): React.ReactElement {
     }
   };
 
+  const cafeLogoCandidate = useMemo(() => {
+    const raw = (cafe as any)?.logo_url || (cafe as any)?.logo || cafe?.image_url || activeBranch?.image_url || null;
+    if (!raw) return null;
+    const str = String(raw).trim();
+    if (!str) return null;
+    if (str.startsWith('http://') || str.startsWith('https://') || str.startsWith('data:')) {
+      return str;
+    }
+    const backendBase = String((import.meta as any).env?.VITE_BACKEND_URL || BACKEND_URL).replace(/\/$/, '');
+    return `${backendBase}${str.startsWith('/') ? '' : '/'}${str}`;
+  }, [cafe?.image_url, (cafe as any)?.logo_url, (cafe as any)?.logo, activeBranch?.image_url]);
+
   useEffect(() => {
     let cancelled = false;
-    const loadLogo = async () => {
-      if (!siteLogo) {
+
+    const loadQrLogo = async () => {
+      // Prioritize cafe logo; fallback to site logo
+      const candidates = [cafeLogoCandidate, siteLogo].filter(Boolean) as string[];
+
+      if (candidates.length === 0) {
         setLogoDataUrl(null);
         setLogoDimensions(null);
         return;
       }
-      try {
-        const res = await fetch(siteLogo);
-        if (!res.ok) throw new Error('logo fetch failed');
-        const blob = await res.blob();
-        const reader = new FileReader();
-        const dataUrl: string = await new Promise((resolve, reject) => {
-          reader.onloadend = () => resolve(String(reader.result || ''));
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-        if (!cancelled) {
-          setLogoDataUrl(dataUrl);
-          const img = new Image();
-          img.onload = () => {
-            if (!cancelled) {
-              const nw = img.naturalWidth || img.width;
-              const nh = img.naturalHeight || img.height;
-              if (nw && nh) {
-                const aspect = nw / nh;
-                if (aspect >= 1) {
-                  setLogoDimensions({ width: qrLogoSize, height: Math.max(16, Math.round(qrLogoSize / aspect)) });
-                } else {
-                  setLogoDimensions({ width: Math.max(16, Math.round(qrLogoSize * aspect)), height: qrLogoSize });
-                }
+
+      for (const candidate of candidates) {
+        try {
+          let dataUrl = candidate;
+
+          // Attempt to convert to dataUrl via fetch blob to guarantee canvas export without CORS taint
+          if (!candidate.startsWith('data:')) {
+            try {
+              const res = await fetch(candidate);
+              if (res.ok) {
+                const blob = await res.blob();
+                dataUrl = await new Promise<string>((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(String(reader.result || ''));
+                  reader.onerror = reject;
+                  reader.readAsDataURL(blob);
+                });
               }
+            } catch {
+              // If fetch fails (e.g. cross-origin restriction), fallback to direct candidate URL
+              dataUrl = candidate;
             }
-          };
+          }
+
+          // Measure natural dimensions and calculate aspect ratio
+          const img = new Image();
+          if (!dataUrl.startsWith('data:')) {
+            img.crossOrigin = 'anonymous';
+          }
           img.src = dataUrl;
-        }
-      } catch {
-        if (!cancelled) {
-          setLogoDataUrl(null);
-          setLogoDimensions(null);
+
+          await new Promise<void>((resolve, reject) => {
+            if (img.complete && (img.naturalWidth || img.width)) return resolve();
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+          });
+
+          if (cancelled) return;
+
+          const nw = img.naturalWidth || img.width;
+          const nh = img.naturalHeight || img.height;
+          let width = qrLogoSize;
+          let height = qrLogoSize;
+
+          if (nw && nh) {
+            const aspect = nw / nh;
+            if (aspect >= 1) {
+              width = qrLogoSize;
+              height = Math.max(16, Math.round(qrLogoSize / aspect));
+            } else {
+              width = Math.max(16, Math.round(qrLogoSize * aspect));
+              height = qrLogoSize;
+            }
+          }
+
+          if (!cancelled) {
+            setLogoDataUrl(dataUrl);
+            setLogoDimensions({ width, height });
+          }
+          return;
+        } catch {
+          // If current candidate fails, continue loop to fallback
+          continue;
         }
       }
+
+      if (!cancelled) {
+        setLogoDataUrl(null);
+        setLogoDimensions(null);
+      }
     };
-    loadLogo();
+
+    loadQrLogo();
+
     return () => {
       cancelled = true;
     };
-  }, [siteLogo, qrLogoSize]);
+  }, [cafeLogoCandidate, siteLogo, qrLogoSize]);
 
   const drawRoundedRect = (
     ctx: CanvasRenderingContext2D,
@@ -764,6 +817,22 @@ export default function CafeDetail(): React.ReactElement {
         const avatarCY = cardY + 120;
         if (loadedCafeImg) {
           drawCircularAvatar(ctx, loadedCafeImg, W / 2, avatarCY, avatarR, '#6f4e37', 6);
+        } else if (loadedLogoImg) {
+          drawCircularAvatar(ctx, loadedLogoImg, W / 2, avatarCY, avatarR, '#6f4e37', 6);
+        } else {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(W / 2, avatarCY, avatarR, 0, Math.PI * 2);
+          ctx.fillStyle = '#fdf8f4';
+          ctx.fill();
+          ctx.strokeStyle = '#6f4e37';
+          ctx.lineWidth = 6;
+          ctx.stroke();
+          ctx.font = '64px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('☕', W / 2, avatarCY);
+          ctx.restore();
         }
 
         // Display Name & detail
@@ -846,6 +915,22 @@ export default function CafeDetail(): React.ReactElement {
         const avatarCY = cardY + 90;
         if (loadedCafeImg) {
           drawCircularAvatar(ctx, loadedCafeImg, avatarCX, avatarCY, avatarR, '#6f4e37', 4);
+        } else if (loadedLogoImg) {
+          drawCircularAvatar(ctx, loadedLogoImg, avatarCX, avatarCY, avatarR, '#6f4e37', 4);
+        } else {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(avatarCX, avatarCY, avatarR, 0, Math.PI * 2);
+          ctx.fillStyle = '#fdf8f4';
+          ctx.fill();
+          ctx.strokeStyle = '#6f4e37';
+          ctx.lineWidth = 4;
+          ctx.stroke();
+          ctx.font = '40px system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('☕', avatarCX, avatarCY);
+          ctx.restore();
         }
 
         ctx.fillStyle = '#111827';
@@ -887,10 +972,27 @@ export default function CafeDetail(): React.ReactElement {
         ctx.fillText(`${resolvedSiteName} · Directorio Oficial`, W / 2, cardY + 865);
       }
 
-      const a = document.createElement('a');
-      a.href = exportCanvas.toDataURL('image/jpeg', 0.95);
-      a.download = `qr-cafe-${cafe.slug || slug}-${format}.jpg`;
-      a.click();
+      let downloadDataUrl: string | null = null;
+      try {
+        downloadDataUrl = exportCanvas.toDataURL('image/jpeg', 0.95);
+      } catch (canvasErr) {
+        console.warn('exportCanvas toDataURL failed, attempting offCanvas fallback:', canvasErr);
+        if (offCanvas) {
+          try {
+            downloadDataUrl = offCanvas.toDataURL('image/png');
+          } catch {}
+        }
+      }
+
+      if (downloadDataUrl) {
+        const a = document.createElement('a');
+        a.href = downloadDataUrl;
+        const ext = downloadDataUrl.startsWith('data:image/png') ? 'png' : 'jpg';
+        a.download = `qr-cafe-${cafe.slug || slug}-${format}.${ext}`;
+        a.click();
+      } else {
+        throw new Error('No se pudo generar el archivo del código QR');
+      }
 
       try {
         root.unmount();
@@ -1588,67 +1690,102 @@ export default function CafeDetail(): React.ReactElement {
               </div>
               <div className="mb-3 d-flex justify-content-center">
                 <Dropdown
-                  as={ButtonGroup}
                   show={showQrDropdown}
                   onToggle={(isOpen) => setShowQrDropdown(isOpen)}
                   autoClose={true}
+                  className="w-100 d-flex justify-content-center"
                 >
-                  <Button
-                    variant="secondary"
-                    className="cafe-secondary-action-btn d-inline-flex align-items-center mt-0"
-                    onClick={() => handleDownloadQr('story')}
-                    disabled={downloadingQr}
-                  >
-                    {downloadingQr ? (
-                      <>
-                        <Spinner animation="border" size="sm" className="me-2" />
-                        {t('common.generating', 'Generando...')}
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-arrow-down-to-bracket me-2" aria-hidden="true"></i>
-                        {t('cafes.detail.download_qr_story', 'Tarjeta Historia (9:16)')}
-                      </>
-                    )}
-                  </Button>
-                  <Dropdown.Toggle
-                    split
-                    variant="secondary"
-                    className="mt-0 rounded-pill px-3"
-                    id="dropdown-cafe-qr-download"
-                    disabled={downloadingQr}
-                  />
-                  <Dropdown.Menu className="shadow-lg border-0 rounded-3 py-2">
+                  <div className="cafe-qr-download-group">
+                    <button
+                      type="button"
+                      className="cafe-qr-download-btn"
+                      onClick={() => handleDownloadQr('story')}
+                      disabled={downloadingQr}
+                    >
+                      {downloadingQr ? (
+                        <>
+                          <Spinner animation="border" size="sm" className="me-2" />
+                          <span>{t('common.generating', 'Generando...')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-arrow-down-to-bracket text-primary" aria-hidden="true"></i>
+                          <span>{t('cafes.detail.download_qr_story', 'Tarjeta Historia (9:16)')}</span>
+                        </>
+                      )}
+                    </button>
+                    <div className="cafe-qr-download-divider" aria-hidden="true" />
+                    <Dropdown.Toggle
+                      className="cafe-qr-download-toggle"
+                      id="dropdown-cafe-qr-download"
+                      disabled={downloadingQr}
+                      aria-label={t('cafes.detail.download_qr', 'Descargar QR')}
+                    >
+                      <i className="fas fa-chevron-down text-muted" aria-hidden="true"></i>
+                    </Dropdown.Toggle>
+                  </div>
+
+                  <Dropdown.Menu className="cafe-apple-dropdown-menu">
                     <Dropdown.Item
                       onClick={() => {
                         handleDownloadQr('story');
                         setShowQrDropdown(false);
                       }}
-                      className="py-2"
+                      className="cafe-apple-dropdown-item"
                     >
-                      <i className="fas fa-mobile-screen me-2 text-primary"></i>
-                      {t('cafes.detail.qr_story_opt', 'Tarjeta Historia / Reels (9:16)')}
+                      <div className="cafe-apple-dropdown-icon">
+                        <i className="fas fa-mobile-screen"></i>
+                      </div>
+                      <div>
+                        <span className="cafe-apple-dropdown-title">
+                          {t('cafes.detail.qr_story_opt', 'Tarjeta Historia / Reels (9:16)')}
+                        </span>
+                        <span className="cafe-apple-dropdown-desc">
+                          {t('cafes.detail.qr_story_desc', 'Ideal para Instagram Reels, Stories y TikTok')}
+                        </span>
+                      </div>
                     </Dropdown.Item>
+
                     <Dropdown.Item
                       onClick={() => {
                         handleDownloadQr('feed');
                         setShowQrDropdown(false);
                       }}
-                      className="py-2"
+                      className="cafe-apple-dropdown-item"
                     >
-                      <i className="fas fa-square me-2 text-success"></i>
-                      {t('cafes.detail.qr_feed_opt', 'Tarjeta Feed / Post (1:1)')}
+                      <div className="cafe-apple-dropdown-icon">
+                        <i className="fas fa-square"></i>
+                      </div>
+                      <div>
+                        <span className="cafe-apple-dropdown-title">
+                          {t('cafes.detail.qr_feed_opt', 'Tarjeta Feed / Post (1:1)')}
+                        </span>
+                        <span className="cafe-apple-dropdown-desc">
+                          {t('cafes.detail.qr_feed_desc', 'Formato cuadrado para publicaciones')}
+                        </span>
+                      </div>
                     </Dropdown.Item>
-                    <Dropdown.Divider />
+
+                    <Dropdown.Divider className="cafe-apple-dropdown-divider" />
+
                     <Dropdown.Item
                       onClick={() => {
                         handleDownloadQr('classic');
                         setShowQrDropdown(false);
                       }}
-                      className="py-2 text-muted"
+                      className="cafe-apple-dropdown-item"
                     >
-                      <i className="fas fa-qrcode me-2"></i>
-                      {t('cafes.detail.qr_classic_opt', 'Solo Código QR (1024x1024)')}
+                      <div className="cafe-apple-dropdown-icon">
+                        <i className="fas fa-qrcode"></i>
+                      </div>
+                      <div>
+                        <span className="cafe-apple-dropdown-title">
+                          {t('cafes.detail.qr_classic_opt', 'Solo Código QR (1024x1024)')}
+                        </span>
+                        <span className="cafe-apple-dropdown-desc">
+                          {t('cafes.detail.qr_classic_desc', 'Código QR en alta resolución sin marco')}
+                        </span>
+                      </div>
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
@@ -1751,45 +1888,61 @@ export default function CafeDetail(): React.ReactElement {
                 {t('cafes.detail.share_native')}
               </Button>
             )}
-            <Dropdown as={ButtonGroup}>
-              <Button
+            <Dropdown>
+              <Dropdown.Toggle
                 variant="outline-primary"
-                className="rounded-pill"
-                onClick={() => handleDownloadQr('story')}
+                className="rounded-pill d-inline-flex align-items-center gap-2"
+                id="dropdown-modal-qr-download"
                 disabled={downloadingQr}
               >
                 {downloadingQr ? (
-                  <>
-                    <Spinner animation="border" size="sm" className="me-2" />
-                    {t('common.generating', 'Generando...')}
-                  </>
+                  <Spinner animation="border" size="sm" />
                 ) : (
-                  <>
-                    <i className="fas fa-qrcode me-2" aria-hidden="true"></i>
-                    {t('cafes.detail.download_qr', 'Descargar QR')}
-                  </>
+                  <i className="fas fa-qrcode" aria-hidden="true"></i>
                 )}
-              </Button>
-              <Dropdown.Toggle
-                split
-                variant="outline-primary"
-                className="rounded-pill"
-                id="dropdown-modal-qr-download"
-                disabled={downloadingQr}
-              />
-              <Dropdown.Menu className="shadow-lg border-0 rounded-3 py-2">
-                <Dropdown.Item onClick={() => handleDownloadQr('story')} className="py-2">
-                  <i className="fas fa-mobile-screen me-2 text-primary"></i>
-                  {t('cafes.detail.qr_story_opt', 'Tarjeta Historia / Reels (9:16)')}
+                {t('cafes.detail.download_qr', 'Descargar QR')}
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu className="cafe-apple-dropdown-menu">
+                <Dropdown.Item onClick={() => handleDownloadQr('story')} className="cafe-apple-dropdown-item">
+                  <div className="cafe-apple-dropdown-icon">
+                    <i className="fas fa-mobile-screen"></i>
+                  </div>
+                  <div>
+                    <span className="cafe-apple-dropdown-title">
+                      {t('cafes.detail.qr_story_opt', 'Tarjeta Historia / Reels (9:16)')}
+                    </span>
+                    <span className="cafe-apple-dropdown-desc">
+                      {t('cafes.detail.qr_story_desc', 'Ideal para Instagram Reels, Stories y TikTok')}
+                    </span>
+                  </div>
                 </Dropdown.Item>
-                <Dropdown.Item onClick={() => handleDownloadQr('feed')} className="py-2">
-                  <i className="fas fa-square me-2 text-success"></i>
-                  {t('cafes.detail.qr_feed_opt', 'Tarjeta Feed / Post (1:1)')}
+                <Dropdown.Item onClick={() => handleDownloadQr('feed')} className="cafe-apple-dropdown-item">
+                  <div className="cafe-apple-dropdown-icon">
+                    <i className="fas fa-square"></i>
+                  </div>
+                  <div>
+                    <span className="cafe-apple-dropdown-title">
+                      {t('cafes.detail.qr_feed_opt', 'Tarjeta Feed / Post (1:1)')}
+                    </span>
+                    <span className="cafe-apple-dropdown-desc">
+                      {t('cafes.detail.qr_feed_desc', 'Formato cuadrado para publicaciones')}
+                    </span>
+                  </div>
                 </Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item onClick={() => handleDownloadQr('classic')} className="py-2 text-muted">
-                  <i className="fas fa-qrcode me-2"></i>
-                  {t('cafes.detail.qr_classic_opt', 'Solo Código QR (1024x1024)')}
+                <Dropdown.Divider className="cafe-apple-dropdown-divider" />
+                <Dropdown.Item onClick={() => handleDownloadQr('classic')} className="cafe-apple-dropdown-item">
+                  <div className="cafe-apple-dropdown-icon">
+                    <i className="fas fa-qrcode"></i>
+                  </div>
+                  <div>
+                    <span className="cafe-apple-dropdown-title">
+                      {t('cafes.detail.qr_classic_opt', 'Solo Código QR (1024x1024)')}
+                    </span>
+                    <span className="cafe-apple-dropdown-desc">
+                      {t('cafes.detail.qr_classic_desc', 'Código QR en alta resolución sin marco')}
+                    </span>
+                  </div>
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>

@@ -6,6 +6,9 @@ return [
         'api/*',
         'graphql*',
         'sanctum/csrf-cookie',
+        'cafe-media/*',
+        'branch-media/*',
+        'gallery-media/*',
     ],
 
     'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

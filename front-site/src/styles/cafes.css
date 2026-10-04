@@ -992,14 +992,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: var(--space-3);
+  padding: var(--space-4);
   margin-bottom: var(--space-3);
   background: #ffffff;
-  border-radius: var(--rounded-xl);
+  border-radius: var(--rounded-2xl);
   width: fit-content;
   margin-left: auto;
   margin-right: auto;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .cafe-qr-link {
@@ -1012,6 +1012,189 @@
 
 .cafe-qr-link:hover {
   text-decoration: underline;
+}
+
+/* Apple HIG Segmented Download Control */
+.cafe-qr-download-group {
+  display: inline-flex;
+  align-items: stretch;
+  width: 100%;
+  max-width: 320px;
+  background: var(--apple-glass-dropdown-bg, rgba(255, 255, 255, 0.8));
+  -webkit-backdrop-filter: var(--glass-filter-dropdown, blur(20px) saturate(160%));
+  backdrop-filter: var(--glass-filter-dropdown, blur(20px) saturate(160%));
+  border: 1px solid var(--apple-glass-border, rgba(0, 0, 0, 0.08));
+  border-radius: var(--rounded-pill, 9999px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: transform var(--transition-fast, 0.18s ease),
+              box-shadow var(--transition-fast, 0.18s ease),
+              border-color var(--transition-fast, 0.18s ease);
+  position: relative;
+  overflow: visible;
+}
+
+.cafe-qr-download-group:hover:not(:has(:disabled)) {
+  border-color: rgba(var(--cafe-primary-rgb, 111, 78, 55), 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.cafe-qr-download-btn {
+  flex: 1 1 auto;
+  min-height: var(--size-touch-min, 44px);
+  padding: 0 var(--space-4, 16px);
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-main, #1c1c1e) !important;
+  font-size: var(--fs-sm, 0.875rem);
+  font-weight: var(--fw-semibold, 600);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2, 8px);
+  border-top-left-radius: var(--rounded-pill, 9999px) !important;
+  border-bottom-left-radius: var(--rounded-pill, 9999px) !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  cursor: pointer;
+  transition: background-color var(--transition-fast, 0.18s ease),
+              color var(--transition-fast, 0.18s ease);
+}
+
+.cafe-qr-download-btn:hover:not(:disabled) {
+  background: rgba(var(--cafe-primary-rgb, 111, 78, 55), 0.1) !important;
+  color: var(--cafe-primary, #6f4e37) !important;
+}
+
+.cafe-qr-download-btn:active:not(:disabled) {
+  background: rgba(var(--cafe-primary-rgb, 111, 78, 55), 0.18) !important;
+}
+
+.cafe-qr-download-divider {
+  width: 1px;
+  background: var(--apple-glass-border, rgba(0, 0, 0, 0.1));
+  align-self: stretch;
+  margin: 8px 0;
+  flex-shrink: 0;
+}
+
+.cafe-qr-download-toggle {
+  flex: 0 0 auto;
+  min-height: var(--size-touch-min, 44px);
+  width: 44px;
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted, #8e8e93) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-top-right-radius: var(--rounded-pill, 9999px) !important;
+  border-bottom-right-radius: var(--rounded-pill, 9999px) !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  cursor: pointer;
+  padding: 0 !important;
+  transition: background-color var(--transition-fast, 0.18s ease),
+              color var(--transition-fast, 0.18s ease);
+}
+
+.cafe-qr-download-toggle::after {
+  display: none !important;
+}
+
+.cafe-qr-download-toggle:hover:not(:disabled) {
+  background: rgba(var(--cafe-primary-rgb, 111, 78, 55), 0.1) !important;
+  color: var(--cafe-primary, #6f4e37) !important;
+}
+
+/* Apple Liquid Glass Dropdown Menu */
+.cafe-apple-dropdown-menu {
+  background: var(--apple-glass-dropdown-bg, rgba(255, 255, 255, 0.9)) !important;
+  -webkit-backdrop-filter: var(--glass-filter-dropdown, blur(28px) saturate(180%)) !important;
+  backdrop-filter: var(--glass-filter-dropdown, blur(28px) saturate(180%)) !important;
+  border: 1px solid var(--apple-glass-border, rgba(0, 0, 0, 0.08)) !important;
+  border-radius: var(--rounded-2xl, 20px) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.2) inset !important;
+  padding: 8px !important;
+  min-width: 300px !important;
+  animation: appleMenuAppear 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1060 !important;
+}
+
+@keyframes appleMenuAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.cafe-apple-dropdown-item {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 14px !important;
+  border-radius: var(--rounded-xl, 14px) !important;
+  color: var(--text-main, #1c1c1e) !important;
+  font-size: var(--fs-sm, 0.875rem) !important;
+  font-weight: 500 !important;
+  cursor: pointer;
+  transition: background-color var(--transition-fast, 0.18s ease),
+              transform var(--transition-fast, 0.18s ease);
+}
+
+.cafe-apple-dropdown-item:hover,
+.cafe-apple-dropdown-item:focus {
+  background: rgba(var(--cafe-primary-rgb, 111, 78, 55), 0.1) !important;
+  color: var(--cafe-primary, #6f4e37) !important;
+}
+
+.cafe-apple-dropdown-item:active {
+  background: rgba(var(--cafe-primary-rgb, 111, 78, 55), 0.18) !important;
+  transform: scale(0.99);
+}
+
+.cafe-apple-dropdown-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  background: rgba(var(--cafe-primary-rgb, 111, 78, 55), 0.08);
+  color: var(--cafe-primary, #6f4e37);
+  transition: transform var(--transition-fast, 0.18s ease);
+}
+
+.cafe-apple-dropdown-item:hover .cafe-apple-dropdown-icon {
+  transform: scale(1.08);
+}
+
+.cafe-apple-dropdown-title {
+  font-weight: 600;
+  line-height: 1.25;
+  display: block;
+  color: var(--text-main, #1c1c1e);
+}
+
+.cafe-apple-dropdown-desc {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted, #8e8e93);
+  display: block;
+  margin-top: 2px;
+}
+
+.cafe-apple-dropdown-divider {
+  margin: 6px 8px !important;
+  border-color: var(--apple-glass-border, rgba(0, 0, 0, 0.08)) !important;
+  opacity: 0.7;
 }
 
 /* Accesibilidad & Modo Reducido */
