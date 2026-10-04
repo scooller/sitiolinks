@@ -810,55 +810,22 @@ export default function CafeDetail(): React.ReactElement {
         const cardY = 220;
         drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 48, '#FFFFFF');
 
-        // Cafe Brand Logo (Rendered as logo with natural aspect ratio, no circular avatar)
-        const brandLogoImg = loadedLogoImg || loadedCafeImg;
-        const logoBoxMaxW = 340;
-        const logoBoxMaxH = 130;
-        const logoBoxY = cardY + 50;
-
-        if (brandLogoImg) {
-          const nw = brandLogoImg.naturalWidth || brandLogoImg.width;
-          const nh = brandLogoImg.naturalHeight || brandLogoImg.height;
-          let bw = logoBoxMaxW;
-          let bh = logoBoxMaxH;
-          if (nw && nh) {
-            const aspect = nw / nh;
-            if (aspect >= logoBoxMaxW / logoBoxMaxH) {
-              bw = logoBoxMaxW;
-              bh = Math.max(30, Math.round(logoBoxMaxW / aspect));
-            } else {
-              bh = logoBoxMaxH;
-              bw = Math.max(30, Math.round(logoBoxMaxH * aspect));
-            }
-          }
-          const bx = Math.round((W - bw) / 2);
-          const by = Math.round(logoBoxY + (logoBoxMaxH - bh) / 2);
-          drawImageContain(ctx, brandLogoImg, bx, by, bw, bh);
-        } else {
-          ctx.save();
-          ctx.font = '64px system-ui, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('☕', W / 2, logoBoxY + logoBoxMaxH / 2);
-          ctx.restore();
-        }
-
-        // Display Name & detail
+        // Display Name & detail (centered cleanly at the top of the card without redundant avatar/logo)
         ctx.fillStyle = '#111827';
-        ctx.font = 'bold 44px system-ui, -apple-system, sans-serif';
+        ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(displayName, W / 2, cardY + 215);
+        ctx.fillText(displayName, W / 2, cardY + 115);
 
         if (detailTxt) {
           ctx.fillStyle = '#6f4e37';
           ctx.font = 'bold 26px system-ui, -apple-system, sans-serif';
-          ctx.fillText(detailTxt, W / 2, cardY + 265);
+          ctx.fillText(detailTxt, W / 2, cardY + 175);
         }
 
-        // QR Code
+        // QR Code (single brand logo positioned strictly inside the QR code)
         const qrX = (W - qrInnerSize) / 2;
-        const qrY = cardY + 390;
+        const qrY = cardY + 260;
         if (offCanvas) {
           ctx.drawImage(offCanvas, qrX, qrY, qrInnerSize, qrInnerSize);
         }
@@ -871,16 +838,16 @@ export default function CafeDetail(): React.ReactElement {
         // Footer Text
         ctx.fillStyle = '#1f2937';
         ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
-        ctx.fillText(t('cafes.detail.qr_cta_scan', 'Escanea para ver información, sucursales y reseñas'), W / 2, cardY + 1120);
+        ctx.fillText(t('cafes.detail.qr_cta_scan', 'Escanea para ver información, sucursales y reseñas'), W / 2, cardY + 1040);
 
         ctx.fillStyle = '#6f4e37';
         ctx.font = '600 26px system-ui, -apple-system, sans-serif';
-        ctx.fillText(cafeUrl.replace(/^https?:\/\//, ''), W / 2, cardY + 1170);
+        ctx.fillText(cafeUrl.replace(/^https?:\/\//, ''), W / 2, cardY + 1095);
 
         const badgePillW = 380;
         const badgePillH = 46;
         const badgePillX = (W - badgePillW) / 2;
-        const badgePillY = cardY + 1225;
+        const badgePillY = cardY + 1165;
         drawRoundedRect(ctx, badgePillX, badgePillY, badgePillW, badgePillH, 23, '#f3f4f6');
         ctx.fillStyle = '#4b5563';
         ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
@@ -917,55 +884,22 @@ export default function CafeDetail(): React.ReactElement {
         const cardY = (H - cardH) / 2;
         drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 44, '#FFFFFF');
 
-        // Header Logo + Name (Rendered as logo with natural aspect ratio, no circular avatar)
-        const brandLogoImg = loadedLogoImg || loadedCafeImg;
-        const logoBoxMaxW = 130;
-        const logoBoxMaxH = 80;
-        const logoBoxX = cardX + 45;
-        const logoBoxY = cardY + 45;
-
-        if (brandLogoImg) {
-          const nw = brandLogoImg.naturalWidth || brandLogoImg.width;
-          const nh = brandLogoImg.naturalHeight || brandLogoImg.height;
-          let bw = logoBoxMaxW;
-          let bh = logoBoxMaxH;
-          if (nw && nh) {
-            const aspect = nw / nh;
-            if (aspect >= logoBoxMaxW / logoBoxMaxH) {
-              bw = logoBoxMaxW;
-              bh = Math.max(24, Math.round(logoBoxMaxW / aspect));
-            } else {
-              bh = logoBoxMaxH;
-              bw = Math.max(24, Math.round(logoBoxMaxH * aspect));
-            }
-          }
-          const bx = Math.round(logoBoxX + (logoBoxMaxW - bw) / 2);
-          const by = Math.round(logoBoxY + (logoBoxMaxH - bh) / 2);
-          drawImageContain(ctx, brandLogoImg, bx, by, bw, bh);
-        } else {
-          ctx.save();
-          ctx.font = '40px system-ui, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('☕', logoBoxX + logoBoxMaxW / 2, logoBoxY + logoBoxMaxH / 2);
-          ctx.restore();
-        }
-
+        // Header Title + Detail (Centered, without redundant top logo/avatar)
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         ctx.fillStyle = '#111827';
-        ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillText(displayName, cardX + 195, cardY + 80);
+        ctx.font = 'bold 40px system-ui, -apple-system, sans-serif';
+        ctx.fillText(displayName, W / 2, cardY + 65);
 
         if (detailTxt) {
           ctx.fillStyle = '#6b7280';
           ctx.font = '600 24px system-ui, -apple-system, sans-serif';
-          ctx.fillText(detailTxt, cardX + 195, cardY + 115);
+          ctx.fillText(detailTxt, W / 2, cardY + 105);
         }
 
-        // QR Code
+        // QR Code (single brand logo positioned strictly inside the QR code)
         const qrX = (W - qrInnerSize) / 2;
-        const qrY = cardY + 160;
+        const qrY = cardY + 150;
         if (offCanvas) {
           ctx.drawImage(offCanvas, qrX, qrY, qrInnerSize, qrInnerSize);
         }
