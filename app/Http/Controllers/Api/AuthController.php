@@ -30,6 +30,7 @@ class AuthController extends Controller
             'birth_date' => 'required|date|before_or_equal:'.now()->subYears(18)->toDateString(),
             'gender' => 'required|in:hombre,mujer,trans,otro',
             'captcha' => 'nullable|string',
+            'privacy_consent' => 'nullable|boolean',
         ], [
             'birth_date.before_or_equal' => 'Debes ser mayor de 18 años.',
             'username.alpha_dash' => 'Solo letras, números, guiones y guiones bajos.',
@@ -51,6 +52,8 @@ class AuthController extends Controller
             ]);
         }
 
+        $privacyConsent = $request->boolean('privacy_consent', true);
+
         // Create user with default role
         $user = User::create([
             'name' => $request->name,
@@ -59,6 +62,10 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'birth_date' => $request->birth_date,
             'gender' => $request->gender,
+            'privacy_consent' => $privacyConsent,
+            'privacy_consent_at' => $privacyConsent ? now() : null,
+            'privacy_policy_version' => $privacyConsent ? $request->input('privacy_policy_version', 'v2026.1') : null,
+            'search_indexing_opt_in' => $request->boolean('search_indexing_opt_in', true),
         ]);
 
         // Assign default 'user' role

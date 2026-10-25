@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.32.5] - 2026-10-25
+
+### Fixed
+- **Registro Automático de Consentimiento ARCOP (Ley N° 21.719)**:
+  - Al completar el registro con la aceptación obligatoria de los términos y políticas de privacidad, en [AuthController.php](file:///d:/laragon/www/link-persons/app/Http/Controllers/Api/AuthController.php) se registra automáticamente `privacy_consent = true`, `privacy_consent_at = now()`, `privacy_policy_version = 'v2026.1'` y `search_indexing_opt_in = true`.
+  - Los datos quedan reflejados en Filament Admin bajo la sección *Protección de Datos & Privacidad (Ley N° 21.719)* de [UserForm.php](file:///d:/laragon/www/link-persons/app/Filament/Resources/Users/Schemas/UserForm.php).
+  - Envío sincronizado del consentimiento desde [Register.tsx](file:///d:/laragon/www/link-persons/front-site/src/pages/Register.tsx), [AuthContext.tsx](file:///d:/laragon/www/link-persons/front-site/src/contexts/AuthContext.tsx) y [types/index.ts](file:///d:/laragon/www/link-persons/front-site/src/types/index.ts).
+
 ## [0.32.4] - 2026-10-25
 
 ### Changed

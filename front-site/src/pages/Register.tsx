@@ -180,7 +180,8 @@ export default function Register(): ReactElement {
         formData.gender,
         captchaToken as any,
         requestCreator,
-        requestManager
+        requestManager,
+        acceptedPrivacy
       );
 
       navigate('/', {

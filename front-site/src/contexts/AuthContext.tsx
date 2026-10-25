@@ -155,7 +155,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         gender: string,
         captcha?: string,
         request_creator?: boolean,
-        request_manager?: boolean
+        request_manager?: boolean,
+        privacy_consent?: boolean,
+        privacy_policy_version?: string
     ): Promise<User> => {
         try {
             // Get CSRF cookie first
@@ -191,6 +193,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     captcha,
                     request_creator,
                     request_manager,
+                    privacy_consent: privacy_consent ?? true,
+                    privacy_policy_version: privacy_policy_version || 'v2026.1',
                 }),
             });
 

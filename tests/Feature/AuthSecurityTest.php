@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-class SecurityPatchesTest extends TestCase
+class AuthSecurityTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -178,5 +178,31 @@ class SecurityPatchesTest extends TestCase
         ]);
 
         $response->assertStatus(429);
+    }
+
+    public function test_register_records_privacy_consent(): void
+    {
+        config(['services.altcha.enabled' => false]);
+        config(['services.recaptcha.enabled' => false]);
+
+        $response = $this->postJson('/api/register', [
+            'name' => 'Consent Registered User',
+            'email' => 'privacy_consent_test@example.com',
+            'username' => 'privacytest',
+            'password' => 'SecurePassword123!',
+            'password_confirmation' => 'SecurePassword123!',
+            'birth_date' => now()->subYears(20)->toDateString(),
+            'gender' => 'hombre',
+            'privacy_consent' => true,
+        ]);
+
+        $response->assertStatus(201);
+
+        $user = User::where('email', 'privacy_consent_test@example.com')->first();
+        $this->assertNotNull($user);
+        $this->assertTrue((bool) $user->privacy_consent);
+        $this->assertNotNull($user->privacy_consent_at);
+        $this->assertEquals('v2026.1', $user->privacy_policy_version);
+        $this->assertTrue((bool) $user->search_indexing_opt_in);
     }
 }

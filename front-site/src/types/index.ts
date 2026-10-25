@@ -288,7 +288,7 @@ export interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string, remember?: boolean) => Promise<User>;
   logout: () => Promise<void>;
-  register: (name: string, email: string, username: string, password: string, password_confirmation: string, birth_date: string, gender: string, captcha?: string, request_creator?: boolean, request_manager?: boolean) => Promise<User>;
+  register: (name: string, email: string, username: string, password: string, password_confirmation: string, birth_date: string, gender: string, captcha?: string, request_creator?: boolean, request_manager?: boolean, privacy_consent?: boolean, privacy_policy_version?: string) => Promise<User>;
   refreshUser: () => Promise<void>;
 }
 
