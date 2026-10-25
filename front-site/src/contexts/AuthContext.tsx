@@ -207,9 +207,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 // Handle validation errors
                 if (data.errors) {
                     const firstError = Object.values(data.errors)[0];
-                    throw new Error(Array.isArray(firstError) ? firstError[0] : firstError);
+                    const msg = Array.isArray(firstError)
+                        ? firstError[0]
+                        : (typeof firstError === 'string' ? firstError : (data.message || 'Error de validación'));
+                    const error: any = new Error(msg);
+                    error.errors = data.errors;
+                    throw error;
                 }
-                throw new Error(data.message || 'Error al registrar usuario');
+                const error: any = new Error(data.message || 'Error al registrar usuario');
+                throw error;
             }
 
             setUser(data.user);

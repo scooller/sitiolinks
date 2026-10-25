@@ -268,3 +268,44 @@
   border-color: rgba(239, 68, 68, 0.36);
   color: #fca5a5;
 }
+
+.auth-status-alert.alert-success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  color: #065f46;
+}
+
+[data-bs-theme="dark"] .auth-status-alert.alert-success {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.36);
+  color: #6ee7b7;
+}
+
+/* Validación y Feedback de Campos */
+.auth-input.is-invalid,
+.auth-select.is-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
+[data-bs-theme="dark"] .auth-input.is-invalid,
+[data-bs-theme="dark"] .auth-select.is-invalid {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.25) !important;
+}
+
+.auth-input-feedback {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: var(--fs-xs, 0.75rem);
+  color: #ef4444;
+  margin-top: 0.35rem;
+  padding-left: 0.25rem;
+  line-height: 1.3;
+}
+
+[data-bs-theme="dark"] .auth-input-feedback {
+  color: #fca5a5;
+}
+

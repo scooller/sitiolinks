@@ -560,7 +560,18 @@
         "error_register": "Error registering user",
         "terms_accept": "I have read and accept the",
         "terms_link": "terms and conditions",
-        "terms_required": "You must accept the terms and conditions to register"
+        "terms_required": "You must accept the terms and conditions to register",
+        "privacy_accept": "I accept the processing of my personal data and",
+        "privacy_link": "ARCOP Rights (Law No. 21.719)",
+        "privacy_required": "You must accept the personal data processing policy and ARCOP Rights (Law No. 21.719).",
+        "name_required": "Full name is required.",
+        "email_required": "Email address is required.",
+        "username_required": "Username is required.",
+        "gender_required": "Gender selection is required.",
+        "birth_date_required": "Date of birth is required.",
+        "password_required": "Password is required.",
+        "register_success_title": "Welcome to the platform!",
+        "register_success_message": "Your registration was successful! We have sent you an email to verify your account."
     },
 
     "filepond": {

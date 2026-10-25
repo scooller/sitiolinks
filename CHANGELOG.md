@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.32.1] - 2026-10-24
+
+### Fixed
+- **Manejo de Errores Granular en Registro**:
+  - Corrección en [AuthContext.tsx](file:///d:/laragon/www/link-persons/front-site/src/contexts/AuthContext.tsx) para adjuntar la estructura de `errors` devuelta por la API al objeto `Error` lanzado.
+  - Validación completa tanto del lado del cliente como del servidor en [Register.tsx](file:///d:/laragon/www/link-persons/front-site/src/pages/Register.tsx), mostrando feedback visual de campo inválido (`isInvalid` y `.auth-input-feedback`) en nombre, email, usuario, género, fecha de nacimiento, contraseña, confirmación, captcha y términos/privacidad.
+  - Limpieza automática de errores por campo a medida que el usuario interactúa con los controles.
+  - Reinicio automático del widget Altcha ante fallo de validación del captcha.
+
+### Added
+- **Alerta de Registro Exitoso al Redirigir al Home**:
+  - Transición fluida al completar el registro llevando al usuario al Home (`/`) con estado de éxito.
+  - Componente de alerta Apple HIG Liquid Glass dismissible en [Home.tsx](file:///d:/laragon/www/link-persons/front-site/src/pages/Home.tsx) notificando la bienvenida y confirmación de correo.
+  - Nuevas traducciones i18n en [translation.json (ES)](file:///d:/laragon/www/link-persons/front-site/public/locales/es/translation.json) y [translation.json (EN)](file:///d:/laragon/www/link-persons/front-site/public/locales/en/translation.json).
+  - Estilos de alerta exitosa `.apple-registration-alert` y `.auth-status-alert.alert-success` en [apple-components.css](file:///d:/laragon/www/link-persons/front-site/src/styles/apple-components.css) y [auth.css](file:///d:/laragon/www/link-persons/front-site/src/styles/auth.css).
+
 ## [0.32.0] - 2026-10-04
 
 ### Added

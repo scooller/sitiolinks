@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { graphqlRequest } from '../lib/graphql/graphqlRequest';
@@ -16,6 +16,7 @@ import type { Page, User } from '../types';
 export default function Home(): React.ReactElement {
   const { t, i18n, ready } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
   const { settings, loading: loadingSettings } = useSiteSettings();
   const [pageContent, setPageContent] = useState<Page | null>(null);
@@ -24,6 +25,27 @@ export default function Home(): React.ReactElement {
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingVips, setLoadingVips] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [registrationAlert, setRegistrationAlert] = useState<{ message: string; title?: string } | null>(null);
+
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.registrationSuccess) {
+      setRegistrationAlert({
+        title: state.title || t('auth.register_success_title', '¡Bienvenido(a) a la plataforma!'),
+        message:
+          state.message ||
+          t(
+            'auth.register_success_message',
+            '¡Tu registro se completó con éxito! Te hemos enviado un correo para verificar tu cuenta.'
+          ),
+      });
+      try {
+        window.history.replaceState({}, document.title);
+      } catch {
+        // no-op
+      }
+    }
+  }, [location.state, t]);
 
   useEffect(() => {
     if (!ready) {
@@ -156,6 +178,42 @@ export default function Home(): React.ReactElement {
 
   return (
     <>
+      {/* Alerta de Registro Exitoso Apple HIG */}
+      {registrationAlert && (
+        <Container className="pt-3">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: appleEase }}
+          >
+            <Alert
+              variant="success"
+              dismissible
+              onClose={() => setRegistrationAlert(null)}
+              className="apple-registration-alert d-flex align-items-center gap-3"
+            >
+              <div
+                className="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  background: 'rgba(16, 185, 129, 0.2)',
+                  color: '#10b981',
+                }}
+              >
+                <i className="fas fa-check-circle fs-5" aria-hidden="true"></i>
+              </div>
+              <div className="flex-grow-1">
+                {registrationAlert.title && (
+                  <strong className="d-block mb-1">{registrationAlert.title}</strong>
+                )}
+                <span>{registrationAlert.message}</span>
+              </div>
+            </Alert>
+          </motion.div>
+        </Container>
+      )}
+
       {/* Hero Section Apple HIG */}
       <section className="apple-hero-section py-4">
         <Container>

@@ -21,7 +21,9 @@ export default function Register(): ReactElement {
   const { register, isAuthenticated } = useAuth();
   const { t } = useTranslation();
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [generalError, setGeneralError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [justRegistered, setJustRegistered] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -39,8 +41,10 @@ export default function Register(): ReactElement {
   const altchaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/');
-  }, [isAuthenticated, navigate]);
+    if (isAuthenticated && !justRegistered) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate, justRegistered]);
 
   useEffect(() => {
     import('altcha');
@@ -50,44 +54,98 @@ export default function Register(): ReactElement {
     const widget = document.querySelector('altcha-widget');
     const onVerified = (ev: any) => {
       setAltchaPayload(ev?.detail?.payload ?? '');
+      if (fieldErrors.captcha) {
+        setFieldErrors(prev => {
+          const next = { ...prev };
+          delete next.captcha;
+          return next;
+        });
+      }
     };
 
     widget?.addEventListener('verified', onVerified as EventListener);
     return () => {
       widget?.removeEventListener('verified', onVerified as EventListener);
     };
-  }, []);
+  }, [fieldErrors.captcha]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.currentTarget;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
+
+  // Calcular fecha máxima permitida (18 años atrás)
+  const maxBirthDate = new Date(Date.now() - 18 * 365.25 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split('T')[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    setGeneralError(null);
 
-    if (formData.password !== formData.password_confirmation) {
-      setError(t('auth.password_mismatch'));
-      setLoading(false);
-      return;
+    const errors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      errors.name = t('auth.name_required', 'El nombre completo es obligatorio.');
     }
-    if (formData.password.length < 12) {
-      setError(t('auth.password_too_short'));
-      setLoading(false);
-      return;
+
+    if (!formData.email.trim()) {
+      errors.email = t('auth.email_required', 'El correo electrónico es obligatorio.');
     }
+
+    if (!formData.username.trim()) {
+      errors.username = t('auth.username_required', 'El nombre de usuario es obligatorio.');
+    } else if (formData.username.length < 3) {
+      errors.username = t('auth.username_help', 'Solo letras minúsculas, números, guiones y guiones bajos. Mínimo 3 caracteres.');
+    } else if (!/^[a-z0-9_-]+$/.test(formData.username)) {
+      errors.username = t('auth.username_invalid', 'Solo letras minúsculas, números, guiones y guiones bajos.');
+    }
+
+    if (!formData.gender) {
+      errors.gender = t('auth.gender_required', 'Debes seleccionar un género.');
+    }
+
+    if (!formData.birth_date) {
+      errors.birth_date = t('auth.birth_date_required', 'La fecha de nacimiento es obligatoria.');
+    } else if (new Date(formData.birth_date) > new Date(maxBirthDate)) {
+      errors.birth_date = t('profile.must_be_adult', 'Debes ser mayor de 18 años.');
+    }
+
+    if (!formData.password) {
+      errors.password = t('auth.password_required', 'La contraseña es obligatoria.');
+    } else if (formData.password.length < 12) {
+      errors.password = t('auth.password_too_short', 'La contraseña debe tener al menos 12 caracteres.');
+    }
+
+    if (!formData.password_confirmation) {
+      errors.password_confirmation = t('auth.password_confirm_placeholder', 'Repite tu contraseña.');
+    } else if (formData.password !== formData.password_confirmation) {
+      errors.password_confirmation = t('auth.password_mismatch', 'Las contraseñas no coinciden.');
+    }
+
     if (!acceptedTerms) {
-      setError(t('auth.terms_required'));
-      setLoading(false);
-      return;
+      errors.terms = t('auth.terms_required', 'Debes aceptar los términos y condiciones para registrarte.');
     }
+
     if (!acceptedPrivacy) {
-      setError(t('auth.privacy_required', 'Debes aceptar la política de tratamiento de datos personales y Derechos ARCOP (Ley N° 21.719).'));
+      errors.privacy = t('auth.privacy_required', 'Debes aceptar la política de tratamiento de datos personales y Derechos ARCOP (Ley N° 21.719).');
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setGeneralError(Object.values(errors)[0]);
       setLoading(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -95,6 +153,8 @@ export default function Register(): ReactElement {
       let captchaToken = '';
       const altInput = document.querySelector('input[name="captcha"]') as HTMLInputElement | null;
       captchaToken = altInput?.value || altchaPayload || '';
+
+      setJustRegistered(true);
 
       await register(
         formData.name,
@@ -108,18 +168,50 @@ export default function Register(): ReactElement {
         requestCreator,
         requestManager
       );
-      navigate('/verify-email');
+
+      navigate('/', {
+        replace: true,
+        state: {
+          registrationSuccess: true,
+          title: t('auth.register_success_title', '¡Bienvenido(a) a la plataforma!'),
+          message: t(
+            'auth.register_success_message',
+            '¡Tu registro se completó con éxito! Te hemos enviado un correo para verificar tu cuenta.'
+          ),
+        },
+      });
     } catch (err: any) {
-      setError(err.message || t('auth.error_register'));
+      setJustRegistered(false);
+      const newErrors: Record<string, string> = {};
+      let firstMsg = err?.message || t('auth.error_register', 'Error al registrar usuario');
+
+      if (err?.errors && typeof err.errors === 'object') {
+        Object.entries(err.errors).forEach(([key, val]) => {
+          const text = Array.isArray(val) ? val[0] : String(val);
+          newErrors[key] = text;
+        });
+        setFieldErrors(newErrors);
+        const firstKey = Object.keys(newErrors)[0];
+        if (firstKey) {
+          firstMsg = newErrors[firstKey];
+        }
+      }
+
+      setGeneralError(firstMsg);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      try {
+        const widget = document.querySelector('altcha-widget') as any;
+        if (widget && typeof widget.reset === 'function') {
+          widget.reset();
+        }
+      } catch {
+        // no-op
+      }
     } finally {
       setLoading(false);
     }
   };
-
-  // Calcular fecha máxima permitida (18 años atrás)
-  const maxBirthDate = new Date(Date.now() - 18 * 365.25 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split('T')[0];
 
   return (
     <div className="auth-page-wrapper">
@@ -143,7 +235,7 @@ export default function Register(): ReactElement {
             <Col md={8} lg={6} xl={5}>
               {/* Tarjeta Liquid Glass Apple */}
               <div className="auth-apple-card">
-                {error && (
+                {generalError && (
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -151,7 +243,7 @@ export default function Register(): ReactElement {
                     role="alert"
                   >
                     <i className="fas fa-circle-exclamation me-2 flex-shrink-0" aria-hidden="true"></i>
-                    <div>{error}</div>
+                    <div>{generalError}</div>
                   </motion.div>
                 )}
 
@@ -171,6 +263,12 @@ export default function Register(): ReactElement {
                       name="captcha"
                     />
                   </div>
+                  {fieldErrors.captcha && (
+                    <div className="auth-input-feedback mb-3">
+                      <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                      <span>{fieldErrors.captcha}</span>
+                    </div>
+                  )}
 
                   {/* Campo Nombre Completo */}
                   <Form.Group className="auth-input-group" controlId="registerName">
@@ -188,11 +286,18 @@ export default function Register(): ReactElement {
                         onChange={handleChange}
                         required
                         disabled={loading}
+                        isInvalid={!!fieldErrors.name}
                         placeholder={t('auth.full_name_placeholder')}
                         className="auth-input"
                         autoComplete="name"
                       />
                     </div>
+                    {fieldErrors.name && (
+                      <div className="auth-input-feedback">
+                        <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                        <span>{fieldErrors.name}</span>
+                      </div>
+                    )}
                   </Form.Group>
 
                   {/* Campo Email */}
@@ -211,11 +316,18 @@ export default function Register(): ReactElement {
                         onChange={handleChange}
                         required
                         disabled={loading}
+                        isInvalid={!!fieldErrors.email}
                         placeholder={t('auth.email_placeholder')}
                         className="auth-input"
                         autoComplete="email"
                       />
                     </div>
+                    {fieldErrors.email && (
+                      <div className="auth-input-feedback">
+                        <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                        <span>{fieldErrors.email}</span>
+                      </div>
+                    )}
                   </Form.Group>
 
                   {/* Campo Nombre de Usuario */}
@@ -237,11 +349,18 @@ export default function Register(): ReactElement {
                         minLength={3}
                         maxLength={30}
                         pattern="[a-z0-9_-]+"
+                        isInvalid={!!fieldErrors.username}
                         placeholder={t('auth.username_placeholder')}
                         className="auth-input"
                         autoComplete="username"
                       />
                     </div>
+                    {fieldErrors.username && (
+                      <div className="auth-input-feedback">
+                        <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                        <span>{fieldErrors.username}</span>
+                      </div>
+                    )}
                     <span className="auth-help-text">{t('auth.username_help')}</span>
                   </Form.Group>
 
@@ -262,6 +381,7 @@ export default function Register(): ReactElement {
                             onChange={handleChange}
                             required
                             disabled={loading}
+                            isInvalid={!!fieldErrors.gender}
                             className="auth-select"
                           >
                             <option value="">{t('common.select')}</option>
@@ -271,6 +391,12 @@ export default function Register(): ReactElement {
                             <option value="otro">{t('auth.gender_other')}</option>
                           </Form.Select>
                         </div>
+                        {fieldErrors.gender && (
+                          <div className="auth-input-feedback">
+                            <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                            <span>{fieldErrors.gender}</span>
+                          </div>
+                        )}
                       </Form.Group>
                     </Col>
 
@@ -291,9 +417,16 @@ export default function Register(): ReactElement {
                             required
                             disabled={loading}
                             max={maxBirthDate}
+                            isInvalid={!!fieldErrors.birth_date}
                             className="auth-input"
                           />
                         </div>
+                        {fieldErrors.birth_date && (
+                          <div className="auth-input-feedback">
+                            <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                            <span>{fieldErrors.birth_date}</span>
+                          </div>
+                        )}
                         <span className="auth-help-text">{t('profile.must_be_adult')}</span>
                       </Form.Group>
                     </Col>
@@ -318,11 +451,18 @@ export default function Register(): ReactElement {
                             required
                             disabled={loading}
                             minLength={12}
+                            isInvalid={!!fieldErrors.password}
                             placeholder={t('auth.password_min_placeholder')}
                             className="auth-input"
                             autoComplete="new-password"
                           />
                         </div>
+                        {fieldErrors.password && (
+                          <div className="auth-input-feedback">
+                            <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                            <span>{fieldErrors.password}</span>
+                          </div>
+                        )}
                       </Form.Group>
                     </Col>
 
@@ -343,11 +483,18 @@ export default function Register(): ReactElement {
                             required
                             disabled={loading}
                             minLength={12}
+                            isInvalid={!!fieldErrors.password_confirmation}
                             placeholder={t('auth.password_confirm_placeholder')}
                             className="auth-input"
                             autoComplete="new-password"
                           />
                         </div>
+                        {fieldErrors.password_confirmation && (
+                          <div className="auth-input-feedback">
+                            <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                            <span>{fieldErrors.password_confirmation}</span>
+                          </div>
+                        )}
                       </Form.Group>
                     </Col>
                   </Row>
@@ -452,39 +599,75 @@ export default function Register(): ReactElement {
 
                   {/* Checkbox Términos y Condiciones y Privacidad ARCOP (Ley N° 21.719) */}
                   <div className="auth-terms-box d-flex flex-column gap-2">
-                    <Form.Check
-                      type="checkbox"
-                      id="accept-terms"
-                      label={
-                        <>
-                          {t('auth.terms_accept')}{' '}
-                          <Link to="/terminos-y-condiciones" target="_blank">
-                            {t('auth.terms_link')}
-                          </Link>
-                        </>
-                      }
-                      checked={acceptedTerms}
-                      onChange={e => setAcceptedTerms(e.target.checked)}
-                      required
-                      disabled={loading}
-                    />
+                    <div>
+                      <Form.Check
+                        type="checkbox"
+                        id="accept-terms"
+                        label={
+                          <>
+                            {t('auth.terms_accept')}{' '}
+                            <Link to="/terminos-y-condiciones" target="_blank">
+                              {t('auth.terms_link')}
+                            </Link>
+                          </>
+                        }
+                        checked={acceptedTerms}
+                        onChange={e => {
+                          setAcceptedTerms(e.target.checked);
+                          if (fieldErrors.terms) {
+                            setFieldErrors(prev => {
+                              const next = { ...prev };
+                              delete next.terms;
+                              return next;
+                            });
+                          }
+                        }}
+                        isInvalid={!!fieldErrors.terms}
+                        required
+                        disabled={loading}
+                      />
+                      {fieldErrors.terms && (
+                        <div className="auth-input-feedback">
+                          <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                          <span>{fieldErrors.terms}</span>
+                        </div>
+                      )}
+                    </div>
 
-                    <Form.Check
-                      type="checkbox"
-                      id="accept-privacy"
-                      label={
-                        <>
-                          {t('auth.privacy_accept', 'Acepto el tratamiento de mis datos personales y los')}{' '}
-                          <Link to="/privacidad-datos" target="_blank">
-                            {t('auth.privacy_link', 'Derechos ARCOP (Ley N° 21.719)')}
-                          </Link>
-                        </>
-                      }
-                      checked={acceptedPrivacy}
-                      onChange={e => setAcceptedPrivacy(e.target.checked)}
-                      required
-                      disabled={loading}
-                    />
+                    <div>
+                      <Form.Check
+                        type="checkbox"
+                        id="accept-privacy"
+                        label={
+                          <>
+                            {t('auth.privacy_accept', 'Acepto el tratamiento de mis datos personales y los')}{' '}
+                            <Link to="/privacidad-datos" target="_blank">
+                              {t('auth.privacy_link', 'Derechos ARCOP (Ley N° 21.719)')}
+                            </Link>
+                          </>
+                        }
+                        checked={acceptedPrivacy}
+                        onChange={e => {
+                          setAcceptedPrivacy(e.target.checked);
+                          if (fieldErrors.privacy) {
+                            setFieldErrors(prev => {
+                              const next = { ...prev };
+                              delete next.privacy;
+                              return next;
+                            });
+                          }
+                        }}
+                        isInvalid={!!fieldErrors.privacy}
+                        required
+                        disabled={loading}
+                      />
+                      {fieldErrors.privacy && (
+                        <div className="auth-input-feedback">
+                          <i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+                          <span>{fieldErrors.privacy}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Botón de Registro 100% Sólido */}

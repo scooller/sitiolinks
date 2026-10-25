@@ -559,7 +559,18 @@
         "error_register": "Error al registrar usuario",
         "terms_accept": "He leído y acepto los",
         "terms_link": "términos y condiciones",
-        "terms_required": "Debes aceptar los términos y condiciones para registrarte"
+        "terms_required": "Debes aceptar los términos y condiciones para registrarte",
+        "privacy_accept": "Acepto el tratamiento de mis datos personales y los",
+        "privacy_link": "Derechos ARCOP (Ley N° 21.719)",
+        "privacy_required": "Debes aceptar la política de tratamiento de datos personales y Derechos ARCOP (Ley N° 21.719).",
+        "name_required": "El nombre completo es obligatorio.",
+        "email_required": "El correo electrónico es obligatorio.",
+        "username_required": "El nombre de usuario es obligatorio.",
+        "gender_required": "Debes seleccionar un género.",
+        "birth_date_required": "La fecha de nacimiento es obligatoria.",
+        "password_required": "La contraseña es obligatoria.",
+        "register_success_title": "¡Bienvenido(a) a la plataforma!",
+        "register_success_message": "¡Tu registro se completó con éxito! Te hemos enviado un correo para verificar tu cuenta."
     },
 
     "filepond": {
