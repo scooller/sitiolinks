@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Cafes\Tables;
 use App\Models\Cafe;
 use App\Models\CafeBranch;
 use App\Models\CafeSuggestion;
+use App\Models\Notification;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -101,6 +102,16 @@ class CafeSuggestionsTable
                             'reviewed_by' => auth()->id(),
                             'reviewed_at' => now(),
                         ]);
+
+                        if ($record->user_id) {
+                            Notification::create([
+                                'user_id' => $record->user_id,
+                                'type' => Notification::TYPE_SYSTEM,
+                                'title' => '¡Sugerencia de Café aprobada!',
+                                'message' => "Tu sugerencia para '{$record->name}' ha sido aprobada y agregada al directorio.",
+                                'url' => '/cafes',
+                            ]);
+                        }
                     }),
 
                 Action::make('reject')
@@ -115,6 +126,15 @@ class CafeSuggestionsTable
                             'reviewed_by' => auth()->id(),
                             'reviewed_at' => now(),
                         ]);
+
+                        if ($record->user_id) {
+                            Notification::create([
+                                'user_id' => $record->user_id,
+                                'type' => Notification::TYPE_SYSTEM,
+                                'title' => 'Sugerencia de Café revisada',
+                                'message' => "Tu sugerencia para '{$record->name}' no pudo ser agregada al directorio.",
+                            ]);
+                        }
                     }),
             ])
             ->bulkActions([])

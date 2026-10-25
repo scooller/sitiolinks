@@ -43,7 +43,7 @@ class CreateCafeSuggestionMutation extends Mutation
 
     public function resolve($root, array $args): bool
     {
-        $user = auth('web')->user();
+        $user = auth('web')->user() ?? auth('sanctum')->user();
 
         if (! $user) {
             throw new UserError('No autenticado');
