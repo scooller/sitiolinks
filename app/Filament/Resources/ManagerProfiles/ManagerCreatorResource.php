@@ -38,7 +38,9 @@ class ManagerCreatorResource extends \Filament\Resources\Resource
                     ->label('@username')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('manager.user.name')
-                    ->label('Manager'),
+                    ->label('Manager')
+                    ->placeholder('Sin Manager / Web')
+                    ->default('Sin Manager / Web'),
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Estado')
                     ->colors([
@@ -50,9 +52,13 @@ class ManagerCreatorResource extends \Filament\Resources\Resource
                 Tables\Columns\IconColumn::make('creator.creatorDocuments')
                     ->label('Docs completos')
                     ->boolean()
-                    ->getStateUsing(fn ($record) => $record->creator?->creatorDocuments()
-                        ->where('manager_profile_id', $record->manager_profile_id)
-                        ->first()?->isComplete() ?? false),
+                    ->getStateUsing(function ($record) {
+                        $doc = ($record->manager_profile_id
+                            ? $record->creator?->creatorDocuments()->where('manager_profile_id', $record->manager_profile_id)->first()
+                            : null) ?? $record->creator?->creatorDocuments()->first();
+
+                        return $doc?->isComplete() ?? false;
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Fecha')
                     ->dateTime('d/m/Y H:i')
@@ -115,16 +121,21 @@ class ManagerCreatorResource extends \Filament\Resources\Resource
                     ->label('Validar docs')
                     ->icon('heroicon-o-shield-check')
                     ->color('info')
-                    ->visible(fn ($record) => ! ($record->creator?->creatorDocuments()
-                        ->where('manager_profile_id', $record->manager_profile_id)
-                        ->first()?->verified ?? false))
+                    ->visible(function ($record) {
+                        $doc = ($record->manager_profile_id
+                            ? $record->creator?->creatorDocuments()->where('manager_profile_id', $record->manager_profile_id)->first()
+                            : null) ?? $record->creator?->creatorDocuments()->first();
+
+                        return ! ($doc?->verified ?? false);
+                    })
                     ->requiresConfirmation()
                     ->modalHeading('Confirmar mayoría de edad')
                     ->modalDescription('¿Confirmas que has revisado los documentos y el creador es mayor de 18 años?')
                     ->action(function ($record) {
-                        $doc = $record->creator?->creatorDocuments()
-                            ->where('manager_profile_id', $record->manager_profile_id)
-                            ->first();
+                        $doc = ($record->manager_profile_id
+                            ? $record->creator?->creatorDocuments()->where('manager_profile_id', $record->manager_profile_id)->first()
+                            : null) ?? $record->creator?->creatorDocuments()->first();
+
                         if ($doc) {
                             $doc->update([
                                 'verified' => true,

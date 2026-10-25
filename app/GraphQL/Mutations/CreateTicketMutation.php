@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\GraphQL\Mutations;
 
 use App\Mail\TicketCreated;
+use App\Models\CreatorDocument;
+use App\Models\ManagerCreator;
 use App\Models\ManagerProfile;
 use App\Models\Ticket;
 use App\Models\User;
@@ -82,10 +84,33 @@ class CreateTicketMutation extends Mutation
             'status' => Ticket::STATUS_OPEN,
         ]);
 
-        if (stripos($args['subject'], 'Manager') !== false) {
-            ManagerProfile::firstOrCreate(
+        $isManagerRequest = stripos($args['subject'], 'Manager') !== false;
+        $isCreatorRequest = stripos($args['subject'], 'Creador') !== false;
+
+        $managerProfile = null;
+        if ($isManagerRequest) {
+            $managerProfile = ManagerProfile::firstOrCreate(
                 ['user_id' => $user->id],
                 ['status' => 'pending']
+            );
+        }
+
+        if ($isManagerRequest || $isCreatorRequest) {
+            ManagerCreator::firstOrCreate(
+                ['creator_user_id' => $user->id],
+                [
+                    'manager_profile_id' => $managerProfile?->id ?? $user->managerProfile?->id,
+                    'contact_email' => $user->email,
+                    'status' => ManagerCreator::STATUS_PENDING,
+                ]
+            );
+
+            CreatorDocument::firstOrCreate(
+                ['creator_user_id' => $user->id],
+                [
+                    'manager_profile_id' => $managerProfile?->id ?? $user->managerProfile?->id,
+                    'type' => 'id_card',
+                ]
             );
         }
 

@@ -529,4 +529,57 @@ class ManagerSystemTest extends TestCase
         ]);
         $resPolyglot->assertStatus(422);
     }
+
+    public function test_creator_request_without_manager_can_be_approved(): void
+    {
+        $creator = User::factory()->create([
+            'username' => 'directcreator',
+            'birth_date' => '2000-01-01',
+        ]);
+        $creator->assignRole('user');
+
+        $managerCreator = ManagerCreator::create([
+            'manager_profile_id' => null,
+            'creator_user_id' => $creator->id,
+            'contact_email' => $creator->email,
+            'status' => ManagerCreator::STATUS_PENDING,
+        ]);
+
+        $this->assertNull($managerCreator->manager_profile_id);
+        $this->assertTrue($managerCreator->isPending());
+
+        // Dispatch approval
+        CreatorApproved::dispatch($managerCreator, null);
+
+        $creator->refresh();
+        $this->assertTrue($creator->hasRole('creator'));
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $creator->id,
+            'type' => Notification::TYPE_CREATOR_APPROVED,
+        ]);
+    }
+
+    public function test_creator_request_without_manager_can_be_rejected(): void
+    {
+        $creator = User::factory()->create([
+            'username' => 'rejectedcreator',
+            'birth_date' => '2000-01-01',
+        ]);
+        $creator->assignRole('user');
+
+        $managerCreator = ManagerCreator::create([
+            'manager_profile_id' => null,
+            'creator_user_id' => $creator->id,
+            'contact_email' => $creator->email,
+            'status' => ManagerCreator::STATUS_PENDING,
+        ]);
+
+        CreatorRejected::dispatch($managerCreator, 'Documentos ilegibles', null);
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $creator->id,
+            'type' => Notification::TYPE_CREATOR_REJECTED,
+        ]);
+    }
 }

@@ -13,6 +13,6 @@ class CreatorRejected
     public function __construct(
         public readonly ManagerCreator $managerCreator,
         public readonly string $reason,
-        public readonly int $rejectedBy,
+        public readonly ?int $rejectedBy = null,
     ) {}
 }

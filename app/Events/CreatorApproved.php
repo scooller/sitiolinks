@@ -12,6 +12,6 @@ class CreatorApproved
 
     public function __construct(
         public readonly ManagerCreator $managerCreator,
-        public readonly int $approvedBy,
+        public readonly ?int $approvedBy = null,
     ) {}
 }

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.32.2] - 2026-10-24
+
+### Fixed
+- **Integración de Solicitudes de Creadores desde Registro**:
+  - Corrección en [AuthController.php](file:///d:/laragon/www/link-persons/app/Http/Controllers/Api/AuthController.php) para registrar automáticamente en `manager_creators` (`status = 'pending'`) y generar el registro base en `creator_documents` cuando el usuario marca *Quiero ser Creador(a) de Contenido* y/o *Quiero ser Manager de Creadores*.
+  - Sincronización idéntica en mutación GraphQL [CreateTicketMutation.php](file:///d:/laragon/www/link-persons/app/GraphQL/Mutations/CreateTicketMutation.php) al solicitar perfiles de creador o manager mediante tickets de soporte in-app.
+  - Creación de migración `2026_10_25_023952_make_manager_profile_id_nullable_in_manager_creators_table.php` para permitir `manager_profile_id` nulo en `manager_creators`, soportando creadores directos sin manager asociado.
+  - Actualización de escuchadores de eventos [NotifyManagerCreatorApproved.php](file:///d:/laragon/www/link-persons/app/Listeners/NotifyManagerCreatorApproved.php) y [NotifyManagerCreatorRejected.php](file:///d:/laragon/www/link-persons/app/Listeners/NotifyManagerCreatorRejected.php) para tolerar `manager` nulo, notificar al creador in-app y activar su `managerProfile` si fue solicitado.
+  - Adaptación de recurso Filament [ManagerCreatorResource.php](file:///d:/laragon/www/link-persons/app/Filament/Resources/ManagerProfiles/ManagerCreatorResource.php) y vista modal [creator-documents.blade.php](file:///d:/laragon/www/link-persons/resources/views/filament/modals/creator-documents.blade.php) para mostrar "Sin Manager / Web" y consultar documentos del creador de forma resiliente.
+
 ## [0.32.1] - 2026-10-24
 
 ### Fixed

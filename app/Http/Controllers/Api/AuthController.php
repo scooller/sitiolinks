@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\CreatorDocument;
+use App\Models\ManagerCreator;
 use App\Models\ManagerProfile;
 use App\Models\Ticket;
 use App\Models\User;
@@ -62,29 +64,13 @@ class AuthController extends Controller
         // Assign default 'user' role
         $user->assignRole('user');
 
-        // Check if user requested creator role during registration
-        if ($request->boolean('request_creator')) {
-            try {
-                Ticket::create([
-                    'user_id' => $user->id,
-                    'category' => Ticket::CATEGORY_ACCOUNT,
-                    'priority' => Ticket::PRIORITY_HIGH,
-                    'status' => Ticket::STATUS_OPEN,
-                    'subject' => "Solicitud de Perfil Creador(a) - @{$user->username}",
-                    'description' => "El usuario {$user->name} (@{$user->username}) ha solicitado la activación del rol de Creador(a) de contenido durante su registro inicial en la plataforma.\n\nEmail: {$user->email}\nFecha de nacimiento: {$user->birth_date}\nGénero: {$user->gender}\n\nRevisar perfil y cambiar rol a 'creator' en la tabla de Usuarios si cumple con los requisitos.",
-                ]);
-            } catch (\Throwable $e) {
-                Log::error('Error al crear ticket de solicitud de creador en registro', [
-                    'user_id' => $user->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
+        $requestedCreator = $request->boolean('request_creator');
+        $requestedManager = $request->boolean('request_manager');
 
-        // Check if user requested manager role during registration
-        if ($request->boolean('request_manager')) {
+        $managerProfile = null;
+        if ($requestedManager) {
             try {
-                ManagerProfile::firstOrCreate([
+                $managerProfile = ManagerProfile::firstOrCreate([
                     'user_id' => $user->id,
                 ], [
                     'status' => 'pending',
@@ -96,10 +82,50 @@ class AuthController extends Controller
                     'priority' => Ticket::PRIORITY_HIGH,
                     'status' => Ticket::STATUS_OPEN,
                     'subject' => "Solicitud de Perfil Manager - @{$user->username}",
-                    'description' => "El usuario {$user->name} (@{$user->username}) ha solicitado un perfil de Manager durante su registro inicial en la plataforma.\n\nEmail: {$user->email}\n\nPuede activarse directamente en Filament en 'Perfiles de Managers' o en la tabla de Usuarios.",
+                    'description' => "El usuario {$user->name} (@{$user->username}) ha solicitado un perfil de Manager durante su registro inicial en la plataforma.\n\nEmail: {$user->email}\n\nPuede revisarse y activarse en Filament en 'Perfiles de Managers' o en 'Solicitudes de Creadores'.",
                 ]);
             } catch (\Throwable $e) {
                 Log::error('Error al registrar solicitud de manager en registro: '.$e->getMessage());
+            }
+        }
+
+        // Crear registro en Solicitudes de Creadores (ManagerCreator) y documento +18
+        if ($requestedCreator || $requestedManager) {
+            try {
+                ManagerCreator::firstOrCreate([
+                    'creator_user_id' => $user->id,
+                ], [
+                    'manager_profile_id' => $managerProfile?->id,
+                    'contact_email' => $user->email,
+                    'status' => ManagerCreator::STATUS_PENDING,
+                ]);
+
+                CreatorDocument::firstOrCreate([
+                    'creator_user_id' => $user->id,
+                ], [
+                    'manager_profile_id' => $managerProfile?->id,
+                    'type' => 'id_card',
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Error al crear ManagerCreator/CreatorDocument en registro: '.$e->getMessage());
+            }
+        }
+
+        if ($requestedCreator) {
+            try {
+                Ticket::create([
+                    'user_id' => $user->id,
+                    'category' => Ticket::CATEGORY_ACCOUNT,
+                    'priority' => Ticket::PRIORITY_HIGH,
+                    'status' => Ticket::STATUS_OPEN,
+                    'subject' => "Solicitud de Perfil Creador(a) - @{$user->username}",
+                    'description' => "El usuario {$user->name} (@{$user->username}) ha solicitado la activación del rol de Creador(a) de contenido durante su registro inicial en la plataforma.\n\nEmail: {$user->email}\nFecha de nacimiento: {$user->birth_date}\nGénero: {$user->gender}\n\nRevisar perfil en 'Solicitudes de Creadores' y cambiar rol a 'creator' si cumple con los requisitos.",
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Error al crear ticket de solicitud de creador en registro', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 

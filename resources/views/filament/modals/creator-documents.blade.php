@@ -2,9 +2,9 @@
     $targetUser = $record instanceof \App\Models\User ? $record : $record->creator;
     $document = $record instanceof \App\Models\User
         ? $record->creatorDocuments()->first()
-        : $record->creator?->creatorDocuments()
-            ->where('manager_profile_id', $record->manager_profile_id)
-            ->first();
+        : (($record->manager_profile_id
+            ? $record->creator?->creatorDocuments()->where('manager_profile_id', $record->manager_profile_id)->first()
+            : null) ?? $record->creator?->creatorDocuments()->first());
     $frontMedia = $document?->getFirstMedia('id_front');
     $backMedia = $document?->getFirstMedia('id_back');
     $selfieMedia = $document?->getFirstMedia('selfie_with_id');
