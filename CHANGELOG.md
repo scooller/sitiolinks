@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.32.4] - 2026-10-25
+
+### Changed
+- **Exclusión Mutua en Switches de Registro**:
+  - En [Register.tsx](file:///d:/laragon/www/link-persons/front-site/src/pages/Register.tsx), los switches de *Quiero ser Creador(a) de Contenido* y *Quiero ser Manager de Creadores* ahora son mutuamente excluyentes; activar uno desactiva automáticamente el otro, permitiendo solicitar solo un rol a la vez o ninguno.
+
 ## [0.32.3] - 2026-10-25
 
 ### Added

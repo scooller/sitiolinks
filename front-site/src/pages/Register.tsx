@@ -40,6 +40,20 @@ export default function Register(): ReactElement {
   const [requestManager, setRequestManager] = useState<boolean>(false);
   const altchaRef = useRef<HTMLDivElement | null>(null);
 
+  const handleToggleCreator = (checked: boolean) => {
+    setRequestCreator(checked);
+    if (checked) {
+      setRequestManager(false);
+    }
+  };
+
+  const handleToggleManager = (checked: boolean) => {
+    setRequestManager(checked);
+    if (checked) {
+      setRequestCreator(false);
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated && !justRegistered) {
       navigate('/');
@@ -543,7 +557,7 @@ export default function Register(): ReactElement {
                         role="switch"
                         id="request_creator_switch"
                         checked={requestCreator}
-                        onChange={(e) => setRequestCreator(e.target.checked)}
+                        onChange={(e) => handleToggleCreator(e.target.checked)}
                         style={{ width: '2.5rem', height: '1.4rem', cursor: 'pointer' }}
                       />
                     </div>
@@ -591,7 +605,7 @@ export default function Register(): ReactElement {
                         role="switch"
                         id="request_manager_switch"
                         checked={requestManager}
-                        onChange={(e) => setRequestManager(e.target.checked)}
+                        onChange={(e) => handleToggleManager(e.target.checked)}
                         style={{ width: '2.5rem', height: '1.4rem', cursor: 'pointer' }}
                       />
                     </div>
